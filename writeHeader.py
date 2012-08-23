@@ -282,7 +282,7 @@ def writeCEnd(fileOut, element):
   fileOut.write('\n\nEND_C_DECLS\n')
   fileOut.write('LIBSBML_CPP_NAMESPACE_END\n\n')
   fileOut.write('#endif  /*  !SWIG  */\n\n')
-  fileOut.write('#endif /*  {0}_H__  */'.format(element))
+  fileOut.write('#endif /*  {0}_H__  */\n\n'.format(element))
  
   
  
