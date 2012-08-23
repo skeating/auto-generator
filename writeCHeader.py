@@ -88,7 +88,10 @@ def writeGetFunction(attrib, output, element):
   attName = att[0]
   capAttName = att[1]
   attType = att[2]
-  attTypeCode = att[3]
+  if att[3] == 'const char *':
+    attTypeCode = 'char *'
+  else:
+    attTypeCode = att[3]
   num = att[4]
   if attrib['type'] == 'element' or attrib['type'] == 'lo_element':
     return
