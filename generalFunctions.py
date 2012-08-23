@@ -63,7 +63,10 @@ def parseAttribute(attrib):
     num = False
   elif attrib['type'] == 'element':
     attType = 'element'
-    attTypeCode = 'element-not-done'
+    if attrib['name'] == 'math':
+      attTypeCode = 'ASTNode*'
+    else:
+      attTypeCode = 'element-not-done'
     num = False
   elif attrib['type'] == 'lo_element':
     attType = 'lo_element'
@@ -118,7 +121,10 @@ def parseAttributeForC(attrib):
     num = False
   elif attrib['type'] == 'element':
     attType = 'element'
-    attTypeCode = 'element-not-done'
+    if attrib['name'] == 'math':
+      attTypeCode = 'ASTNode_t*'
+    else:
+      attTypeCode = 'element-not-done'
     num = False
   elif attrib['type'] == 'lo_element':
     attType = 'lo_element'
@@ -563,23 +569,34 @@ def writeHasReqdElementsHeader(outFile, element, attribs):
   outFile.write('\t */\n')
   outFile.write('\tvirtual bool hasRequiredElements() const;\n\n\n')
 
+def writeReadOtherXMLHeader(outFile):
+  writeInternalStart(outFile)
+  outFile.write('\t/**\n')
+  outFile.write('\t * Subclasses should override this method ro read other XML.\n')
+  outFile.write('\t *\n\t * return true if read from stream, false otherwise.\n')
+  outFile.write('\t */\n')
+  outFile.write('\tvirtual bool readOtherXML (XMLInputStream& stream);\n\n\n')
+  writeInternalEnd(outFile)
+  
 
 
-def writeProtectedHeaders(outFile, hasChildren=False):
+def writeProtectedHeaders(outFile, hasChildren=False, hasMath=False):
   if hasChildren == True:
     writeCreateObjectHeader(outFile)
   writeAddExpectedHeader(outFile)
   writeReadAttributesHeader(outFile)
   writeWriteAttributesHeader(outFile)
+  if hasMath == True:
+    writeReadOtherXMLHeader(outFile)
   
-def writeCommonHeaders(outFile, element, attribs, isListOf, hasChildren=False):
+def writeCommonHeaders(outFile, element, attribs, isListOf, hasChildren=False, hasMath=False):
   writeGetElementNameHeader(outFile, element, isListOf)
   if isListOf == True:
     writeGetTypeCodeHeader(outFile, False)
   writeGetTypeCodeHeader(outFile, isListOf)
   if isListOf == False:
     writeHasReqdAttribHeader(outFile, element, attribs)
-  if hasChildren == True:
+  if hasChildren == True or hasMath == True:
     writeHasReqdElementsHeader(outFile, element, attribs)
 
 

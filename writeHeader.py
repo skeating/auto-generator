@@ -71,7 +71,10 @@ def writeAtt(attrib, output):
   if attType == 'string':
     output.write('\tstd::string   m{0};\n'.format(capAttName))
   elif attType == 'element':
-    return
+    if attTypeCode == 'ASTNode*':
+      output.write('\tASTNode*      m{0};\n'.format(capAttName))
+    else:
+      return
   elif attType == 'lo_element':
     output.write('\t{0}   m{1};\n'.format(generalFunctions.writeListOf(attTypeCode), capAttName))
   elif num == True:
@@ -98,17 +101,31 @@ def writeGetFunction(attrib, output, element):
   attType = att[2]
   attTypeCode = att[3]
   num = att[4]
-  if attrib['type'] == 'element' or attrib['type'] == 'lo_element':
+  if attrib['type'] == 'lo_element':
     return
-  output.write('\t/**\n')
-  output.write('\t * Returns the value of the \"{0}\"'.format(attName))
-  output.write(' attribute of this {0}.\n'.format(element))
-  output.write('\t *\n')
-  output.write('\t * @return the value of the \"{0}\"'.format(attName))
-  output.write(' attribute of this {0} as a {1}.\n'.format(element, attType))
-  output.write('\t */\n')
-  output.write('\tvirtual const {0}'.format(attTypeCode))
-  output.write(' get{0}() const;\n\n\n'.format(capAttName))
+  elif attrib['type'] == 'element':
+    if attrib['element'] == 'Math':
+      output.write('\t/**\n')
+      output.write('\t * Returns the \"{0}\"'.format(attName))
+      output.write(' element of this {0}.\n'.format(element))
+      output.write('\t *\n')
+      output.write('\t * @return the \"{0}\"'.format(attName))
+      output.write(' element of this {0}.\n'.format(element))
+      output.write('\t */\n')
+      output.write('\tvirtual const ASTNode*')
+      output.write(' get{0}() const;\n\n\n'.format(capAttName))
+    else:
+      return
+  else:
+    output.write('\t/**\n')
+    output.write('\t * Returns the value of the \"{0}\"'.format(attName))
+    output.write(' attribute of this {0}.\n'.format(element))
+    output.write('\t *\n')
+    output.write('\t * @return the value of the \"{0}\"'.format(attName))
+    output.write(' attribute of this {0} as a {1}.\n'.format(element, attType))
+    output.write('\t */\n')
+    output.write('\tvirtual const {0}'.format(attTypeCode))
+    output.write(' get{0}() const;\n\n\n'.format(capAttName))
      
 def writeIsSetFunction(attrib, output, element):
   att = generalFunctions.parseAttribute(attrib)
@@ -117,17 +134,31 @@ def writeIsSetFunction(attrib, output, element):
   attType = att[2]
   attTypeCode = att[3]
   num = att[4]
-  if attrib['type'] == 'element' or attrib['type'] == 'lo_element':
+  if attrib['type'] == 'lo_element':
     return
-  output.write('\t/**\n')
-  output.write('\t * Predicate returning @c true or @c false depending on ')
-  output.write('whether this\n\t * {0}\'s \"{1}\" '.format(element, attName))
-  output.write('attribute has been set.\n\t *\n')
-  output.write('\t * @return @c true if this {0}\'s \"{1}\"'.format(element, attName))
-  output.write(' attribute has been set,\n')
-  output.write('\t * otherwise @c false is returned.\n')
-  output.write('\t */\n')
-  output.write('\tvirtual bool isSet{0}() const;\n\n\n'.format(capAttName))
+  elif attrib['type'] == 'element':
+    if attrib['element'] == 'Math':
+      output.write('\t/**\n')
+      output.write('\t * Predicate returning @c true or @c false depending on ')
+      output.write('whether this\n\t * {0}\'s \"{1}\" '.format(element, attName))
+      output.write('element has been set.\n\t *\n')
+      output.write('\t * @return @c true if this {0}\'s \"{1}\"'.format(element, attName))
+      output.write(' element has been set,\n')
+      output.write('\t * otherwise @c false is returned.\n')
+      output.write('\t */\n')
+      output.write('\tvirtual bool isSet{0}() const;\n\n\n'.format(capAttName))
+    else:
+      return
+  else:
+    output.write('\t/**\n')
+    output.write('\t * Predicate returning @c true or @c false depending on ')
+    output.write('whether this\n\t * {0}\'s \"{1}\" '.format(element, attName))
+    output.write('attribute has been set.\n\t *\n')
+    output.write('\t * @return @c true if this {0}\'s \"{1}\"'.format(element, attName))
+    output.write(' attribute has been set,\n')
+    output.write('\t * otherwise @c false is returned.\n')
+    output.write('\t */\n')
+    output.write('\tvirtual bool isSet{0}() const;\n\n\n'.format(capAttName))
    
 def writeSetFunction(attrib, output, element):
   att = generalFunctions.parseAttribute(attrib)
@@ -139,53 +170,90 @@ def writeSetFunction(attrib, output, element):
   else:
     attTypeCode = att[3]
   num = att[4]
-  if attrib['type'] == 'element' or attrib['type'] == 'lo_element':
+  if attrib['type'] == 'lo_element':
     return
-  output.write('\t/**\n')
-  output.write('\t * Sets the value of the \"{0}\"'.format(attName))
-  output.write(' attribute of this {0}.\n'.format(element))
-  output.write('\t *\n')
-  output.write('\t * @param {0}; {1} value of the "{0}" attribute to be set\n'.format(attName, attTypeCode))
-  output.write('\t *\n')
-  output.write('\t * @return integer value indicating success/failure of the\n')
-  output.write('\t * function.  @if clike The value is drawn from the\n')
-  output.write('\t * enumeration #OperationReturnValues_t. @endif The possible values\n')
-  output.write('\t * returned by this function are:\n')
-  output.write('\t * @li LIBSBML_OPERATION_SUCCESS\n')
-  output.write('\t * @li LIBSBML_INVALID_ATTRIBUTE_VALUE\n')
-  output.write('\t */\n')
-  output.write('\tvirtual int set{0}('.format(capAttName))
-  output.write('{0} {1});\n\n\n'.format(attTypeCode, attName))
+  elif attrib['type'] == 'element':
+    if attrib['element'] == 'Math':
+      output.write('\t/**\n')
+      output.write('\t * Sets the \"{0}\"'.format(attName))
+      output.write(' element of this {0}.\n'.format(element))
+      output.write('\t *\n')
+      output.write('\t * @param {0}; {1} determining the value of the "resultLevel" attribute to be set.\n'.format(attName, attTypeCode))
+      output.write('\t *\n')
+      output.write('\t * @return integer value indicating success/failure of the\n')
+      output.write('\t * function.  @if clike The value is drawn from the\n')
+      output.write('\t * enumeration #OperationReturnValues_t. @endif The possible values\n')
+      output.write('\t * returned by this function are:\n')
+      output.write('\t * @li LIBSBML_OPERATION_SUCCESS\n')
+      output.write('\t * @li LIBSBML_INVALID_ATTRIBUTE_VALUE\n')
+      output.write('\t */\n')
+      output.write('\tvirtual int set{0}('.format(capAttName))
+      output.write('{0} {1});\n\n\n'.format(attTypeCode, attName))
+    else:
+      return
+  else:
+    output.write('\t/**\n')
+    output.write('\t * Sets the value of the \"{0}\"'.format(attName))
+    output.write(' attribute of this {0}.\n'.format(element))
+    output.write('\t *\n')
+    output.write('\t * @param {0}; {1} value of the "{0}" attribute to be set\n'.format(attName, attTypeCode))
+    output.write('\t *\n')
+    output.write('\t * @return integer value indicating success/failure of the\n')
+    output.write('\t * function.  @if clike The value is drawn from the\n')
+    output.write('\t * enumeration #OperationReturnValues_t. @endif The possible values\n')
+    output.write('\t * returned by this function are:\n')
+    output.write('\t * @li LIBSBML_OPERATION_SUCCESS\n')
+    output.write('\t * @li LIBSBML_INVALID_ATTRIBUTE_VALUE\n')
+    output.write('\t */\n')
+    output.write('\tvirtual int set{0}('.format(capAttName))
+    output.write('{0} {1});\n\n\n'.format(attTypeCode, attName))
      
   
 def writeUnsetFunction(attrib, output, element):
   attName = attrib['name']
   capAttName = strFunctions.cap(attName)
-  if attrib['type'] == 'element' or attrib['type'] == 'lo_element':
+  if attrib['type'] == 'lo_element':
     return
-  output.write('\t/**\n')
-  output.write('\t * Unsets the value of the \"{0}\"'.format(attName))
-  output.write(' attribute of this {0}.\n'.format(element))
-  output.write('\t *\n')
-  output.write('\t * @return integer value indicating success/failure of the\n')
-  output.write('\t * function.  @if clike The value is drawn from the\n')
-  output.write('\t * enumeration #OperationReturnValues_t. @endif The possible values\n')
-  output.write('\t * returned by this function are:\n')
-  output.write('\t * @li LIBSBML_OPERATION_SUCCESS\n')
-  output.write('\t * @li LIBSBML_OPERATION_FAILED\n')
-  output.write('\t */\n')
-  output.write('\tvirtual int unset{0}();\n\n\n'.format(capAttName))
+  elif attrib['type'] == 'element':
+    if attrib['element'] == 'Math':
+      output.write('\t/**\n')
+      output.write('\t * Unsets the \"{0}\"'.format(attName))
+      output.write(' element of this {0}.\n'.format(element))
+      output.write('\t *\n')
+      output.write('\t * @return integer value indicating success/failure of the\n')
+      output.write('\t * function.  @if clike The value is drawn from the\n')
+      output.write('\t * enumeration #OperationReturnValues_t. @endif The possible values\n')
+      output.write('\t * returned by this function are:\n')
+      output.write('\t * @li LIBSBML_OPERATION_SUCCESS\n')
+      output.write('\t * @li LIBSBML_OPERATION_FAILED\n')
+      output.write('\t */\n')
+      output.write('\tvirtual int unset{0}();\n\n\n'.format(capAttName))
+    else:
+      return
+  else:
+    output.write('\t/**\n')
+    output.write('\t * Unsets the value of the \"{0}\"'.format(attName))
+    output.write(' attribute of this {0}.\n'.format(element))
+    output.write('\t *\n')
+    output.write('\t * @return integer value indicating success/failure of the\n')
+    output.write('\t * function.  @if clike The value is drawn from the\n')
+    output.write('\t * enumeration #OperationReturnValues_t. @endif The possible values\n')
+    output.write('\t * returned by this function are:\n')
+    output.write('\t * @li LIBSBML_OPERATION_SUCCESS\n')
+    output.write('\t * @li LIBSBML_OPERATION_FAILED\n')
+    output.write('\t */\n')
+    output.write('\tvirtual int unset{0}();\n\n\n'.format(capAttName))
    
   
    
 def writeAttributeFunctions(attrs, output, element):
   for i in range(0, len(attrs)):
     writeGetFunction(attrs[i], output, element)
-  for i in range(0, len(attrs)):
+#  for i in range(0, len(attrs)):
     writeIsSetFunction(attrs[i], output, element)
-  for i in range(0, len(attrs)):
+#  for i in range(0, len(attrs)):
     writeSetFunction(attrs[i], output, element)
-  for i in range(0, len(attrs)):
+#  for i in range(0, len(attrs)):
     writeUnsetFunction(attrs[i], output, element)
   for i in range(0, len(attrs)):
     if attrs[i]['type'] == 'lo_element':
@@ -235,17 +303,17 @@ def writeListOfSubFunctions(attrib, output, element):
   writeListOfHeader.writeRemoveFunctions(output, attrib['element'], True, element)
  
 #write class
-def writeClass(attributes, header, nameOfElement, nameOfPackage, hasChildren):
+def writeClass(attributes, header, nameOfElement, nameOfPackage, hasChildren, hasMath):
   header.write('class LIBSBML_EXTERN {0} :'.format(nameOfElement))
   header.write(' public SBase\n{0}\n\n'.format('{'))
   writeAttributes(attributes, header)
   header.write('public:\n\n')
   writeConstructors(nameOfElement, nameOfPackage, header)
   writeAttributeFunctions(attributes, header, nameOfElement)
-  generalFunctions.writeCommonHeaders(header, nameOfElement, attributes, False, hasChildren)
+  generalFunctions.writeCommonHeaders(header, nameOfElement, attributes, False, hasChildren, hasMath)
   generalFunctions.writeInternalHeaders(header, hasChildren)
   header.write('protected:\n\n')
-  generalFunctions.writeProtectedHeaders(header)
+  generalFunctions.writeProtectedHeaders(header, hasChildren, hasMath)
   header.write('\n};\n\n')
  
 # write the include files
@@ -295,12 +363,13 @@ def createHeader(element):
   isListOf = element['hasListOf']
   attributes = element['attribs']
   hasChildren = element['hasChildren']
+  hasMath = element['hasMath']
   headerName = nameOfElement + '.h'
   header = open(headerName, 'w')
   fileHeaders.addFilename(header, headerName, nameOfElement)
   fileHeaders.addLicence(header)
   writeIncludes(header, nameOfElement, nameOfPackage)
-  writeClass(attributes, header, nameOfElement, nameOfPackage, hasChildren)
+  writeClass(attributes, header, nameOfElement, nameOfPackage, hasChildren, hasMath)
   if isListOf == True:
     writeListOfHeader.createHeader(element, header)
   writeCPPEnd(header)
