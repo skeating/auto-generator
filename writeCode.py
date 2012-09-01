@@ -14,9 +14,11 @@ import writeListOfCode
 import writeCCode
 
 
-def writeIncludes(fileOut, element, pkg):
+def writeIncludes(fileOut, element, pkg, hasMath=False):
   fileOut.write('\n\n');
   fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), element))
+  if hasMath == True:
+    fileOut.write('#include <sbml/math/MathML.h>\n')
   fileOut.write('\n\n');
 #  fileOut.write('#if WIN32 && !defined(CYGWIN)\n')
 #  fileOut.write('\t#define isnan _isnan\n')
@@ -37,7 +39,7 @@ def writeAtt(atttype, name, output, constType, pkg):
   if atttype == 'SId' or atttype == 'SIdRef' or atttype == 'UnitSId' or atttype == 'UnitSIdRef' or atttype == 'string':
     output.write('\t ,m{0} ("")\n'.format(strFunctions.cap(name)))
   elif atttype == 'element':
-    return
+    output.write('\t ,m{0} (NULL)\n'.format(strFunctions.cap(name)))
   elif atttype == 'lo_element':
     output.write('\t ,m{0} ('.format(strFunctions.cap(name)))
     if constType == 0:
@@ -68,7 +70,7 @@ def writeCopyAttributes(attrs, output, tabs, name):
       output.write('{0}mIsSet{1}  = {2}.mIsSet{1};\n'.format(tabs, strFunctions.cap(attrs[i]['name']), name))    
 
 
-def writeConstructors(element, package, output, attrs, hasChildren=False):
+def writeConstructors(element, package, output, attrs, hasChildren=False, hasMath=False):
   output.write('/*\n' )
   output.write(' * Creates a new {0}'.format(element))
   output.write(' with the given level, version, and package version.\n */\n')
@@ -78,7 +80,7 @@ def writeConstructors(element, package, output, attrs, hasChildren=False):
   output.write('{\n')
   output.write('\t// set an SBMLNamespaces derived object of this package\n')
   output.write('\tsetSBMLNamespacesAndOwn(new {0}PkgNamespaces(level, version, pkgVersion));\n'.format(package))
-  if hasChildren == True:
+  if hasChildren == True or hasMath == True:
     output.write('\n\t// connect to child objects\n')
     output.write('\tconnectToChild();\n')
   output.write('}\n\n\n')
@@ -182,6 +184,8 @@ def writeIsSetCode(attrib, output, element):
   output.write('{\n')
   if attType == 'string':
     output.write('\treturn (m{0}.empty() == false);\n'.format(capAttName))
+  elif attType == 'element':
+    output.write('\treturn (m{0} != NULL);\n'.format(capAttName))
   elif num == True:
     output.write('\treturn mIsSet{0};\n'.format(capAttName))
   elif attType == 'boolean':
@@ -228,6 +232,32 @@ def writeSetCode(attrib, output, element):
     output.write('\tm{0} = {1};\n'.format(capAttName, attName))
     output.write('\tmIsSet{0} = true;\n'.format(capAttName))
     output.write('\treturn LIBSBML_OPERATION_SUCCESS;\n')
+  elif attType == 'element':
+    output.write('\tif (m{0} == {1})\n'.format(capAttName, attName))
+    output.write('\t{\n\t\treturn LIBSBML_OPERATION_SUCCESS;\n\t}\n')
+    output.write('\telse if ({0} == NULL)\n'.format(attName))
+    output.write('\t{\n')
+    output.write('\t\tdelete m{0};\n'.format(capAttName))
+    output.write('\t\tm{0} = NULL;\n'.format(capAttName))
+    output.write('\t\treturn LIBSBML_OPERATION_SUCCESS;\n\t}\n')
+    if attTypeCode == 'ASTNode*':
+      output.write('\telse if (!({0}->isWellFormedASTNode()))\n'.format(attName))
+      output.write('\t{\n\t\treturn LIBSBML_INVALID_OBJECT;\n\t}\n')
+    output.write('\telse\n\t{\n')
+    output.write('\t\tdelete m{0};\n'.format(capAttName))
+    output.write('\t\tm{0} = ({1} != NULL) ?\n'.format(capAttName, attName))
+    if attTypeCode == 'ASTNode*':
+      output.write('\t\t\t{0}->deepCopy() : NULL;\n'.format(attName))
+    else:
+      output.write('\t\t\tstatic_cast<{0}*>({1}->clone()) : NULL;\n'.format(capAttName, attName))
+    output.write('\t\tif (m{0} != NULL)\n'.format(capAttName))
+    output.write('\t\t{\n')
+    if attTypeCode == 'ASTNode*':
+      output.write('\t\t\tm{0}->setParentSBMLObject(this);\n'.format(capAttName, attName))
+    else:
+      output.write('\t\t\tm{0}->connectToParent(this);\n'.format(capAttName, attName))
+    output.write('\t\t}\n')
+    output.write('\t\treturn LIBSBML_OPERATION_SUCCESS;\n\t}\n')
   output.write('}\n\n\n')
    
   
@@ -266,6 +296,10 @@ def writeUnsetCode(attrib, output, element):
   elif attType == 'boolean':
     output.write('\tm{0} = false;\n'.format(capAttName))
     output.write('\tmIsSet{0} = false;\n'.format(capAttName))
+    output.write('\treturn LIBSBML_OPERATION_SUCCESS;\n')
+  elif attType == 'element':
+    output.write('\tdelete m{0};\n'.format(capAttName))
+    output.write('\tm{0} = NULL;\n'.format(capAttName))
     output.write('\treturn LIBSBML_OPERATION_SUCCESS;\n')
   output.write('}\n\n\n')
    
@@ -340,16 +374,17 @@ def createCode(element):
   isListOf = element['hasListOf']
   attributes = element['attribs']
   hasChildren = element['hasChildren']
+  hasMath = element['hasMath']
   codeName = nameOfElement + '.cpp'
   code = open(codeName, 'w')
   fileHeaders.addFilename(code, codeName, nameOfElement)
   fileHeaders.addLicence(code)
-  writeIncludes(code, nameOfElement, nameOfPackage)
-  writeConstructors(nameOfElement, nameOfPackage, code, attributes, hasChildren)
+  writeIncludes(code, nameOfElement, nameOfPackage, hasMath)
+  writeConstructors(nameOfElement, nameOfPackage, code, attributes, hasChildren, hasMath)
   writeAttributeCode(attributes, code, nameOfElement)
-  generalFunctions.writeCommonCPPCode(code, nameOfElement, sbmltypecode, attributes, False) 
-  generalFunctions.writeInternalCPPCode(code, nameOfElement) 
-  generalFunctions.writeProtectedCPPCode(code, nameOfElement, attributes) 
+  generalFunctions.writeCommonCPPCode(code, nameOfElement, sbmltypecode, attributes, False, hasChildren, hasMath) 
+  generalFunctions.writeInternalCPPCode(code, nameOfElement, attributes, False, hasChildren, hasMath) 
+  generalFunctions.writeProtectedCPPCode(code, nameOfElement, attributes, False, hasChildren, hasMath) 
   writeListOfCode.createCode(element, code)
   writeCCode.createCode(element, code)
 

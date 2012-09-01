@@ -174,7 +174,7 @@ def createHeader(element, header):
   writeConstructors(element['name'], element['package'], header)
   writeAttributeFunctions(element['attribs'], header, element['name'])
   writeHasReqdAttrFunction(header, element['name'])
-  if element['hasChildren'] == True:
+  if element['hasChildren'] == True or element['hasMath'] == True:
     writeHasReqdElementsFunction(header, element['name'])
   if element['hasListOf'] == True:
     writeListOfHeaders(header, element['name'])
