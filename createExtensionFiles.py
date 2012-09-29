@@ -8,9 +8,11 @@
 import sys
 import createNewPackage
 import writeExtensionHeader
+import writeExtensionCode
 
 if len(sys.argv) != 1:
   print 'Usage: createExtensionFiles.py'
 else:
   package = createNewPackage.createQual()
   writeExtensionHeader.createHeader(package)
+#  writeExtensionCode.createCode(package)
