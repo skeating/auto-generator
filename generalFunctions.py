@@ -302,7 +302,7 @@ def writeEnablePkgCPPCode(outFile, element):
 def writeCreateObjectHeader(outFile):
   writeInternalStart(outFile)
   outFile.write('\t/**\n')
-  outFile.write('\t * return teh SBML object corresponding to next XMLToken.\n')
+  outFile.write('\t * return the SBML object corresponding to next XMLToken.\n')
   outFile.write('\t */\n')
   outFile.write('\tvirtual SBase* createObject(XMLInputStream& stream);\n\n\n')
   writeInternalEnd(outFile)

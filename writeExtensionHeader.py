@@ -222,7 +222,7 @@ def writeTypeDefns(fileOut, nameOfClass, nameOfPkg, elements, number):
     el = elements[i];
     el_ty = el['typecode']
     fileOut.write('\t, {0:<30} = {1}\n'.format(el_ty, number+i))
-  fileOut.write('} SBMLQualTypeCode_t;\n\n\n')
+  fileOut.write('} SBML{0}TypeCode_t;\n\n\n'.format(nameOfPkg))
 
 
 

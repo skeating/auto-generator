@@ -151,7 +151,7 @@ def writeIncludeEnds(fileOut, element):
   fileOut.write('\n\n');
   fileOut.write('LIBSBML_CPP_NAMESPACE_END\n')
   fileOut.write('\n\n');
-  fileOut.write('#endif /* __cplusplus */\n')
+  fileOut.write('#endif /* __cplusplus */\n\n\n')
 
 def writeInitFunction(fileOut, pkg, nameOfClass, plugins):
   fileOut.write('/*\n')
