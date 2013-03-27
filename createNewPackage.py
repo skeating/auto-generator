@@ -43,3 +43,9 @@ def createArrays():
   plug = [param_plug, comp_plug, sp_plug, react_plug, event_plug, con_plug, ea_plug, sr_plug, rule_plug, ia_plug]
   package = dict({'name' : 'Arrays', 'elements': elem, 'plugins': plug, 'number': 1200})
   return package
+
+def createDistrib():
+  fd_plug = dict({'sbase': 'FunctionDefinition', 'extension': []}) 
+  plug = [fd_plug]
+  package = dict({'name' : 'Distrib', 'elements': [], 'plugins': plug, 'number': 1300})
+  return package

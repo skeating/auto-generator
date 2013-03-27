@@ -114,3 +114,129 @@ def createArraysIndex() :
   attributes = [math ]
   element = dict({'name': 'Index', 'package': 'Arrays', 'typecode': 'SBML_ARRAYS_INDEX', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':True}) 
   return element
+
+def createMultiPossvalue() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  name = dict({'type': 'string', 'reqd' : False, 'name':'name'})
+  attributes = [id, name ]
+  element = dict({'name': 'PossibleValue', 'package': 'Multi', 'typecode': 'SBML_MULTI_POSSIBLE_VALUE', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+def createMultiStatefeature() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  name = dict({'type': 'string', 'reqd' : False, 'name':'name'})
+  loPV = dict({'type': 'lo_element', 'reqd' : False, 'name':'possibleValue', 'element': 'PossibleValue'})
+  attributes = [id, name, loPV]
+  element = dict({'name': 'StateFeature', 'package': 'Multi', 'typecode': 'SBML_MULTI_STATE_FEATURE', 'hasListOf': True, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
+  return element
+
+def createMultiSspeciestype() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  name = dict({'type': 'string', 'reqd' : False, 'name':'name'})
+  bind = dict({'type': 'bool', 'reqd' : True, 'name':'bindingSite'})
+  loSF = dict({'type': 'lo_element', 'reqd' : False, 'name':'stateFeature', 'element': 'StateFeature'})
+  attributes = [id, name, bind, loSF]
+  element = dict({'name': 'SpeciesType', 'package': 'Multi', 'typecode': 'SBML_MULTI_SPECIES_TYPE', 'hasListOf': True, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
+  return element
+
+######
+
+# has a list of but that is called listOfUnboundBindingsSites
+def createMultiBindSiteRef() :
+  id = dict({'type': 'SIdRef', 'reqd' : True, 'name':'bindingSiteReference'})
+  attributes = [id]
+  element = dict({'name': 'BindingSiteReference', 'package': 'Multi', 'typecode': 'SBML_MULTI_BINDING_SITE_REFERENCE', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+# occurence comes from an enumeration
+def createMultiBond() :
+  id = dict({'type': 'string', 'reqd' : True, 'name':'occurence'})
+  loSF = dict({'type': 'lo_element', 'reqd' : False, 'name':'bindingSiteReference', 'element': 'BindingSiteReference'})
+  attributes = [id, loSF]
+  element = dict({'name': 'Bond', 'package': 'Multi', 'typecode': 'SBML_MULTI_BOND', 'hasListOf': True, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
+  return element
+
+def createMultiStatefeatureV() :
+  id = dict({'type': 'SIdRef', 'reqd' : True, 'name':'possibleValue'})
+  attributes = [id]
+  element = dict({'name': 'StateFeatureValue', 'package': 'Multi', 'typecode': 'SBML_MULTI_STATE_FEATURE_VALUE', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+  #####
+def createMultiSFI() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  name = dict({'type': 'string', 'reqd' : False, 'name':'name'})
+  bind = dict({'type': 'SIdRef', 'reqd' : True, 'name':'stateFeature'})
+  loSF = dict({'type': 'lo_element', 'reqd' : False, 'name':'stateFeatureValue', 'element': 'StateFeatureValue'})
+  attributes = [id, name, bind, loSF]
+  element = dict({'name': 'StateFeatureInstance', 'package': 'Multi', 'typecode': 'SBML_MULTI_STATE_FEATURE_INSTANCE', 'hasListOf': True, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
+  return element
+
+def createMultiCST() :
+  id = dict({'type': 'SIdRef', 'reqd' : True, 'name':'speciesTypeState'})
+  attributes = [id]
+  element = dict({'name': 'ContainedSpeciesType', 'package': 'Multi', 'typecode': 'SBML_MULTI_CONTAINED_SPECIES_TYPE', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+## Comp
+def createSBaseRef() :
+  portRef = dict({'type': 'SIdRef', 'reqd' : False, 'name' : 'portRef'})
+  idRef = dict({'type': 'SIdRef', 'reqd' : False, 'name' : 'idRef'})
+  unitRef = dict({'type': 'SIdRef', 'reqd' : False, 'name' : 'unitRef'})
+  metaidRef = dict({'type': 'SIdRef', 'reqd' : False, 'name' : 'metaIdRef'})
+  sbaseRef = dict({'type': 'SIdRef', 'reqd' : False, 'name' : 'sBaseRef'})
+  attributes = [portRef, idRef, unitRef, metaidRef, sbaseRef]
+  element = dict({'name': 'SBaseRef', 'package': 'Comp', 'typecode': 'SBML_COMP_DELETION', 'hasListOf': False, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+
+def createCompDeletion() :
+  id = dict({'type': 'SId', 'reqd' : False, 'name':'id'})
+  name = dict({'type': 'string', 'reqd' : False, 'name':'name'})
+  attributes = [id, name]
+  element = dict({'name': 'Deletion', 'package': 'Comp', 'typecode': 'SBML_COMP_DELETION', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+def createCompSubModel() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  name = dict({'type': 'string', 'reqd' : False, 'name':'name'})
+  modelRef = dict({'type': 'SIdRef', 'reqd' : True, 'name' : 'modelRef'})
+  timeConv = dict({'type': 'SIdRef', 'reqd' : False, 'name' : 'timeConversionFactor'})
+  extentConv = dict({'type': 'SIdRef', 'reqd' : False, 'name' : 'extentConversionFactor'})
+  loDel = dict({'type': 'lo_element', 'reqd' : False, 'name':'deletion', 'element': 'Deletion'})
+  attributes = [id, name, modelRef, timeConv, extentConv, loDel]
+  element = dict({'name': 'Submodel', 'package': 'Comp', 'typecode': 'SBML_COMP_SUBMODEL', 'hasListOf': True, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
+  return element
+  
+def createCompPort() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  name = dict({'type': 'string', 'reqd' : False, 'name':'name'})
+  attributes = [id, name]
+  element = dict({'name': 'Port', 'package': 'Comp', 'typecode': 'SBML_COMP_DELETION', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+def createCompReplacedE() :
+  id = dict({'type': 'SIdRef', 'reqd' : True, 'name':'submodelRef'})
+  timeConv = dict({'type': 'SIdRef', 'reqd' : False, 'name' : 'deletion'})
+  extentConv = dict({'type': 'SIdRef', 'reqd' : False, 'name' : 'conversionFactor'})
+  attributes = [id, timeConv, extentConv]
+  element = dict({'name': 'ReplacedElement', 'package': 'Comp', 'typecode': 'SBML_COMP_DELETION', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+def createCompReplacedBy() :
+  id = dict({'type': 'SIdRef', 'reqd' : True, 'name':'submodelRef'})
+  attributes = [id]
+  element = dict({'name': 'ReplacedBy', 'package': 'Comp', 'typecode': 'SBML_COMP_DELETION', 'hasListOf': False, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+def createCompExtModDef() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  name = dict({'type': 'string', 'reqd' : False, 'name':'name'})
+  src = dict({'type': 'string', 'reqd' : True, 'name' : 'source'})
+  modelRef = dict({'type': 'SIdRef', 'reqd' : False, 'name' : 'modelRef'})
+  attributes = [id, src, name, modelRef]
+  element = dict({'name': 'ExternalModelDefinition', 'package': 'Comp', 'typecode': 'SBML_COMP_SUBMODEL', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+  
+
+  

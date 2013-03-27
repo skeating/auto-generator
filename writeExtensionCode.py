@@ -279,16 +279,17 @@ def writeRequiredMethods(fileOut, nameOfClass, pkg, elements):
   fileOut.write(' * object is instantiated\n')
   fileOut.write(' */\n')
   fileOut.write('static SBMLExtensionRegister<{0}> {1}ExtensionRegistry;\n\n\n'.format(nameOfClass, pkg.lower()))
-  fileOut.write('static\nconst char * SBML_{0}_TYPECODE_STRINGS[] = \n'.format(pkg.upper()))
-  fileOut.write('{\n')
-  el = elements[0]
-  name = el['name']
-  fileOut.write('\t  "{0}"\n'.format(name))
-  for i in range (1, len(elements)):
-    el = elements[i]
+  if len(elements) > 0:
+    fileOut.write('static\nconst char * SBML_{0}_TYPECODE_STRINGS[] = \n'.format(pkg.upper()))
+    fileOut.write('{\n')
+    el = elements[0]
     name = el['name']
-    fileOut.write('\t, "{0}"\n'.format(name))
-  fileOut.write('};\n\n\n')
+    fileOut.write('\t  "{0}"\n'.format(name))
+    for i in range (1, len(elements)):
+      el = elements[i]
+      name = el['name']
+      fileOut.write('\t, "{0}"\n'.format(name))
+    fileOut.write('};\n\n\n')
   fileOut.write('/*\n')
   fileOut.write(' * Instantiate SBMLExtensionNamespaces<{0}>\n'.format(nameOfClass))
   fileOut.write(' * ({0}PkgNamespaces) for DLL.\n'.format(pkg))
@@ -299,24 +300,25 @@ def writeRequiredMethods(fileOut, nameOfClass, pkg, elements):
 
 def writeTypeDefns(fileOut, nameOfClass, pkg, elements, number):
   length = len(elements)
-  el = elements[0];
-  el_ty_min = el['typecode']
-  el = elements[length-1]
-  el_ty_max = el['typecode']
-  fileOut.write('/*\n')
-  fileOut.write(' * This method takes a type code from the {0} package and returns a string representing \n'.format(pkg))
-  fileOut.write(' */\n')
-  fileOut.write('const char*\n')   
-  fileOut.write('{0}::getStringFromTypeCode(int typeCode) const\n'.format(nameOfClass))
-  fileOut.write('{\n')
-  fileOut.write('\tint min = {0};\n'.format(el_ty_min))
-  fileOut.write('\tint max = {0};\n'.format(el_ty_max))
-  fileOut.write('\n\tif ( typeCode < min || typeCode > max)\n')
-  fileOut.write('\t{\n')
-  fileOut.write('\t\treturn "(Unknown SBML {0} Type)";\n'.format(pkg))
-  fileOut.write('\t}\n')
-  fileOut.write('\n\treturn SBML_{0}_TYPECODE_STRINGS[typeCode - min];\n'.format(pkg.upper()))
-  fileOut.write('}\n\n\n')
+  if length > 1:
+    el = elements[0];
+    el_ty_min = el['typecode']
+    el = elements[length-1]
+    el_ty_max = el['typecode']
+    fileOut.write('/*\n')
+    fileOut.write(' * This method takes a type code from the {0} package and returns a string representing \n'.format(pkg))
+    fileOut.write(' */\n')
+    fileOut.write('const char*\n')   
+    fileOut.write('{0}::getStringFromTypeCode(int typeCode) const\n'.format(nameOfClass))
+    fileOut.write('{\n')
+    fileOut.write('\tint min = {0};\n'.format(el_ty_min))
+    fileOut.write('\tint max = {0};\n'.format(el_ty_max))
+    fileOut.write('\n\tif ( typeCode < min || typeCode > max)\n')
+    fileOut.write('\t{\n')
+    fileOut.write('\t\treturn "(Unknown SBML {0} Type)";\n'.format(pkg))
+    fileOut.write('\t}\n')
+    fileOut.write('\n\treturn SBML_{0}_TYPECODE_STRINGS[typeCode - min];\n'.format(pkg.upper()))
+    fileOut.write('}\n\n\n')
 
 
 

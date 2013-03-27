@@ -214,15 +214,16 @@ def writeTypeDefns(fileOut, nameOfClass, nameOfPkg, elements, number):
   fileOut.write('// in {0}.cpp for DLL.\n'.format(nameOfClass))
   fileOut.write('//\n')
   fileOut.write('typedef SBMLExtensionNamespaces<{0}> {1}PkgNamespaces;\n\n'.format(nameOfClass, nameOfPkg))
-  fileOut.write('typedef enum\n{\n')
-  el = elements[0];
-  el_ty = el['typecode']
-  fileOut.write('\t  {0}  = {1}\n'.format(el_ty, number))
-  for i in range (1, len(elements)):
-    el = elements[i];
+  if len(elements) > 0:
+    fileOut.write('typedef enum\n{\n')
+    el = elements[0];
     el_ty = el['typecode']
-    fileOut.write('\t, {0:<30} = {1}\n'.format(el_ty, number+i))
-  fileOut.write('} SBML{0}TypeCode_t;\n\n\n'.format(nameOfPkg))
+    fileOut.write('\t  {0}  = {1}\n'.format(el_ty, number))
+    for i in range (1, len(elements)):
+      el = elements[i];
+      el_ty = el['typecode']
+      fileOut.write('\t, {0:<30} = {1}\n'.format(el_ty, number+i))
+    fileOut.write('} SBML{0}TypeCode_t;\n\n\n'.format(nameOfPkg))
 
 
 

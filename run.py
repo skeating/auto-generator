@@ -6,15 +6,18 @@
 #
 
 import sys
+import os
 import createDirStruct
-import createNewElementDictObj
+# import createNewElementDictObj
 import writeCode
 import writeHeader
 
 if len(sys.argv) != 1:
   print 'Usage: run.py'
 else:
-#  createDirStruct.main('qual')
-  element = createNewElementDictObj.createFBCObjective()
-  writeCode.createCode(element)
-  writeHeader.createHeader(element)
+  createDirStruct.main('distrib')
+#  os.chdir('./distrib/src/sbml/packages/distrib/sbml')
+#  element = createNewElementDictObj.createFunctionDef()
+#  writeCode.createCode(element)
+#  writeHeader.createHeader(element)
+#  os.chdir('./distrib/src/sbml/packages/distrib/extension')

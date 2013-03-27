@@ -14,4 +14,4 @@ import writeHeader
 if len(sys.argv) != 1:
   print 'Usage: createCommonFiles.py'
 else:
-  package = createNewPacakge.createQual()
+  package = createNewPackage.createQual()
