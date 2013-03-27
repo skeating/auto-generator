@@ -1,0 +1,115 @@
+How to create code with auto-generator
+
+Ultimately it should all work as one thing but at the moment it is still 
+underdeveloped and not linked together.
+
+The most complete bit involves the generation of SBML classes. This can be 
+done as shown in
+
+createSBMLFiles.py
+==================
+
+Here you need to create each element and then run the code generators 
+on each element.
+
+So 
+
+   element = createNewElementDictObj.createQualInput()
+   writeCode.createCode(element)
+   writeHeader.createHeader(element)
+
+will write files Input.h and Input.cpp (both C++ and C API)
+
+The elements are described as shown in createNewElementDictObj.py
+
+createNewElementDictObj.py
+==========================
+
+Here each element is described by creating a dictionary for each attribute 
+specifying the type, whether it is a required attribute and the name of the 
+attribute.
+
+So
+
+  id = dict({'type': 'SId', 'reqd' : False, 'name':'id'})
+
+specifies an attribute 'id' with type SId that is not required
+  
+The attributes are all added to a List, for example
+
+  attributes = [id, qs, effect, name, sign, maxL ]
+
+  where each member is a dict object as specified above.
+  
+The overall element is then created as a dictionary containing
+
+	name = the name of the class
+	package = the name of the SBML L3 package
+	typecode = the value of this class in the enueration of SBMLTypecodes for this package
+	hasListOf = true if this class (XYZ) also has a corresponding class ListOfXYZ
+	attribs = the List of attributes already created
+	hasChildren = true if this class has child elements (excluding a math element)
+	hasMath = true if this class has a child math element (defaults to False)
+	
+Thus the dictionary object for an Input class in package Qual is defined as
+
+  element = dict({'name': 'Input', 'package': 'Qual', 'typecode': 'SBML_QUAL_INPUT', 
+                  'hasListOf': True, 'attribs':attributes, 'hasChildren':False}) 
+				  
+*****************************************************
+
+Other files:
+
+createCommonFiles.py
+====================
+
+does nothing yet 
+
+createDirStruct.py
+===================
+
+creates the SVN directory structure for the package
+
+createExtensionFiles.py
+=======================
+
+takes a package definition (see createNewPackage) and writes the extension
+files (QualExtension) plus the appropriate Plugin files
+
+createNewPackage.py
+===================
+
+creates a dictionary object that specifies the entire package
+
+it creates a dictionary object for each element e.g.
+
+  inp = dict({'name': 'Input', 'typecode': 'SBML_QUAL_INPUT'})
+  
+then a List containing all the elements
+  elem = [qs, tr, inp, out, ft, dt]
+
+it then creates a List element for the elements available to each plugin
+
+  model_elem = [qs, tr]
+
+and a dictionionary object for each plugin indictating which sbase object 
+is plugged into and the elements that are plugged into this element
+
+So Qual has a plugin on Model object that adds the qs and tr elements
+
+  model_plug = dict({'sbase': 'Model', 'extension': model_elem}) 
+
+Then create a List of all plugins and finally a dictionary object 
+
+  package = dict({'name' : 'Qual', 'elements': elem, 'plugins': plug, 'number': 1100})
+
+	with 
+	name = name of the package
+	elements = List of all elements in the package
+	plugins = List of all plugins for the package
+	number = the first integer to be used in the enumeration of the SBMLTypecodes for this package
+
+****************************
+
+Any files names writeXYZ are called by the above functions,
+as are fileHeaders.py, generalFunction.py and strFunctions.py.
