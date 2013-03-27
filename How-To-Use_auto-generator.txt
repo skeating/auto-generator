@@ -19,6 +19,7 @@ So
    writeHeader.createHeader(element)
 
 will write files Input.h and Input.cpp (both C++ and C API)
+Note this covers both the element and a ListOf (if it was stated that the element has a ListOf).
 
 The elements are described as shown in createNewElementDictObj.py
 
