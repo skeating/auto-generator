@@ -54,17 +54,17 @@ def createQualSpecies() :
   initL = dict({'type': 'int', 'reqd' : False, 'name':'initialLevel'})
   maxL = dict({'type': 'int', 'reqd' : False, 'name':'maxLevel'})
   attributes = [id, comp, constant, name, initL, maxL ]
-  element = dict({'name': 'QualitativeSpecies', 'package': 'Qual', 'typecode': 'SBML_QUAL_QUALITATIVE_SPECIES', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False}) 
+  element = dict({'name': 'QualitativeSpecies', 'package': 'Qual', 'typecode': 'SBML_QUAL_QUALITATIVE_SPECIES', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
   return element
 
 def createQualTransition() :
   id = dict({'type': 'SId', 'reqd' : False, 'name':'id'})
   name = dict({'type': 'string', 'reqd' : False, 'name':'name'})
   loInputs = dict({'type': 'lo_element', 'reqd' : False, 'name':'input', 'element': 'Input'})
-  loOutputs = dict({'type': 'lo_element', 'reqd' : True, 'name':'output', 'element': 'Output'})
+  loOutputs = dict({'type': 'lo_element', 'reqd' : False, 'name':'output', 'element': 'Output'})
   loFunc = dict({'type': 'lo_element', 'reqd' : False, 'name':'functionTerm', 'element': 'FunctionTerm'})
   attributes = [id, name, loInputs, loOutputs, loFunc ]
-  element = dict({'name': 'Transition', 'package': 'Qual', 'typecode': 'SBML_QUAL_TRANSITION', 'hasListOf': True, 'attribs':attributes, 'hasChildren':True}) 
+  element = dict({'name': 'Transition', 'package': 'Qual', 'typecode': 'SBML_QUAL_TRANSITION', 'hasListOf': True, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
   return element
 
 def createQualInput() :
@@ -75,7 +75,7 @@ def createQualInput() :
   sign = dict({'type': 'string', 'reqd' : False, 'name':'sign'})
   maxL = dict({'type': 'int', 'reqd' : False, 'name':'thresholdLevel'})
   attributes = [id, qs, effect, name, sign, maxL ]
-  element = dict({'name': 'Input', 'package': 'Qual', 'typecode': 'SBML_QUAL_INPUT', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False}) 
+  element = dict({'name': 'Input', 'package': 'Qual', 'typecode': 'SBML_QUAL_INPUT', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
   return element
 
 def createQualOutput() :
@@ -85,7 +85,7 @@ def createQualOutput() :
   name = dict({'type': 'string', 'reqd' : False, 'name':'name'})
   maxL = dict({'type': 'int', 'reqd' : False, 'name':'outputLevel'})
   attributes = [id, qs, effect, name, maxL ]
-  element = dict({'name': 'Output', 'package': 'Qual', 'typecode': 'SBML_QUAL_OUTPUT', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False}) 
+  element = dict({'name': 'Output', 'package': 'Qual', 'typecode': 'SBML_QUAL_OUTPUT', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
   return element
 
 def createQualFunctionTerm() :

@@ -6,16 +6,13 @@
 #
 
 import sys
-import createNewPackage
+
 import writeExtensionHeader
 import writeExtensionCode
 import writePluginHeader
 import writePluginCode
 
-if len(sys.argv) != 1:
-  print 'Usage: createExtensionFiles.py'
-else:
-  package = createNewPackage.createDistrib()
+def main(package) :
   writeExtensionHeader.createHeader(package)
   writeExtensionCode.createCode(package)
   plugins = package['plugins']

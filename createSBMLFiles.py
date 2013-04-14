@@ -7,7 +7,6 @@
 
 import sys
 import createDirStruct
-import createNewElementDictObj
 import writeCode
 import writeHeader
 

@@ -6,23 +6,43 @@
 #
 
 import sys
+import createNewElementDictObj
 
 
 
 def createQual():
+  # for each sbml class create the sbml obj and the overall description object
+  #QualitativeSpecies
+  sbml_qs = createNewElementDictObj.createQualSpecies()
   qs = dict({'name': 'QualitativeSpecies', 'typecode': 'SBML_QUAL_QUALITATIVE_SPECIES', 'isListOf': True})
+  #Transition
+  sbml_tr = createNewElementDictObj.createQualTransition()
   tr = dict({'name': 'Transition', 'typecode': 'SBML_QUAL_TRANSITION', 'isListOf': True})
+  #Input
+  sbml_inp = createNewElementDictObj.createQualInput()
   inp = dict({'name': 'Input', 'typecode': 'SBML_QUAL_INPUT'})
+  #Output
+  sbml_out = createNewElementDictObj.createQualOutput()
   out = dict({'name': 'Output', 'typecode': 'SBML_QUAL_OUTPUT'})
+  #FunctionTerm
+  sbml_ft = createNewElementDictObj.createQualFunctionTerm()
   ft = dict({'name': 'FunctionTerm', 'typecode': 'SBML_QUAL_FUNCTION_TERM'})
+  #DefaultTerm
+  sbml_dt = createNewElementDictObj.createQualDefaultTerm()
   dt = dict({'name': 'DefaultTerm', 'typecode': 'SBML_QUAL_DEFAULT_TERM'})
+  # create a list of teh sbml classes
+  sbml_classes = [sbml_qs, sbml_tr, sbml_inp, sbml_out, sbml_ft, sbml_dt]
+  # create a list of the types
   elem = [qs, tr, inp, out, ft, dt]
+  # define information about plugins
   model_elem = [qs, tr]
   model_plug = dict({'sbase': 'Model', 'extension': model_elem}) 
   plug = [model_plug]
-  package = dict({'name' : 'Qual', 'elements': elem, 'plugins': plug, 'number': 1100})
+  #create teh overall package description
+  package = dict({'name' : 'Qual', 'elements': elem, 'plugins': plug, 'number': 1100, 'sbmlElements': sbml_classes})
   return package
 
+#note arrays is not finished - needs teh sbml lass information
 def createArrays():
   dim = dict({'name': 'Dimension', 'typecode': 'SBML_ARRAYS_DIMENSION', 'isListOf': True})
   ind = dict({'name': 'Index', 'typecode': 'SBML_ARRAYS_INDEX', 'isListOf': True})
@@ -44,8 +64,20 @@ def createArrays():
   package = dict({'name' : 'Arrays', 'elements': elem, 'plugins': plug, 'number': 1200})
   return package
 
+#note distrib is not finished - needs teh sbml lass information
 def createDistrib():
   fd_plug = dict({'sbase': 'FunctionDefinition', 'extension': []}) 
   plug = [fd_plug]
   package = dict({'name' : 'Distrib', 'elements': [], 'plugins': plug, 'number': 1300})
+  return package
+
+def createPackage(name):
+  if (name == 'qual'):
+	package = createQual()
+  elif (name == 'arrays'):
+    package = createArrays()
+  elif (name == 'distrib'):
+    package = createDistrib()
+  else:
+    package = null
   return package

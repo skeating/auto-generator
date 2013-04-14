@@ -71,6 +71,8 @@ def parseAttribute(attrib):
   elif attrib['type'] == 'lo_element':
     attType = 'lo_element'
     attTypeCode = attrib['element']
+    attName = attName + 's'
+    capAttName = capAttName + 's'
     num = False
   else:
     attType = 'FIX ME'
@@ -223,6 +225,11 @@ def writeWriteElementsCPPCode(outFile, element, attributes, hasChildren=False, h
       if attributes[i]['type'] == 'element':
         outFile.write('\tif (isSet{0}() == true)\n'.format(strFunctions.cap(attributes[i]['name'])))
         outFile.write('\t{\n\t\t;\n\t}\n')
+      elif attributes[i]['type'] == 'lo_element':
+        outFile.write('\tif (getNum{0}s() > 0)\n'.format(strFunctions.cap(attributes[i]['name'])))
+        outFile.write('\t{\n')
+        outFile.write('\t\tm{0}s.write(stream);\n'.format(strFunctions.cap(attributes[i]['name'])))
+        outFile.write('\t}\n\n')
   if hasMath == True:
     for i in range(0, len(attributes)):
       if attributes[i]['type'] == 'element' and attributes[i]['element'] == 'Math':
@@ -259,7 +266,7 @@ def writeSetDocHeader(outFile):
   outFile.write('\tvirtual void setSBMLDocument (SBMLDocument* d);\n\n\n')
   writeInternalEnd(outFile)
 
-def writeSetDocCPPCode(outFile, element):
+def writeSetDocCPPCode(outFile, element, attribs):
   writeInternalStart(outFile)
   outFile.write('/*\n')
   outFile.write(' * Sets the parent SBMLDocument.\n')
@@ -267,6 +274,9 @@ def writeSetDocCPPCode(outFile, element):
   outFile.write('void\n{0}::setSBMLDocument (SBMLDocument* d)\n'.format(element))
   outFile.write('{\n')
   outFile.write('\tSBase::setSBMLDocument(d);\n')
+  for i in range (0, len(attribs)):
+    if attribs[i]['type'] == 'lo_element':
+      outFile.write('\tm{0}s.setSBMLDocument(d);\n'.format(strFunctions.cap(attribs[i]['name'])))
   outFile.write('}\n\n\n')
   writeInternalEnd(outFile)
 
@@ -278,6 +288,19 @@ def writeConnectHeader(outFile):
   outFile.write('\tvirtual void connectToChild ();\n\n\n')
   writeInternalEnd(outFile)
 
+def writeConnectCPPCode(outFile, element, attribs):
+  writeInternalStart(outFile)
+  outFile.write('/*\n')
+  outFile.write('\t * Connects to child elements.\n')
+  outFile.write(' */\n')
+  outFile.write('void\n{0}::connectToChild()\n'.format(element))
+  outFile.write('{\n')
+  for i in range (0, len(attribs)):
+    if attribs[i]['type'] == 'lo_element':
+      outFile.write('\tm{0}s.connectToParent(this);\n'.format(strFunctions.cap(attribs[i]['name'])))
+  outFile.write('}\n\n\n')
+  writeInternalEnd(outFile)
+
 def writeEnablePkgHeader(outFile):
   writeInternalStart(outFile)
   outFile.write('\t/**\n')
@@ -287,7 +310,7 @@ def writeEnablePkgHeader(outFile):
   outFile.write('\t             const std::string& pkgPrefix, bool flag);\n\n\n')
   writeInternalEnd(outFile)
 
-def writeEnablePkgCPPCode(outFile, element):
+def writeEnablePkgCPPCode(outFile, element, attribs):
   writeInternalStart(outFile)
   outFile.write('/*\n')
   outFile.write(' * Enables/Disables the given package with this element.\n')
@@ -296,6 +319,9 @@ def writeEnablePkgCPPCode(outFile, element):
   outFile.write('             const std::string& pkgPrefix, bool flag)\n')
   outFile.write('{\n')
   outFile.write('\tSBase::enablePackageInternal(pkgURI, pkgPrefix, flag);\n')
+  for i in range (0, len(attribs)):
+    if attribs[i]['type'] == 'lo_element':
+      outFile.write('\tm{0}s.enablePackageInternal(pkgURI, pkgPrefix, flag);\n'.format(strFunctions.cap(attribs[i]['name'])))
   outFile.write('}\n\n\n')
   writeInternalEnd(outFile)
 
@@ -307,6 +333,41 @@ def writeCreateObjectHeader(outFile):
   outFile.write('\tvirtual SBase* createObject(XMLInputStream& stream);\n\n\n')
   writeInternalEnd(outFile)
 
+def writeCreateObjectCPPCode(outFile, element, attribs):
+  writeInternalStart(outFile)
+  outFile.write('/*\n')
+  outFile.write(' * creates object.\n')
+  outFile.write(' */\n')
+  outFile.write('SBase*\n{0}::createObject(XMLInputStream& stream)\n'.format(element))
+  outFile.write('{\n')
+  outFile.write('\tconst string& name = stream.peek().getName();\n')
+  outFile.write('\tSBase* object = NULL;\n\n')
+  first = True
+  for i in range (0, len(attribs)):
+    if attribs[i]['type'] == 'element':
+		if first == True:
+			outFile.write('\tif')
+			first = False
+		else:
+			outFile.write('\telse if')
+		outFile.write(' (name == "{0}")\n'.format(attribs[i]['name']))
+		outFile.write('\t{\n')
+		outFile.write('\t\tobject = &m{0};\n'.format(strFunctions.cap(attribs[i]['name'])))
+		outFile.write('\t}\n')
+    elif attribs[i]['type'] == 'lo_element':
+		if first == True:
+			outFile.write('\tif')
+			first = False
+		else:
+			outFile.write('\telse if')
+		outFile.write(' (name == "listOf{0}s")\n'.format(strFunctions.cap(attribs[i]['name'])))
+		outFile.write('\t{\n')
+		outFile.write('\t\tobject = &m{0}s;\n'.format(strFunctions.cap(attribs[i]['name'])))
+		outFile.write('\t}\n')
+  outFile.write('\n\treturn object;\n')
+  outFile.write('}\n\n\n')
+  writeInternalEnd(outFile)
+  
 def writeAddExpectedHeader(outFile):
   writeInternalStart(outFile)
   outFile.write('\t/**\n')
@@ -324,7 +385,7 @@ def writeAddExpectedCPPCode(outFile, element, attribs):
   outFile.write('{\n')
   outFile.write('\tSBase::addExpectedAttributes(attributes);\n\n')
   for i in range (0, len(attribs)):
-    if attribs[i]['type'] != 'element':
+    if attribs[i]['type'] != 'element' and attribs[i]['type'] != 'lo_element':
       outFile.write('\tattributes.add("{0}");\n'.format(attribs[i]['name']))
   outFile.write('}\n\n\n')
   writeInternalEnd(outFile)
@@ -505,7 +566,7 @@ def writeWriteAttributesCPPCode(outFile, element, attribs):
   outFile.write('{\n')
   outFile.write('\tSBase::writeAttributes(stream);\n\n')
   for i in range (0, len(attribs)):
-    if attribs[i]['type'] != 'element':
+    if attribs[i]['type'] != 'element' and attribs[i]['type'] != 'lo_element':
       outFile.write('\tif (isSet{0}() == true)\n'.format(strFunctions.cap(attribs[i]['name'])))
       outFile.write('\t\tstream.writeAttribute("{0}", getPrefix(), m{1});\n\n'.format(attribs[i]['name'], strFunctions.cap(attribs[i]['name'])))
   outFile.write('\tSBase::writeExtensionAttributes(stream);\n\n')
@@ -667,11 +728,13 @@ def writeCommonCPPCode(outFile, element, sbmltypecode, attribs, isListOf, hasChi
 def writeInternalCPPCode(outFile, element, attributes, False, hasChildren, hasMath):
   writeWriteElementsCPPCode(outFile, element, attributes, hasChildren, hasMath)
   writeAcceptCPPCode(outFile, element)
-  writeSetDocCPPCode(outFile, element)
- # writeConnectCPPCode(outFile)
-  writeEnablePkgCPPCode(outFile, element)
+  writeSetDocCPPCode(outFile, element, attributes)
+  writeConnectCPPCode(outFile, element, attributes)
+  writeEnablePkgCPPCode(outFile, element, attributes)
 
 def writeProtectedCPPCode(outFile, element, attribs, False, hasChildren, hasMath):
+  if hasChildren == True:
+    writeCreateObjectCPPCode(outFile, element, attribs)
   writeAddExpectedCPPCode(outFile, element, attribs)
   writeReadAttributesCPPCode(outFile, element, attribs)
   if hasMath == True:

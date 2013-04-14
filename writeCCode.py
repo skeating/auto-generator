@@ -84,7 +84,7 @@ def writeGetFunction(attrib, output, element):
   else:
     attTypeCode = att[3]
   num = att[4]
-  if attrib['type'] == 'element':
+  if attrib['type'] == 'element' or attrib['type'] == 'lo_element':
     return
   varname = strFunctions.objAbbrev(element)
   output.write('/**\n')
@@ -115,7 +115,7 @@ def writeIsSetFunction(attrib, output, element):
   attType = att[2]
   attTypeCode = att[3]
   num = att[4]
-  if attrib['type'] == 'element':
+  if attrib['type'] == 'element' or attrib['type'] == 'lo_element':
     return
   varname = strFunctions.objAbbrev(element)
   output.write('/**\n')
@@ -137,7 +137,7 @@ def writeSetFunction(attrib, output, element):
   attType = att[2]
   attTypeCode = att[3]
   num = att[4]
-  if attrib['type'] == 'element':
+  if attrib['type'] == 'element' or attrib['type'] == 'lo_element':
     return
   varname = strFunctions.objAbbrev(element)
   output.write('/**\n')
@@ -159,7 +159,7 @@ def writeUnsetFunction(attrib, output, element):
   attType = att[2]
   attTypeCode = att[3]
   num = att[4]
-  if attrib['type'] == 'element':
+  if attrib['type'] == 'element' or attrib['type'] == 'lo_element':
     return
   varname = strFunctions.objAbbrev(element)
   output.write('/**\n')
@@ -219,6 +219,7 @@ def writeListOfCode(output, element):
 def createCode(element, code):
   writeConstructors(element['name'], element['package'], code)
   writeAttributeFunctions(element['attribs'], code, element['name'])
+  # TO DO: write code for dealing with child elements
   writeHasReqdAttrFunction(code, element['name'])
   if element['hasListOf'] == True:
     writeListOfCode(code, element['name'])
