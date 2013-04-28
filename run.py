@@ -8,7 +8,6 @@
 import sys
 import os
 import createDirStruct
-# import createNewElementDictObj
 import writeCode
 import writeHeader
 import createExtensionFiles
@@ -16,17 +15,19 @@ import createNewPackage
 import createCommonFiles
 import createCMakeFiles
 import createRegisterFiles
+import createBindingsFiles
 
 if len(sys.argv) != 2:
   print 'Usage: run.py name'
 else:
   name = sys.argv[1]
-#  createDirStruct.main(name)
+  createDirStruct.main(name)
   thisDir = os.getcwd()
   extDir = './' + name + '/src/sbml/packages/' + name + '/extension'
   sbmlDir = './' + name + '/src/sbml/packages/' + name + '/sbml'
   cmnDir = './' + name + '/src/sbml/packages/' + name + '/common'
   srcDir = './' + name + '/src'
+  bindDir = './' + name + '/src/bindings'
   os.chdir(extDir)
   packageDefn = createNewPackage.createPackage(name)
   createExtensionFiles.main(packageDefn)
@@ -45,4 +46,7 @@ else:
   os.chdir(thisDir)
   os.chdir(srcDir)
   createRegisterFiles.main(name)
+  os.chdir(thisDir)
+  os.chdir(bindDir)
+  createBindingsFiles.main(packageDefn)
 	

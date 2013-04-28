@@ -33,6 +33,7 @@ def main(pkgName):
       createDir('java')
       createDir('perl')
       createDir('python')
+	  createDir('r')
       createDir('ruby')
       createDir('swig')
       os.chdir('../sbml')

@@ -273,7 +273,7 @@ def main(package):
 	classes = package['sbmlElements']
 	os.chdir('./' + name)
 	writeTopLevelFile(name)
-	writeTopLevelListsFile(name)
+#	writeTopLevelListsFile(name)
 	os.chdir('./src')
 	writeSrcFile(name)
-	writeSrcListsFile(name, nameOfPackage, plugins, classes)
+#	writeSrcListsFile(name, nameOfPackage, plugins, classes)

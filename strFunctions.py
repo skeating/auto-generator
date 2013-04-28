@@ -30,4 +30,9 @@ def objAbbrev(element):
       abbrev = abbrev + element[i]
   return abbrev.lower()
     
-  
+def listOfName(name):
+	if (name.endswith('s')):
+		listOf = 'listOf' + name
+	else:
+		listOf = 'listOf' + name + 's'
+	return listOf
