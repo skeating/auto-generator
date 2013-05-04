@@ -42,7 +42,7 @@ def createQual():
   package = dict({'name' : 'Qual', 'elements': elem, 'plugins': plug, 'number': 1100, 'sbmlElements': sbml_classes})
   return package
 
-#note arrays is not finished - needs teh sbml lass information
+#note arrays is not finished - NEED To create the objects
 def createArrays():
   dim = dict({'name': 'Dimension', 'typecode': 'SBML_ARRAYS_DIMENSION', 'isListOf': True})
   ind = dict({'name': 'Index', 'typecode': 'SBML_ARRAYS_INDEX', 'isListOf': True})
@@ -64,7 +64,7 @@ def createArrays():
   package = dict({'name' : 'Arrays', 'elements': elem, 'plugins': plug, 'number': 1200})
   return package
 
-#note distrib is not finished - needs teh sbml lass information
+#note distrib is not finished - NEED To create the objects 
 def createDistrib():
   fd_plug = dict({'sbase': 'FunctionDefinition', 'extension': []}) 
   plug = [fd_plug]
@@ -74,10 +74,10 @@ def createDistrib():
 def createPackage(name):
   if (name == 'qual'):
 	package = createQual()
-  elif (name == 'arrays'):
-    package = createArrays()
-  elif (name == 'distrib'):
-    package = createDistrib()
+#  elif (name == 'arrays'):
+#    package = createArrays()
+#  elif (name == 'distrib'):
+#    package = createDistrib()
   else:
-    package = null
+    package = None
   return package

@@ -33,7 +33,7 @@ def main(pkgName):
       createDir('java')
       createDir('perl')
       createDir('python')
-	  createDir('r')
+      createDir('r')
       createDir('ruby')
       createDir('swig')
       os.chdir('../sbml')
@@ -46,3 +46,9 @@ def main(pkgName):
       createDir('sbml')
       createDir('util')
     
+if len(sys.argv) != 2:
+  print 'Usage: createDirStruct.py name'
+else:
+  name = sys.argv[1]
+  main(name)
+
