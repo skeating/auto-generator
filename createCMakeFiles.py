@@ -261,7 +261,7 @@ def writeTopLevelFile(name):
 	fileOut.write('option(ENABLE_{0}        "Enable {1} package"      OFF)\n\n\n'.format(capName, name))
 	fileOut.write('if (ENABLE_{0} )\n'.format(capName))
 	fileOut.write('\tadd_definitions(-DUSE_{0})\n'.format(capName))
-	fileOut.write('\tset(LIBSBML_PACKAGE_INCLUDES $ {LIBSBML_PACKAGE_INCLUDES} ')
+	fileOut.write('\tset(LIBSBML_PACKAGE_INCLUDES ${LIBSBML_PACKAGE_INCLUDES} ')
 	fileOut.write('"LIBSBML_HAS_PACKAGE_{0}")\n'.format(capName))
 	fileOut.write('\tlist(APPEND SWIG_EXTRA_ARGS -DUSE_{0})\n'.format(capName))
 	fileOut.write('endif()\n\n')

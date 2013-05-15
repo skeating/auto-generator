@@ -433,8 +433,9 @@ def createCode(element):
   writeAttributeCode(attributes, code, nameOfElement, nameOfPackage)
   generalFunctions.writeCommonCPPCode(code, nameOfElement, sbmltypecode, attributes, False, hasChildren, hasMath) 
   generalFunctions.writeInternalCPPCode(code, nameOfElement, attributes, False, hasChildren, hasMath) 
-  generalFunctions.writeProtectedCPPCode(code, nameOfElement, attributes, False, hasChildren, hasMath) 
-  writeListOfCode.createCode(element, code)
+  generalFunctions.writeProtectedCPPCode(code, nameOfElement, attributes, False, hasChildren, hasMath, nameOfPackage) 
+  if isListOf == True:
+	writeListOfCode.createCode(element, code)
   writeCCode.createCode(element, code)
 
 #if len(sys.argv) != 2:

@@ -66,7 +66,7 @@ def parseAttribute(attrib):
     if attrib['name'] == 'math':
       attTypeCode = 'ASTNode*'
     else:
-      attTypeCode = 'element-not-done'
+      attTypeCode = attrib['element']+'*'
     num = False
   elif attrib['type'] == 'lo_element':
     attType = 'lo_element'
@@ -333,7 +333,7 @@ def writeCreateObjectHeader(outFile):
   outFile.write('\tvirtual SBase* createObject(XMLInputStream& stream);\n\n\n')
   writeInternalEnd(outFile)
 
-def writeCreateObjectCPPCode(outFile, element, attribs):
+def writeCreateObjectCPPCode(outFile, element, attribs, pkg):
   writeInternalStart(outFile)
   outFile.write('/*\n')
   outFile.write(' * creates object.\n')
@@ -342,6 +342,7 @@ def writeCreateObjectCPPCode(outFile, element, attribs):
   outFile.write('{\n')
   outFile.write('\tconst string& name = stream.peek().getName();\n')
   outFile.write('\tSBase* object = NULL;\n\n')
+  outFile.write('\t{0}_CREATE_NS({1}ns, getSBMLNamespaces());\n\n'.format(pkg.upper(), pkg.lower()))
   first = True
   for i in range (0, len(attribs)):
     if attribs[i]['type'] == 'element':
@@ -352,7 +353,8 @@ def writeCreateObjectCPPCode(outFile, element, attribs):
 			outFile.write('\telse if')
 		outFile.write(' (name == "{0}")\n'.format(attribs[i]['name']))
 		outFile.write('\t{\n')
-		outFile.write('\t\tobject = &m{0};\n'.format(strFunctions.cap(attribs[i]['name'])))
+		outFile.write('\t\tm{0} = new {0}({1}ns);\n'.format(strFunctions.cap(attribs[i]['name']), pkg.lower()))
+		outFile.write('\t\tobject = m{0};\n'.format(strFunctions.cap(attribs[i]['name'])))
 		outFile.write('\t}\n')
     elif attribs[i]['type'] == 'lo_element':
 		if first == True:
@@ -729,12 +731,13 @@ def writeInternalCPPCode(outFile, element, attributes, False, hasChildren, hasMa
   writeWriteElementsCPPCode(outFile, element, attributes, hasChildren, hasMath)
   writeAcceptCPPCode(outFile, element)
   writeSetDocCPPCode(outFile, element, attributes)
-  writeConnectCPPCode(outFile, element, attributes)
+  if hasChildren == True:
+    writeConnectCPPCode(outFile, element, attributes)
   writeEnablePkgCPPCode(outFile, element, attributes)
 
-def writeProtectedCPPCode(outFile, element, attribs, False, hasChildren, hasMath):
+def writeProtectedCPPCode(outFile, element, attribs, False, hasChildren, hasMath, pkg):
   if hasChildren == True:
-    writeCreateObjectCPPCode(outFile, element, attribs)
+    writeCreateObjectCPPCode(outFile, element, attribs, pkg)
   writeAddExpectedCPPCode(outFile, element, attribs)
   writeReadAttributesCPPCode(outFile, element, attribs)
   if hasMath == True:
