@@ -64,11 +64,42 @@ def createArrays():
   package = dict({'name' : 'Arrays', 'elements': elem, 'plugins': plug, 'number': 1200})
   return package
 
-#note distrib is not finished - NEED To create the objects 
+#distrib
 def createDistrib():
-  fd_plug = dict({'sbase': 'FunctionDefinition', 'extension': []}) 
-  plug = [fd_plug]
-  package = dict({'name' : 'Distrib', 'elements': [], 'plugins': plug, 'number': 1300})
+  # for each sbml class create the sbml obj and the overall description object
+  #Draw
+  sbml_draw = createNewElementDictObj.createDistribDraw()
+  draw = dict({'name': sbml_draw['name'], 'typecode': sbml_draw['typecode'], 'isListOf': False})
+  #Input
+  sbml_in = createNewElementDictObj.createDistribInput()
+  input = dict({'name': sbml_in['name'], 'typecode': sbml_in['typecode'], 'isListOf': True})
+  #PredefPDF
+  sbml_pdf = createNewElementDictObj.createDistribPredefinedPDF()
+  pdf = dict({'name': sbml_pdf['name'], 'typecode': sbml_pdf['typecode'], 'isListOf': False})
+  #explicitPMF
+  sbml_pmf = createNewElementDictObj.createDistribExplicitPMF()
+  pmf = dict({'name': sbml_pmf['name'], 'typecode': sbml_pmf['typecode'], 'isListOf': False})
+  #PredefPDF
+  sbml_expl = createNewElementDictObj.createDistribExplicitPDF()
+  exppdf = dict({'name': sbml_expl['name'], 'typecode': sbml_expl['typecode'], 'isListOf': False})
+  #uncertML
+  sbml_un = createNewElementDictObj.createDistribUncertML()
+  un = dict({'name': sbml_un['name'], 'typecode': sbml_un['typecode'], 'isListOf': False})
+  #uncertMath
+  sbml_math = createNewElementDictObj.createDistribUncertMath()
+  unmath = dict({'name': sbml_math['name'], 'typecode': sbml_math['typecode'], 'isListOf': False})
+  # create a list of the sbml classes
+  sbml_classes = [sbml_draw, sbml_in, sbml_pdf, sbml_pmf, sbml_expl, sbml_un, sbml_math]
+  # create a list of the types
+  elem = [draw, input, pdf, pmf, exppdf, un, unmath]
+  # define information about plugins
+  fd_elem = [draw]
+  fd_plug = dict({'sbase': 'FunctionDefinition', 'extension': fd_elem})
+  sb_elem = [un, unmath]
+  sb_plug = dict({'sbase': 'SBase', 'extension': sb_elem})  
+  plug = [fd_plug, sb_plug]
+  #create the overall package description
+  package = dict({'name' : 'Distrib', 'elements': elem, 'plugins': plug, 'number': 1300, 'sbmlElements': sbml_classes})
   return package
 
 def createPackage(name):
@@ -76,8 +107,8 @@ def createPackage(name):
 	package = createQual()
 #  elif (name == 'arrays'):
 #    package = createArrays()
-#  elif (name == 'distrib'):
-#    package = createDistrib()
+  elif (name == 'distrib'):
+    package = createDistrib()
   else:
     package = None
   return package
