@@ -12,7 +12,7 @@ import strFunctions
 
 def writeClassDefn(fileOut, nameOfClass, pkg, members):
   writeConstructors(fileOut, nameOfClass, pkg, members)
-  writeRequiredMethods(fileOut, nameOfClass, members)
+  writeRequiredMethods(fileOut, nameOfClass, members, pkg)
   writeGetFunctions(fileOut, pkg, members, nameOfClass)
   writeOtherFunctions(fileOut, nameOfClass, members)
 
@@ -26,7 +26,13 @@ def writeOtherFunctions(fileOut, nameOfClass, members):
   fileOut.write('\tSBasePlugin::setSBMLDocument(d);\n\n')
   for i in range (0, len(members)):
     mem = members[i]
-    fileOut.write('\tm{0}s.setSBMLDocument(d);\n'.format(mem['name']))
+    if mem['isListOf'] == True:
+      fileOut.write('\tm{0}s.setSBMLDocument(d);\n'.format(mem['name']))
+    else:
+      fileOut.write('\tif (isSet{0}() == true)\n'.format(mem['name']))
+      fileOut.write('\t{\n')
+      fileOut.write('\t\tm{0}.setSBMLDocument(d);\n'.format(mem['name']))
+      fileOut.write('\t}\n')
   fileOut.write('}\n\n\n')
   fileOut.write('/*\n' )
   fileOut.write(' * Connect to parent.\n')
@@ -37,7 +43,13 @@ def writeOtherFunctions(fileOut, nameOfClass, members):
   fileOut.write('\tSBasePlugin::connectToParent(sbase);\n\n')
   for i in range (0, len(members)):
     mem = members[i]
-    fileOut.write('\tm{0}s.connectToParent(sbase);\n'.format(mem['name']))
+    if mem['isListOf'] == True:
+      fileOut.write('\tm{0}s.connectToParent(sbase);\n'.format(mem['name']))
+    else:
+      fileOut.write('\tif (isSet{0}() == true)\n'.format(mem['name']))
+      fileOut.write('\t{\n')
+      fileOut.write('\t\tm{0}.connectToParent(sbase);\n'.format(mem['name']))
+      fileOut.write('\t}\n')
   fileOut.write('}\n\n\n')
   fileOut.write('/*\n' )
   fileOut.write(' * Enables the given package.\n')
@@ -48,7 +60,13 @@ def writeOtherFunctions(fileOut, nameOfClass, members):
   fileOut.write('{\n')
   for i in range (0, len(members)):
     mem = members[i]
-    fileOut.write('\tm{0}s.enablePackageInternal(pkgURI, pkgPrefix, flag);\n'.format(mem['name']))
+    if mem['isListOf'] == True:
+      fileOut.write('\tm{0}s.enablePackageInternal(pkgURI, pkgPrefix, flag);\n'.format(mem['name']))
+    else:
+      fileOut.write('\tif (isSet{0}() == true)\n'.format(mem['name']))
+      fileOut.write('\t{\n')
+      fileOut.write('\t\tm{0}.enablePackageInternal(pkgURI, pkgPrefix, flag);\n'.format(mem['name']))
+      fileOut.write('\t}\n')
   fileOut.write('}\n\n\n')
 
 #  generalFunctions.writeSetDocHeader(fileOut)
@@ -68,7 +86,10 @@ def writeConstructors(fileOut, nameOfClass, pkg, members):
   fileOut.write('\t  SBasePlugin(uri, prefix, {0}ns)\n'.format(pkg.lower()))
   for i in range (0, len(members)):
     mem = members[i]
-    fileOut.write('\t, m{0}s ({1}ns)\n'.format(mem['name'], pkg.lower()))
+    if mem['isListOf'] == True:
+      fileOut.write('\t, m{0}s ({1}ns)\n'.format(mem['name'], pkg.lower()))
+    else:
+	  fileOut.write('\t, m{0}  ( NULL )\n'.format(mem['name']))
   fileOut.write('{\n')
   fileOut.write('}\n\n\n')
   fileOut.write('/*\n' )
@@ -78,7 +99,10 @@ def writeConstructors(fileOut, nameOfClass, pkg, members):
   fileOut.write('\t  SBasePlugin(orig)\n')
   for i in range (0, len(members)):
     mem = members[i]
-    fileOut.write('\t, m{0}s ( orig.m{0}s)\n'.format(mem['name']))
+    if mem['isListOf'] == True:
+      fileOut.write('\t, m{0}s ( orig.m{0}s)\n'.format(mem['name']))
+    else:
+	  fileOut.write('\t, m{0} ( orig.m{0} )\n'.format(mem['name']))
   fileOut.write('{\n')
   fileOut.write('}\n\n\n')
   fileOut.write('/*\n' )
@@ -92,7 +116,10 @@ def writeConstructors(fileOut, nameOfClass, pkg, members):
   fileOut.write('\t\tthis->SBasePlugin::operator=(rhs);\n')
   for i in range (0, len(members)):
     mem = members[i]
-    fileOut.write('\t\tm{0}s = rhs.m{0}s;\n'.format(mem['name']))
+    if mem['isListOf'] == True:
+      fileOut.write('\t\tm{0}s = rhs.m{0}s;\n'.format(mem['name']))
+    else:
+	  fileOut.write('\t\tm{0} = rhs.m{0};\n'.format(mem['name']))
   fileOut.write('\t}\n\n')
   fileOut.write('\treturn *this;\n')
   fileOut.write('}\n\n\n')
@@ -119,10 +146,75 @@ def writeGetFunctions(fileOut, pkg, members, nameOfClass):
   fileOut.write('//---------------------------------------------------------------\n\n')
   for i in range (0, len(members)):
     mem = members[i]
-    writeFunctions(fileOut, mem['name'], nameOfClass, pkg)
+    if mem['isListOf'] == True:
+      writeLOFunctions(fileOut, mem['name'], nameOfClass, pkg)
+    else:
+      writeFunctions(fileOut, mem['name'], nameOfClass, pkg)
   fileOut.write('//---------------------------------------------------------------\n\n\n')
   
 def writeFunctions(fileOut, object, nameOfClass, pkg):
+  ob = strFunctions.lowerFirst(object) 
+  fileOut.write('/*\n')
+  fileOut.write(' * Returns the {0} from this {1} object.\n'.format(object, nameOfClass))
+  fileOut.write(' */\n')
+  fileOut.write('const {0}* \n'.format(object))
+  fileOut.write('{0}::{1} () const\n'.format(nameOfClass, object))
+  fileOut.write('{\n')
+  fileOut.write('\treturn m{0};\n'.format(object))
+  fileOut.write('}\n\n\n')
+  fileOut.write('/*\n')
+  fileOut.write(' * @return @c true if the \"{0}\"'.format(object))
+  fileOut.write(' element has been set,\n')
+  fileOut.write(' */\n')
+  fileOut.write('bool \n'.format(object))
+  fileOut.write('{0}::isSet{1} () const\n'.format(nameOfClass, object))
+  fileOut.write('{\n')
+  fileOut.write('\treturn (m{0} != NULL);\n'.format(object))
+  fileOut.write('}\n\n\n')
+  fileOut.write('/*\n')
+  fileOut.write(' * Sets the {0} element in this {1} object.\n'.format(object, nameOfClass))
+  fileOut.write(' */\n')
+  fileOut.write('int\n'.format(object))
+  fileOut.write('{0}::set{1}(const {1}* {2})\n'.format(nameOfClass, object, ob))
+  fileOut.write('{\n')
+  fileOut.write('\tif ({0} == NULL)\n'.format(ob))
+  fileOut.write('\t{\n')
+  fileOut.write('\t\treturn LIBSBML_OPERATION_FAILED;\n')
+  fileOut.write('\t}\n')
+  fileOut.write('\telse if ({0}->hasRequiredElements() == false)\n'.format(ob))
+  fileOut.write('\t{\n')
+  fileOut.write('\t\treturn LIBSBML_INVALID_OBJECT;\n')
+  fileOut.write('\t}\n')
+  fileOut.write('\telse if (getLevel() != {0}->getLevel())\n'.format(ob))
+  fileOut.write('\t{\n')
+  fileOut.write('\t\treturn LIBSBML_LEVEL_MISMATCH;\n')
+  fileOut.write('\t}\n')
+  fileOut.write('\telse if (getVersion() != {0}->getVersion())\n'.format(ob))
+  fileOut.write('\t{\n')
+  fileOut.write('\t\treturn LIBSBML_VERSION_MISMATCH;\n')
+  fileOut.write('\t}\n')
+  fileOut.write('\telse if (getPackageVersion() != {0}->getPackageVersion())\n'.format(ob))
+  fileOut.write('\t{\n')
+  fileOut.write('\t\treturn LIBSBML_PKG_VERSION_MISMATCH;\n')
+  fileOut.write('\t}\n')
+  fileOut.write('\telse\n')
+  fileOut.write('\t{\n')
+  fileOut.write('\t\tm{0} = {1};\n'.format(object, ob))
+  fileOut.write('\t\treturn LIBSBML_OPERATION_SUCCESS;\n')
+  fileOut.write('\t}\n')
+  fileOut.write('}\n\n\n')
+  fileOut.write('/*\n')
+  fileOut.write(' * Creates a new {0} object and adds it to the {1} object.\n'.format(object, nameOfClass))
+  fileOut.write(' */\n')
+  fileOut.write('{0}*\n'.format(object))
+  fileOut.write('{0}::create{1}()\n'.format(nameOfClass, object))
+  fileOut.write('{\n')
+  fileOut.write('\t{0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(pkg.upper(), pkg.lower()))
+  fileOut.write('\tm{0} = new {0}({1}ns);\n\n'.format(object, pkg.lower()))
+  fileOut.write('\treturn m{0};\n'.format(object))
+  fileOut.write('}\n\n\n')
+
+def writeLOFunctions(fileOut, object, nameOfClass, pkg):
   ob = strFunctions.objAbbrev(object) 
   fileOut.write('/*\n')
   fileOut.write(' * Returns the ListOf{0}s in this plugin object.\n'.format(object))
@@ -269,7 +361,7 @@ def writeIncludeEnds(fileOut, element):
   fileOut.write('\n\n');
   fileOut.write('#endif /* __cplusplus */\n\n\n')
 
-def writeRequiredMethods(fileOut, nameOfClass, members):
+def writeRequiredMethods(fileOut, nameOfClass, members, pkg):
   fileOut.write('//---------------------------------------------------------------\n')
   fileOut.write('//\n')
   fileOut.write('// overridden virtual functions for read/write/check\n')
@@ -288,10 +380,14 @@ def writeRequiredMethods(fileOut, nameOfClass, members):
   fileOut.write('\tconst std::string& targetPrefix = (xmlns.hasURI(mURI)) ? xmlns.getPrefix(mURI) : mPrefix;\n\n')
   fileOut.write('\tif (prefix == targetPrefix) \n')
   fileOut.write('\t{ \n')
+  fileOut.write('\t\t{0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(pkg.upper(), pkg.lower()))
   ifCount = 1
   for i in range (0, len(members)):
     mem = members[i]
-    writeCreateObject(fileOut, mem, ifCount)
+    if mem['isListOf'] == True:
+      writeCreateLOObject(fileOut, mem, ifCount)
+    else:
+      writeCreateObject(fileOut, mem, ifCount, pkg)
     ifCount = ifCount + 1
   fileOut.write('\t} \n\n')
   fileOut.write('\treturn object; \n')
@@ -304,10 +400,16 @@ def writeRequiredMethods(fileOut, nameOfClass, members):
   fileOut.write('{\n')
   for i in range (0, len(members)):
     mem = members[i]
-    fileOut.write('\tif (getNum{0}s() > 0) \n'.format(mem['name']))
-    fileOut.write('\t{ \n')
-    fileOut.write('\t\tm{0}s.write(stream);\n'.format(mem['name']))
-    fileOut.write('\t} \n')
+    if mem['isListOf'] == True:
+      fileOut.write('\tif (getNum{0}s() > 0) \n'.format(mem['name']))
+      fileOut.write('\t{ \n')
+      fileOut.write('\t\tm{0}s.write(stream);\n'.format(mem['name']))
+      fileOut.write('\t} \n')
+    else:
+      fileOut.write('\tif (isSet{0}() == true) \n'.format(mem['name']))
+      fileOut.write('\t{ \n')
+      fileOut.write('\t\tm{0}.write(stream);\n'.format(mem['name']))
+      fileOut.write('\t} \n')
   fileOut.write('}\n\n\n')
   fileOut.write('/*\n')
   fileOut.write(' * Checks if this plugin object has all the required elements.\n')
@@ -320,7 +422,19 @@ def writeRequiredMethods(fileOut, nameOfClass, members):
   fileOut.write('\treturn allPresent; \n')
   fileOut.write('}\n\n\n')
 
-def writeCreateObject(fileOut, mem, ifCount):
+def writeCreateObject(fileOut, mem, ifCount, pkg):
+  name = mem['name']
+  if ifCount == 1:
+    fileOut.write('\t\tif (name == "{0}" ) \n'.format(strFunctions.lowerFirst(name)))
+  else:
+    fileOut.write('\t\telse if (name == "{0}" ) \n'.format(strFunctions.lowerFirst(name)))
+  fileOut.write('\t\t{ \n')
+  fileOut.write('\t\t\tm{0} = new {0}({1}ns);\n\n'.format(name, pkg.lower()))
+  fileOut.write('\t\t\tobject = m{0};\n\n'.format(name))
+  fileOut.write('\t\t} \n')
+
+  
+def writeCreateLOObject(fileOut, mem, ifCount):
   name = mem['name']
   if ifCount == 1:
     fileOut.write('\t\tif (name == "listOf{0}s" ) \n'.format(name))

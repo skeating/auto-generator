@@ -15,7 +15,7 @@ def writeClassDefn(fileOut, nameOfClass, pkg, members):
   fileOut.write('{\npublic:\n\n')
   writeConstructors(fileOut, nameOfClass, pkg)
   writeRequiredMethods(fileOut)
-  writeGetFunctions(fileOut, pkg, members)
+  writeGetFunctions(fileOut, pkg, members, nameOfClass)
   generalFunctions.writeSetDocHeader(fileOut)
   # TO DO - these properly
   fileOut.write('\tvirtual void connectToParent (SBase* sbase);\n\n\n')
@@ -28,7 +28,10 @@ def writeClassEnd(fileOut, members):
   generalFunctions.writeInternalStart(fileOut)
   for i in range (0, len(members)):
     mem = members[i]
-    fileOut.write('\tListOf{0}s m{0}s;\n'.format(mem['name']))
+    if mem['isListOf'] == True:
+      fileOut.write('\tListOf{0}s* m{0}s;\n'.format(mem['name']))
+    else:
+	  fileOut.write('\t{0}* m{0};\n'.format(mem['name']))
   fileOut.write('\n')
   generalFunctions.writeInternalEnd(fileOut)
   fileOut.write('};\n\n\n')
@@ -60,7 +63,7 @@ def writeConstructors(fileOut, nameOfClass, pkg):
   fileOut.write('Destructor for {0}.\n\t */\n'.format(nameOfClass))
   fileOut.write('\tvirtual ~{0}();\n\n\n '.format(nameOfClass))
 
-def writeGetFunctions(fileOut, pkg, members):
+def writeGetFunctions(fileOut, pkg, members, plugin):
   fileOut.write('\t//---------------------------------------------------------------\n')
   fileOut.write('\t//\n')
   fileOut.write('\t// Functions for interacting with the members of the plugin\n')
@@ -68,8 +71,46 @@ def writeGetFunctions(fileOut, pkg, members):
   fileOut.write('\t//---------------------------------------------------------------\n\n')
   for i in range (0, len(members)):
     mem = members[i]
-    writeFunctions(fileOut, mem['name'])
+    if mem['isListOf'] == True:
+      writeFunctions(fileOut, mem['name'])
+    else:
+      writeMemberFunctions(fileOut, mem['name'], plugin)
   
+def writeMemberFunctions(fileOut, object, plugin):
+  fileOut.write('\t/**\n')
+  fileOut.write('\t * Returns the {0} from this {1} object.\n'.format(object, plugin))
+  fileOut.write('\t *\n')
+  fileOut.write('\t * @return the {0} from object in this {1} object.\n'.format(object, plugin))
+  fileOut.write('\t */\n')
+  fileOut.write('\tconst {0}* get{0} () const;\n\n\n'.format(object))
+  fileOut.write('\t/**\n')
+  fileOut.write('\t * Predicate returning @c true or @c false depending on ')
+  fileOut.write('whether the\n\t  \"{0}\" '.format(object))
+  fileOut.write('element has been set.\n\t *\n')
+  fileOut.write('\t * @return @c true if the \"{0}\"'.format(object))
+  fileOut.write(' element has been set,\n')
+  fileOut.write('\t * otherwise @c false is returned.\n')
+  fileOut.write('\t */\n')
+  fileOut.write('\tbool isSet{0}() const;\n\n\n'.format(object))
+  fileOut.write('\t/**\n')
+  fileOut.write('\t * Sets the {0} element in this {1} object.\n'.format(object, plugin))
+  fileOut.write('\t *\n')
+  fileOut.write('\t * @param {0} the {0}* to be set.\n'.format(strFunctions.lowerFirst(object), object))
+  fileOut.write('\t *\n')
+  fileOut.write('\t * @return integer value indicating success/failure of the\n')
+  fileOut.write('\t * function.  @if clike The value is drawn from the\n')
+  fileOut.write('\t * enumeration #OperationReturnValues_t. @endif The possible values\n')
+  fileOut.write('\t * returned by this function are:\n')
+  fileOut.write('\t * @li LIBSBML_OPERATION_SUCCESS\n')
+  fileOut.write('\t */\n')
+  fileOut.write('\tint set{0} (const {0}* {1});\n\n\n'.format(object, strFunctions.lowerFirst(object)))
+  fileOut.write('\t/**\n')
+  fileOut.write('\t * Creates a new {0} object and adds it to the {1} object.\n'.format(object, plugin))
+  fileOut.write('\t *\n')
+  fileOut.write('\t * @return the newly created {0} object.\n'.format(object))
+  fileOut.write('\t */\n')
+  fileOut.write('\t{0}* create{0} ();\n\n\n'.format(object))
+
 def writeFunctions(fileOut, object):
   fileOut.write('\t/**\n')
   fileOut.write('\t * Returns the ListOf{0}s in this plugin object.\n'.format(object))
