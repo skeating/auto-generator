@@ -139,6 +139,8 @@ def writeIncludes(fileOut, element, pkg, plugins):
   for i in range (0, len(plugins)):
     plug = plugins[i]
     fileOut.write('#include <sbml/packages/{0}/extension/{1}{2}Plugin.h>\n'.format(pkg.lower(), pkg, plug['sbase']))
+  fileOut.write('#include <sbml/packages/{0}/extension/{1}SBMLDocumentPlugin.h>\n'.format(pkg.lower(), pkg))
+  fileOut.write('#include <sbml/packages/{0}/validator/{1}SBMLErrorTable.h>\n'.format(pkg.lower(), pkg))
   fileOut.write('\n\n');
   fileOut.write('#ifdef __cplusplus\n')
   fileOut.write('\n\n');
@@ -191,7 +193,7 @@ def writeInitFunction(fileOut, pkg, nameOfClass, plugins):
     plug = plug_ext['sbase']
     fileOut.write('\tSBaseExtensionPoint {0}ExtPoint("core", SBML_{1});\n'.format(plug.lower(), plug.upper()))
   fileOut.write('\n')
-  fileOut.write('\tSBasePluginCreator<SBMLDocumentPlugin, {0}Extension> sbmldocPluginCreator(sbmldocExtPoint, packageURIs);\n'.format(pkg))
+  fileOut.write('\tSBasePluginCreator<{0}SBMLDocumentPlugin, {0}Extension> sbmldocPluginCreator(sbmldocExtPoint, packageURIs);\n'.format(pkg))
   for i in range (0, len(plugins)):
     plug_ext = plugins[i]
     plug = plug_ext['sbase']
@@ -221,6 +223,48 @@ def writeInitFunction(fileOut, pkg, nameOfClass, plugins):
   fileOut.write('\t\tstd::cerr << "[Error] {0}Extension::init() failed." << std::endl;\n'.format(pkg))
   fileOut.write('\t}\n')
   fileOut.write('}\n\n\n')
+
+def writeErrorFunction(fileOut, pkg, nameOfClass, offset):
+  generalFunctions.writeInternalStart(fileOut)
+  fileOut.write('/*\n')
+  fileOut.write(' * Return error table entry. \n')
+  fileOut.write(' */\n')
+  fileOut.write('packageErrorTableEntry\n')
+  fileOut.write('{0}::getErrorTable(unsigned int index) const\n'.format(nameOfClass))
+  fileOut.write('{\n')
+  fileOut.write('\treturn {0}ErrorTable[index];\n'.format(pkg.lower()))
+  fileOut.write('}\n\n')
+  generalFunctions.writeInternalEnd(fileOut)
+  generalFunctions.writeInternalStart(fileOut)
+  fileOut.write('/*\n')
+  fileOut.write(' * Return error table index for this id. \n')
+  fileOut.write(' */\n')
+  fileOut.write('unsigned int\n')
+  fileOut.write('{0}::getErrorTableIndex(unsigned int errorId) const\n'.format(nameOfClass))
+  fileOut.write('{\n')
+  fileOut.write('\tunsigned int tableSize = sizeof({0}ErrorTable)/sizeof({0}ErrorTable[0]);\n'.format(pkg.lower()))
+  fileOut.write('\tunsigned int index = 0;\n\n')
+  fileOut.write('\tfor(unsigned int i = 0; i < tableSize; i++)\n')
+  fileOut.write('\t{\n')
+  fileOut.write('\t\tif (errorId == {0}ErrorTable[i].code)\n'.format(pkg.lower()))
+  fileOut.write('\t\t{\n')
+  fileOut.write('\t\t\tindex = i;\n')
+  fileOut.write('\t\t\tbreak;\n')
+  fileOut.write('\t\t}\n\n')
+  fileOut.write('\t}\n\n')
+  fileOut.write('\treturn index;\n')
+  fileOut.write('}\n\n')
+  generalFunctions.writeInternalEnd(fileOut)
+  generalFunctions.writeInternalStart(fileOut)
+  fileOut.write('/*\n')
+  fileOut.write(' * Return error offset. \n')
+  fileOut.write(' */\n')
+  fileOut.write('unsigned int\n')
+  fileOut.write('{0}::getErrorIdOffset() const\n'.format(nameOfClass))
+  fileOut.write('{\n')
+  fileOut.write('\treturn {0};\n'.format(offset))
+  fileOut.write('}\n\n')
+  generalFunctions.writeInternalEnd(fileOut)
 
 
 def writeRequiredMethods(fileOut, nameOfClass, pkg, elements):
@@ -327,6 +371,7 @@ def createCode(package):
   nameOfPackage = package['name']
   nameOfClass = nameOfPackage + 'Extension'
   plugins = package['plugins']
+  offset = package['offset']
   codeName = nameOfClass + '.cpp'
   code = open(codeName, 'w')
   fileHeaders.addFilename(code, codeName, nameOfClass)
@@ -335,6 +380,7 @@ def createCode(package):
   writeClass(code, nameOfClass, nameOfPackage, package['elements'])
   writeTypeDefns(code, nameOfClass, nameOfPackage, package['elements'], package['number']) 
   writeInitFunction(code, nameOfPackage, nameOfClass, plugins)
+  writeErrorFunction(code, nameOfPackage, nameOfClass, offset)
   writeIncludeEnds(code, nameOfClass)
 
   

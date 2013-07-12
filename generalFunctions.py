@@ -219,7 +219,7 @@ def writeWriteElementsCPPCode(outFile, element, attributes, hasChildren=False, h
   outFile.write(' */\n')
   outFile.write('void\n{0}::writeElements (XMLOutputStream& stream) const\n'.format(element))
   outFile.write('{\n')
-  outFile.write('\tSBase::writeElements(stream);\n')
+  outFile.write('\tSBase::writeElements(stream);\n\n')
   if hasChildren == True:
     for i in range(0, len(attributes)):
       if attributes[i]['type'] == 'element':
@@ -234,7 +234,7 @@ def writeWriteElementsCPPCode(outFile, element, attributes, hasChildren=False, h
     for i in range(0, len(attributes)):
       if attributes[i]['type'] == 'element' and attributes[i]['element'] == 'Math':
         outFile.write('\tif (isSet{0}() == true)\n'.format(strFunctions.cap(attributes[i]['name'])))
-        outFile.write('\t{\n\t\twriteMathML(getMath(), stream, getSBMLNamespaces());\n\t}\n')
+        outFile.write('\t{\n\t\twriteMathML(getMath(), stream, getSBMLNamespaces());\n\t}\n\n')
   outFile.write('\tSBase::writeExtensionElements(stream);\n')
   outFile.write('}\n\n\n')
   writeInternalEnd(outFile)
@@ -247,14 +247,20 @@ def writeAcceptHeader(outFile):
   outFile.write('\tvirtual bool accept (SBMLVisitor& v) const;\n\n\n')
   writeInternalEnd(outFile)
 
-def writeAcceptCPPCode(outFile, element):
+def writeAcceptCPPCode(outFile, element, hasChildren):
   writeInternalStart(outFile)
   outFile.write('/*\n')
   outFile.write(' * Accepts the given SBMLVisitor.\n')
   outFile.write(' */\n')
   outFile.write('bool\n{0}::accept (SBMLVisitor& v) const\n'.format(element))
   outFile.write('{\n')
-  outFile.write('\treturn false;\n\n')
+  if hasChildren == False:
+      outFile.write('\treturn v.visit(*this);\n')
+  else:
+      outFile.write('\tv.visit(*this);\n')
+      outFile.write('\n\* VISIT CHILDREN */\n\n')
+      outFile.write('\tv.leave(*this);\n\n')
+      outFile.write('\treturn true;\n')
   outFile.write('}\n\n\n')
   writeInternalEnd(outFile)
 
@@ -401,7 +407,7 @@ def writeReadAttributesHeader(outFile):
   outFile.write('\t                             const ExpectedAttributes& expectedAttributes);\n\n\n')
   writeInternalEnd(outFile)
 
-def writeReadAttribute(output, attrib, element):
+def writeReadAttribute(output, attrib, element, pkg):
   attName = attrib['name']
   capAttName = strFunctions.cap(attName)
   if attrib['reqd'] == True:
@@ -411,11 +417,7 @@ def writeReadAttribute(output, attrib, element):
   if attrib['type'] == 'SId':
     output.write('\t//\n\t// {0} SId'.format(attName))
     output.write('  ( use = "{0}" )\n\t//\n'.format(use))
-    output.write('\tassigned = attributes.readInto("{0}", m{1}, getErrorLog(), '.format(attName, capAttName))
-    if use == 'required':
-      output.write('true);\n\n')
-    else:
-      output.write('false);\n\n')
+    output.write('\tassigned = attributes.readInto("{0}", m{1});\n\n '.format(attName, capAttName))
     output.write('\tif (assigned == true)\n')
     output.write('\t{\n')
     output.write('\t\t// check string is not empty and correct syntax\n\n')
@@ -425,15 +427,18 @@ def writeReadAttribute(output, attrib, element):
     output.write('\t\t}\n')
     output.write('\t\telse if (SyntaxChecker::isValidSBMLSId(m{0}) == false)\n'.format(capAttName))
     output.write('\t\t{\n\t\t\tlogError(InvalidIdSyntax);\n\t\t}\n')
+    if use == 'required':
+	  output.write('\t}\n')
+	  output.write('\telse\n')
+	  output.write('\t{\n')
+	  output.write('\t\tstd::string message = "{0} attribute \'{1}\' is missing.";\n'.format(pkg, attName))
+	  output.write('\t\tgetErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
+	  output.write('\t\t               getPackageVersion(), sbmlLevel, sbmlVersion, message);\n')
     output.write('\t}\n\n')
   elif attrib['type'] == 'SIdRef':
     output.write('\t//\n\t// {0} SIdRef '.format(attName))
     output.write('  ( use = "{0}" )\n\t//\n'.format(use))
-    output.write('\tassigned = attributes.readInto("{0}", m{1}, getErrorLog(), '.format(attName, capAttName))
-    if use == 'required':
-      output.write('true);\n\n')
-    else:
-      output.write('false);\n\n')
+    output.write('\tassigned = attributes.readInto("{0}", m{1});\n\n'.format(attName, capAttName))
     output.write('\tif (assigned == true)\n')
     output.write('\t{\n')
     output.write('\t\t// check string is not empty and correct syntax\n\n')
@@ -443,15 +448,18 @@ def writeReadAttribute(output, attrib, element):
     output.write('\t\t}\n')
     output.write('\t\telse if (SyntaxChecker::isValidSBMLSId(m{0}) == false)\n'.format(capAttName))
     output.write('\t\t{\n\t\t\tlogError(InvalidIdSyntax);\n\t\t}\n')
+    if use == 'required':
+	  output.write('\t}\n')
+	  output.write('\telse\n')
+	  output.write('\t{\n')
+	  output.write('\t\tstd::string message = "{0} attribute \'{1}\' is missing.";\n'.format(pkg, attName))
+	  output.write('\t\tgetErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
+	  output.write('\t\t               getPackageVersion(), sbmlLevel, sbmlVersion, message);\n')
     output.write('\t}\n\n')
   elif attrib['type'] == 'UnitSIdRef':
     output.write('\t//\n\t// {0} UnitSIdRef '.format(attName))
     output.write('  ( use = "{0}" )\n\t//\n'.format(use))
-    output.write('\tassigned = attributes.readInto("{0}", m{1}, getErrorLog(), '.format(attName, capAttName))
-    if use == 'required':
-      output.write('true);\n\n')
-    else:
-      output.write('false);\n\n')
+    output.write('\tassigned = attributes.readInto("{0}", m{1});\n\n'.format(attName, capAttName))
     output.write('\tif (assigned == true)\n')
     output.write('\t{\n')
     output.write('\t\t// check string is not empty and correct syntax\n\n')
@@ -461,15 +469,18 @@ def writeReadAttribute(output, attrib, element):
     output.write('\t\t}\n')
     output.write('\t\telse if (SyntaxChecker::isValidInternalUnitSId(m{0}) == false)\n'.format(capAttName))
     output.write('\t\t{\n\t\t\tlogError(InvalidUnitIdSyntax);\n\t\t}\n')
+    if use == 'required':
+	  output.write('\t}\n')
+	  output.write('\telse\n')
+	  output.write('\t{\n')
+	  output.write('\t\tstd::string message = "{0} attribute \'{1}\' is missing.";\n'.format(pkg, attName))
+	  output.write('\t\tgetErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
+	  output.write('\t\t               getPackageVersion(), sbmlLevel, sbmlVersion, message);\n')
     output.write('\t}\n\n')
   elif attrib['type'] == 'UnitSId':
     output.write('\t//\n\t// {0} UnitSId '.format(attName))
     output.write('  ( use = "{0}" )\n\t//\n'.format(use))
-    output.write('\tassigned = attributes.readInto("{0}", m{1}, getErrorLog(), '.format(attName, capAttName))
-    if use == 'required':
-      output.write('true);\n\n')
-    else:
-      output.write('false);\n\n')
+    output.write('\tassigned = attributes.readInto("{0}", m{1});\n\n'.format(attName, capAttName))
     output.write('\tif (assigned == true)\n')
     output.write('\t{\n')
     output.write('\t\t// check string is not empty and correct syntax\n\n')
@@ -479,15 +490,18 @@ def writeReadAttribute(output, attrib, element):
     output.write('\t\t}\n')
     output.write('\t\telse if (SyntaxChecker::isValidInternalUnitSId(m{0}) == false)\n'.format(capAttName))
     output.write('\t\t{\n\t\t\tlogError(InvalidUnitIdSyntax);\n\t\t}\n')
+    if use == 'required':
+	  output.write('\t}\n')
+	  output.write('\telse\n')
+	  output.write('\t{\n')
+	  output.write('\t\tstd::string message = "{0} attribute \'{1}\' is missing.";\n'.format(pkg, attName))
+	  output.write('\t\tgetErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
+	  output.write('\t\t               getPackageVersion(), sbmlLevel, sbmlVersion, message);\n')
     output.write('\t}\n\n')
   elif attrib['type'] == 'string':
     output.write('\t//\n\t// {0} string '.format(attName))
     output.write('  ( use = "{0}" )\n\t//\n'.format(use))
-    output.write('\tassigned = attributes.readInto("{0}", m{1}, getErrorLog(), '.format(attName, capAttName))
-    if use == 'required':
-      output.write('true);\n\n')
-    else:
-      output.write('false);\n\n')
+    output.write('\tassigned = attributes.readInto("{0}", m{1});\n\n'.format(attName, capAttName))
     output.write('\tif (assigned == true)\n')
     output.write('\t{\n')
     output.write('\t\t// check string is not empty\n\n')
@@ -495,39 +509,152 @@ def writeReadAttribute(output, attrib, element):
     output.write('\t\t{\n')
     output.write('\t\t\tlogEmptyString(m{0}, getLevel(), getVersion(), "<{1}>");\n'.format(capAttName, element))
     output.write('\t\t}\n')
+    if use == 'required':
+	  output.write('\t}\n')
+	  output.write('\telse\n')
+	  output.write('\t{\n')
+	  output.write('\t\tstd::string message = "{0} attribute \'{1}\' is missing.";\n'.format(pkg, attName))
+	  output.write('\t\tgetErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
+	  output.write('\t\t               getPackageVersion(), sbmlLevel, sbmlVersion, message);\n')
     output.write('\t}\n\n')
   elif attrib['type'] == 'double':
     output.write('\t//\n\t// {0} double '.format(attName))
     output.write('  ( use = "{0}" )\n\t//\n'.format(use))
-    output.write('\tmIsSet{1} = attributes.readInto("{0}", m{1}, getErrorLog(), '.format(attName, capAttName))
+    output.write('\tnumErrs = getErrorLog()->getNumErrors();\n')
+    output.write('\tmIsSet{1} = attributes.readInto("{0}", m{1});\n\n'.format(attName, capAttName))
+    # if use == 'required':
+	  # output.write('\tif (mIsSet{0} == false)\n'.format(capAttName))
+	  # output.write('\t{\n')
+	  # output.write('\t\tstd::string message = "{0} attribute \'{1}\' is missing.";\n'.format(pkg, attName))
+	  # output.write('\t\tgetErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
+	  # output.write('\t\t               getPackageVersion(), sbmlLevel, sbmlVersion, message);\n')
+	  # output.write('\t}\n')
+    output.write('\tif (mIsSet{0} == false)\n'.format(capAttName))
+    output.write('\t{\n')
+    output.write('\t\tif (getErrorLog() != NULL)\n')
+    output.write('\t\t{\n')
+    output.write('\t\t\tif (getErrorLog()->getNumErrors() == numErrs + 1 &&\n')
+    output.write('\t\t\t        getErrorLog()->contains(XMLAttributeTypeMismatch))\n')
+    output.write('\t\t\t{\n')
+    output.write('\t\t\t\tgetErrorLog()->remove(XMLAttributeTypeMismatch);\n')
+    output.write('\t\t\t\tgetErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
+    output.write('\t\t\t\t             getPackageVersion(), sbmlLevel, sbmlVersion);\n')
+    output.write('\t\t\t}\n')
     if use == 'required':
-      output.write('true);\n\n')
-    else:
-      output.write('false);\n\n')
+	  output.write('\t\t\telse\n')
+	  output.write('\t\t\t{\n')
+	  output.write('\t\t\t\tstd::string message = "{0} attribute \'{1}\' is missing.";\n'.format(pkg, attName))
+	  output.write('\t\t\t\tgetErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
+	  output.write('\t\t\t\t               getPackageVersion(), sbmlLevel, sbmlVersion, message);\n')
+	  output.write('\t\t\t}\n')
+    output.write('\t\t}\n')
+    output.write('\t}\n\n')
   elif attrib['type'] == 'int':
     output.write('\t//\n\t// {0} int '.format(attName))
     output.write('  ( use = "{0}" )\n\t//\n'.format(use))
-    output.write('\tmIsSet{1} = attributes.readInto("{0}", m{1}, getErrorLog(), '.format(attName, capAttName))
+    output.write('\tnumErrs = getErrorLog()->getNumErrors();\n')
+    output.write('\tmIsSet{1} = attributes.readInto("{0}", m{1});\n\n'.format(attName, capAttName))
+    # if use == 'required':
+	  # output.write('\tif (mIsSet{0} == false)\n'.format(capAttName))
+	  # output.write('\t{\n')
+	  # output.write('\t\tstd::string message = "{0} attribute \'{1}\' is missing.";\n'.format(pkg, attName))
+	  # output.write('\t\tgetErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
+	  # output.write('\t\t               getPackageVersion(), sbmlLevel, sbmlVersion, message);\n')
+	  # output.write('\t}\n')
+    output.write('\tif (mIsSet{0} == false)\n'.format(capAttName))
+    output.write('\t{\n')
+    output.write('\t\tif (getErrorLog() != NULL)\n')
+    output.write('\t\t{\n')
+    output.write('\t\t\tif (getErrorLog()->getNumErrors() == numErrs + 1 &&\n')
+    output.write('\t\t\t        getErrorLog()->contains(XMLAttributeTypeMismatch))\n')
+    output.write('\t\t\t{\n')
+    output.write('\t\t\t\tgetErrorLog()->remove(XMLAttributeTypeMismatch);\n')
+    output.write('\t\t\t\tgetErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
+    output.write('\t\t\t\t             getPackageVersion(), sbmlLevel, sbmlVersion);\n')
+    output.write('\t\t\t}\n')
     if use == 'required':
-      output.write('true);\n\n')
-    else:
-      output.write('false);\n\n')
+	  output.write('\t\t\telse\n')
+	  output.write('\t\t\t{\n')
+	  output.write('\t\t\t\tstd::string message = "{0} attribute \'{1}\' is missing.";\n'.format(pkg, attName))
+	  output.write('\t\t\t\tgetErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
+	  output.write('\t\t\t\t               getPackageVersion(), sbmlLevel, sbmlVersion, message);\n')
+	  output.write('\t\t\t}\n')
+    output.write('\t\t}\n')
+    output.write('\t}\n\n')
   elif attrib['type'] == 'uint':
     output.write('\t//\n\t// {0} unsigned int '.format(attName))
     output.write('  ( use = "{0}" )\n\t//\n'.format(use))
-    output.write('\tmIsSet{1} = attributes.readInto("{0}", m{1}, getErrorLog(), '.format(attName, capAttName))
+    output.write('\tnumErrs = getErrorLog()->getNumErrors();\n')
+    output.write('\tmIsSet{1} = attributes.readInto("{0}", m{1});\n\n'.format(attName, capAttName))
+    # if use == 'required':
+	  # output.write('\tif (mIsSet{0} == false)\n'.format(capAttName))
+	  # output.write('\t{\n')
+	  # output.write('\t\tstd::string message = "{0} attribute \'{1}\' is missing.";\n'.format(pkg, attName))
+	  # output.write('\t\tgetErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
+	  # output.write('\t\t               getPackageVersion(), sbmlLevel, sbmlVersion, message);\n')
+	  # output.write('\t}\n')
+    output.write('\tif (mIsSet{0} == false)\n'.format(capAttName))
+    output.write('\t{\n')
+    output.write('\t\tif (getErrorLog() != NULL)\n')
+    output.write('\t\t{\n')
+    output.write('\t\t\tif (getErrorLog()->getNumErrors() == numErrs + 1 &&\n')
+    output.write('\t\t\t        getErrorLog()->contains(XMLAttributeTypeMismatch))\n')
+    output.write('\t\t\t{\n')
+    output.write('\t\t\t\tgetErrorLog()->remove(XMLAttributeTypeMismatch);\n')
+    output.write('\t\t\t\tgetErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
+    output.write('\t\t\t\t             getPackageVersion(), sbmlLevel, sbmlVersion);\n')
+    output.write('\t\t\t}\n')
     if use == 'required':
-      output.write('true);\n\n')
-    else:
-      output.write('false);\n\n')
+	  output.write('\t\t\telse\n')
+	  output.write('\t\t\t{\n')
+	  output.write('\t\t\t\tstd::string message = "{0} attribute \'{1}\' is missing.";\n'.format(pkg, attName))
+	  output.write('\t\t\t\tgetErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
+	  output.write('\t\t\t\t               getPackageVersion(), sbmlLevel, sbmlVersion, message);\n')
+	  output.write('\t\t\t}\n')
+    output.write('\t\t}\n')
+    output.write('\t}\n\n')
   elif attrib['type'] == 'bool':
     output.write('\t//\n\t// {0} bool '.format(attName))
     output.write('  ( use = "{0}" )\n\t//\n'.format(use))
-    output.write('\tmIsSet{1} = attributes.readInto("{0}", m{1}, getErrorLog(), '.format(attName, capAttName))
+    output.write('\tnumErrs = getErrorLog()->getNumErrors();\n')
+    output.write('\tmIsSet{1} = attributes.readInto("{0}", m{1});\n\n'.format(attName, capAttName))
+    output.write('\tif (mIsSet{0} == false)\n'.format(capAttName))
+    output.write('\t{\n')
+    output.write('\t\tif (getErrorLog() != NULL)\n')
+    output.write('\t\t{\n')
+    output.write('\t\t\tif (getErrorLog()->getNumErrors() == numErrs + 1 &&\n')
+    output.write('\t\t\t        getErrorLog()->contains(XMLAttributeTypeMismatch))\n')
+    output.write('\t\t\t{\n')
+    output.write('\t\t\t\tgetErrorLog()->remove(XMLAttributeTypeMismatch);\n')
+    output.write('\t\t\t\tgetErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
+    output.write('\t\t\t\t             getPackageVersion(), sbmlLevel, sbmlVersion);\n')
+    output.write('\t\t\t}\n')
     if use == 'required':
-      output.write('true);\n\n')
-    else:
-      output.write('false);\n\n')
+	  output.write('\t\t\telse\n')
+	  output.write('\t\t\t{\n')
+	  output.write('\t\t\t\tstd::string message = "{0} attribute \'{1}\' is missing.";\n'.format(pkg, attName))
+	  output.write('\t\t\t\tgetErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
+	  output.write('\t\t\t\t               getPackageVersion(), sbmlLevel, sbmlVersion, message);\n')
+	  output.write('\t\t\t}\n')
+    output.write('\t\t}\n')
+    output.write('\t}\n\n')
+    # if use == 'required':
+	  # output.write('\tif (mIsSet{0} == false)\n'.format(capAttName))
+	  # output.write('\t{\n')
+	  # output.write('\t\tstd::string message = "{0} attribute \'{1}\' is missing.";\n'.format(pkg, attName))
+	  # output.write('\t\tgetErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
+	  # output.write('\t\t               getPackageVersion(), sbmlLevel, sbmlVersion, message);\n')
+	  # output.write('\t}\n\n')
+    # output.write('\tif (mIsSet{0} == false)\n'.format(capAttName))
+    # output.write('\t{\n')
+    # output.write('\t\tif (getErrorLog()->getNumErrors() == numErrs + 1 &&\n')
+    # output.write('\t\t        getErrorLog()->contains(XMLAttributeTypeMismatch))\n')
+    # output.write('\t\t{\n')
+    # output.write('\t\t\tgetErrorLog()->remove(XMLAttributeTypeMismatch);\n')
+    # output.write('\t\t\tgetErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
+    # output.write('\t\t\t             getPackageVersion(), sbmlLevel, sbmlVersion);\n')
+    # output.write('\t\t}\n')
+    # output.write('\t}\n')
   elif attrib['type'] == 'element':
     return
   else:
@@ -536,7 +663,7 @@ def writeReadAttribute(output, attrib, element):
     num = False
 
 
-def writeReadAttributesCPPCode(outFile, element, attribs):
+def writeReadAttributesCPPCode(outFile, element, attribs, pkg, isListOf):
   writeInternalStart(outFile)
   outFile.write('/*\n')
   outFile.write(' * Read values from the given XMLAttributes set into their specific fields.\n')
@@ -544,10 +671,65 @@ def writeReadAttributesCPPCode(outFile, element, attribs):
   outFile.write('void\n{0}::readAttributes (const XMLAttributes& attributes,\n'.format(element))
   outFile.write('                             const ExpectedAttributes& expectedAttributes)\n')
   outFile.write('{\n')
+  outFile.write('\tconst unsigned int sbmlLevel   = getLevel  ();\n')
+  outFile.write('\tconst unsigned int sbmlVersion = getVersion();\n\n')
+  outFile.write('\tunsigned int numErrs;\n\n')
+  if isListOf == True:
+	outFile.write('\t/* look to see whether an unknown attribute error was logged\n')
+	outFile.write('\t * during the read of the listOf{0}s - which will have\n'.format(element))
+	outFile.write('\t * happened immediately prior to this read\n\t*/\n\n')
+	outFile.write('\tif (getErrorLog() != NULL &&\n')
+	outFile.write('\t    static_cast<ListOf{0}s*>(getParentSBMLObject())->size() < 2)\n'.format(element))
+	outFile.write('\t{\n')
+	outFile.write('\t\tnumErrs = getErrorLog()->getNumErrors();\n')
+	outFile.write('\t\tfor (int n = numErrs-1; n >= 0; n--)\n')
+	outFile.write('\t\t{\n')
+	outFile.write('\t\t\tif (getErrorLog()->getError(n)->getErrorId() == UnknownPackageAttribute)\n')
+	outFile.write('\t\t\t{\n')
+	outFile.write('\t\t\t\tconst std::string details =\n')
+	outFile.write('\t\t\t\t      getErrorLog()->getError(n)->getMessage();\n')
+	outFile.write('\t\t\t\tgetErrorLog()->remove(UnknownPackageAttribute);\n')
+	outFile.write('\t\t\t\tgetErrorLog()->logPackageError("{0}", UnknwonError,\n'.format(pkg.lower()))
+	outFile.write('\t\t\t\t          getPackageVersion(), sbmlLevel, sbmlVersion, details);\n')
+	outFile.write('\t\t\t}\n')
+	outFile.write('\t\t\telse if (getErrorLog()->getError(n)->getErrorId() == UnknownCoreAttribute)\n')
+	outFile.write('\t\t\t{\n')
+	outFile.write('\t\t\t\tconst std::string details =\n')
+	outFile.write('\t\t\t\t           getErrorLog()->getError(n)->getMessage();\n')
+	outFile.write('\t\t\t\tgetErrorLog()->remove(UnknownCoreAttribute);\n')
+	outFile.write('\t\t\t\tgetErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
+	outFile.write('\t\t\t\t          getPackageVersion(), sbmlLevel, sbmlVersion, details);\n')
+	outFile.write('\t\t\t}\n')
+	outFile.write('\t\t}\n')
+	outFile.write('\t}\n\n')
   outFile.write('\tSBase::readAttributes(attributes, expectedAttributes);\n\n')
+  outFile.write('\t// look to see whether an unknown attribute error was logged\n')
+  outFile.write('\tif (getErrorLog() != NULL)\n')
+  outFile.write('\t{\n')
+  outFile.write('\t\tnumErrs = getErrorLog()->getNumErrors();\n')
+  outFile.write('\t\tfor (int n = numErrs-1; n >= 0; n--)\n')
+  outFile.write('\t\t{\n')
+  outFile.write('\t\t\tif (getErrorLog()->getError(n)->getErrorId() == UnknownPackageAttribute)\n')
+  outFile.write('\t\t\t{\n')
+  outFile.write('\t\t\t\tconst std::string details =\n')
+  outFile.write('\t\t\t\t                  getErrorLog()->getError(n)->getMessage();\n')
+  outFile.write('\t\t\t\tgetErrorLog()->remove(UnknownPackageAttribute);\n')
+  outFile.write('\t\t\t\tgetErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
+  outFile.write('\t\t\t\t               getPackageVersion(), sbmlLevel, sbmlVersion, details);\n')
+  outFile.write('\t\t\t}\n')
+  outFile.write('\t\t\telse if (getErrorLog()->getError(n)->getErrorId() == UnknownCoreAttribute)\n')
+  outFile.write('\t\t\t{\n')
+  outFile.write('\t\t\t\tconst std::string details =\n')
+  outFile.write('\t\t\t\t                  getErrorLog()->getError(n)->getMessage();\n')
+  outFile.write('\t\t\t\tgetErrorLog()->remove(UnknownCoreAttribute);\n')
+  outFile.write('\t\t\t\tgetErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
+  outFile.write('\t\t\t\t               getPackageVersion(), sbmlLevel, sbmlVersion, details);\n')
+  outFile.write('\t\t\t}\n')
+  outFile.write('\t\t}\n')
+  outFile.write('\t}\n\n')
   outFile.write('\tbool assigned = false;\n\n')
   for i in range (0, len(attribs)):
-    writeReadAttribute(outFile, attribs[i], element)
+    writeReadAttribute(outFile, attribs[i], element, pkg)
   outFile.write('}\n\n\n')
   writeInternalEnd(outFile)
 
@@ -727,19 +909,19 @@ def writeCommonCPPCode(outFile, element, sbmltypecode, attribs, isListOf, hasChi
   if hasChildren == True or hasMath == True:
     writeHasReqdElementsCPPCode(outFile, element, attribs)
 
-def writeInternalCPPCode(outFile, element, attributes, False, hasChildren, hasMath):
+def writeInternalCPPCode(outFile, element, attributes, hasChildren, hasMath):
   writeWriteElementsCPPCode(outFile, element, attributes, hasChildren, hasMath)
-  writeAcceptCPPCode(outFile, element)
+  writeAcceptCPPCode(outFile, element, hasChildren)
   writeSetDocCPPCode(outFile, element, attributes)
   if hasChildren == True:
     writeConnectCPPCode(outFile, element, attributes)
   writeEnablePkgCPPCode(outFile, element, attributes)
 
-def writeProtectedCPPCode(outFile, element, attribs, False, hasChildren, hasMath, pkg):
+def writeProtectedCPPCode(outFile, element, attribs, False, hasChildren, hasMath, pkg, isListOf):
   if hasChildren == True:
     writeCreateObjectCPPCode(outFile, element, attribs, pkg)
   writeAddExpectedCPPCode(outFile, element, attribs)
-  writeReadAttributesCPPCode(outFile, element, attribs)
+  writeReadAttributesCPPCode(outFile, element, attribs, pkg, isListOf)
   if hasMath == True:
     writeReadOtherXMLCPPCode(outFile, element)
   writeWriteAttributesCPPCode(outFile, element, attribs)

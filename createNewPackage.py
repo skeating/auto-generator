@@ -39,7 +39,7 @@ def createQual():
   model_plug = dict({'sbase': 'Model', 'extension': model_elem}) 
   plug = [model_plug]
   #create teh overall package description
-  package = dict({'name' : 'Qual', 'elements': elem, 'plugins': plug, 'number': 1100, 'sbmlElements': sbml_classes})
+  package = dict({'name' : 'Qual', 'elements': elem, 'plugins': plug, 'number': 1100, 'sbmlElements': sbml_classes, 'offset': 3000000})
   return package
 
 #note arrays is not finished - NEED To create the objects

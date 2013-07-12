@@ -89,14 +89,14 @@ def createQualOutput() :
   return element
 
 def createQualFunctionTerm() :
-  maxL = dict({'type': 'int', 'reqd' : False, 'name':'resultLevel'})
+  maxL = dict({'type': 'int', 'reqd' : True, 'name':'resultLevel'})
   math = dict({'type': 'element', 'reqd' : True, 'name':'math', 'element': 'Math'})
   attributes = [maxL, math ]
   element = dict({'name': 'FunctionTerm', 'package': 'Qual', 'typecode': 'SBML_QUAL_FUNCTION_TERM', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':True}) 
   return element
 
 def createQualDefaultTerm() :
-  maxL = dict({'type': 'int', 'reqd' : False, 'name':'resultLevel'})
+  maxL = dict({'type': 'int', 'reqd' : True, 'name':'resultLevel'})
   attributes = [maxL ]
   element = dict({'name': 'DefaultTerm', 'package': 'Qual', 'typecode': 'SBML_QUAL_DEFAULT_TERM', 'hasListOf': False, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
   return element

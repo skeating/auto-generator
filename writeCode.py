@@ -17,6 +17,7 @@ import writeCCode
 def writeIncludes(fileOut, element, pkg, hasMath=False):
   fileOut.write('\n\n');
   fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), element))
+  fileOut.write('#include <sbml/packages/{0}/validator/{1}SBMLError.h>\n'.format(pkg.lower(), pkg))
   if hasMath == True:
     fileOut.write('#include <sbml/math/MathML.h>\n')
   fileOut.write('\n\n');
@@ -33,7 +34,7 @@ def writeIncludes(fileOut, element, pkg, hasMath=False):
 def writeAttributes(attrs, output, constType=0, pkg=""):
   for i in range(0, len(attrs)):
     writeAtt(attrs[i]['type'], attrs[i]['name'], output, constType, pkg)  
-  output.write('\n')
+#  output.write('\n')
 
 def writeAtt(atttype, name, output, constType, pkg):
   if atttype == 'SId' or atttype == 'SIdRef' or atttype == 'UnitSId' or atttype == 'UnitSIdRef' or atttype == 'string':
@@ -66,7 +67,21 @@ def writeCopyAttributes(attrs, output, tabs, name):
     attName = strFunctions.cap(attrs[i]['name'])
     atttype = attrs[i]['type']
     if atttype != 'lo_element':
-      output.write('{0}m{1}  = {2}.m{1};\n'.format(tabs, strFunctions.cap(attrs[i]['name']), name))  
+	  if atttype != 'element':
+		output.write('{0}m{1}  = {2}.m{1};\n'.format(tabs, strFunctions.cap(attrs[i]['name']), name))
+	  else:
+		output.write('{0}if ({2}.m{1} != NULL)\n'.format(tabs, strFunctions.cap(attrs[i]['name']), name))
+		output.write('{0}'.format(tabs))
+		output.write('{\n')
+		output.write('{0}\tm{1} = {2}.m{1}->deepCopy();\n'.format(tabs, strFunctions.cap(attrs[i]['name']), name))
+		output.write('{0}'.format(tabs))
+		output.write('}\n')
+		output.write('{0}else\n'.format(tabs))
+		output.write('{0}'.format(tabs))
+		output.write('{\n')
+		output.write('{0}\tm{1} = NULL;\n'.format(tabs, strFunctions.cap(attrs[i]['name'])))
+		output.write('{0}'.format(tabs))
+		output.write('}\n')
     else:
       output.write('{0}m{1}s  = {2}.m{1}s;\n'.format(tabs, strFunctions.cap(attrs[i]['name']), name))  	
     if atttype == 'double' or atttype == 'int' or atttype == 'uint' or atttype == 'bool':
@@ -147,6 +162,8 @@ def writeConstructors(element, package, output, attrs, hasChildren=False, hasMat
   output.write(' * Destructor for {0}.\n */\n'.format(element))
   output.write('{0}::~{0} ()\n'.format(element))
   output.write('{\n')
+  if hasMath == True:
+    output.write('\tdelete mMath;\n')
   output.write('}\n\n\n')
  
   
@@ -432,8 +449,8 @@ def createCode(element):
   writeConstructors(nameOfElement, nameOfPackage, code, attributes, hasChildren, hasMath)
   writeAttributeCode(attributes, code, nameOfElement, nameOfPackage)
   generalFunctions.writeCommonCPPCode(code, nameOfElement, sbmltypecode, attributes, False, hasChildren, hasMath) 
-  generalFunctions.writeInternalCPPCode(code, nameOfElement, attributes, False, hasChildren, hasMath) 
-  generalFunctions.writeProtectedCPPCode(code, nameOfElement, attributes, False, hasChildren, hasMath, nameOfPackage) 
+  generalFunctions.writeInternalCPPCode(code, nameOfElement, attributes, hasChildren, hasMath) 
+  generalFunctions.writeProtectedCPPCode(code, nameOfElement, attributes, False, hasChildren, hasMath, nameOfPackage, isListOf) 
   if isListOf == True:
 	writeListOfCode.createCode(element, code)
   writeCCode.createCode(element, code)
