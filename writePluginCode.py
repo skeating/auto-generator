@@ -68,6 +68,24 @@ def writeOtherFunctions(fileOut, nameOfClass, members):
       fileOut.write('\t\tm{0}.enablePackageInternal(pkgURI, pkgPrefix, flag);\n'.format(mem['name']))
       fileOut.write('\t}\n')
   fileOut.write('}\n\n\n')
+  fileOut.write('/*\n' )
+  fileOut.write(' * Accept the SBMLVisitor.\n')
+  fileOut.write(' */\n')
+  fileOut.write('bool\n')
+  fileOut.write('{0}::accept(SBMLVisitor& v) const\n'.format(nameOfClass))
+  fileOut.write('{\n')
+  fileOut.write('\tconst Model * model = static_cast<const Model * >(this->getParentSBMLObject());\n\n')
+  fileOut.write('\tv.visit(*model);\n')
+  fileOut.write('\tv.leave(*model);\n\n')
+  for i in range (0, len(members)):
+    mem = members[i]
+    if mem['isListOf'] == True:
+      fileOut.write('\tfor(unsigned int i = 0; i < getNum{0}s(); i++)\n'.format(mem['name']))
+      fileOut.write('\t{\n')
+      fileOut.write('\t\tget{0}(i)->accept(v);\n'.format(mem['name']))
+      fileOut.write('\t}\n\n')
+  fileOut.write('\treturn true;\n')
+  fileOut.write('}\n\n\n')
 
 #  generalFunctions.writeSetDocHeader(fileOut)
 #  # TO DO - these properly

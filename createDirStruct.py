@@ -45,6 +45,8 @@ def main(pkgName):
       createDir('extension')
       createDir('sbml')
       createDir('validator')
+      os.chdir('validator')
+      createDir('constraints')
     
 if len(sys.argv) != 2:
   print 'Usage: createDirStruct.py name'

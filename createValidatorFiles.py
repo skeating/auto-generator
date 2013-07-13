@@ -230,7 +230,26 @@ def createConsistencyFiles(pkg, type):
   fileHeaders.addLicence(output1)
   writeConsistencyFile(output1, nameOfElement, pkg, type)
   
+def createConstraintsFile(pkg, type):
+  nameOfElement = pkg + type + 'ConsistencyConstraints'
+  fileName = nameOfElement + '.cpp'
+  output = open(fileName, 'w')
+  generalFunctions.writeInternalStart(output)
+  fileHeaders.addFilename(output, fileName, nameOfElement)
+  fileHeaders.addLicence(output)
+  output.write('\n#ifndef  AddingConstraintsToValidator\n\n')
+  output.write('#include <sbml/validator/VConstraint.h>\n\n')
+  output.write('#include <sbml/packages/{0}/validator/{1}SBMLError.h>\n\n'.format(pkg.lower(), pkg))
+  output.write('#endif  /* AddingConstrainstToValidator */\n\n')
+  output.write('#include <sbml/validator/ConstraintMacros.h>\n\n')
+  output.write('/** @cond doxygen-ignored */\n\n')
+  output.write('using namespace std;\n\n')
+  output.write('/** @endcond */\n\n')
+  output.write('/** PUT CONSTRAINTS HERE */\n\n')
+  generalFunctions.writeInternalEnd(output)
+  
 
+  
 def main(package):
   nameOfPackage = package['name']
   classes = package['sbmlElements']
@@ -240,3 +259,7 @@ def main(package):
   createErrorFiles(nameOfPackage, offset)
   createConsistencyFiles(nameOfPackage, "")
   createConsistencyFiles(nameOfPackage, "Identifier")
+  os.chdir('constraints')
+  createConstraintsFile(nameOfPackage, "")
+  createConstraintsFile(nameOfPackage, "Identifier")
+  

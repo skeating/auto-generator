@@ -16,6 +16,7 @@ import createCMakeFiles
 import createRegisterFiles
 import createBindingsFiles
 import createArchiveFile
+import createValidatorFiles
 
 if len(sys.argv) != 2:
   print 'Usage: run.py name'
@@ -29,6 +30,7 @@ else:
   extDir = './' + name + '/src/sbml/packages/' + name + '/extension'
   sbmlDir = './' + name + '/src/sbml/packages/' + name + '/sbml'
   cmnDir = './' + name + '/src/sbml/packages/' + name + '/common'
+  valDir = './' + name + '/src/sbml/packages/' + name + '/validator'
   packDir = './' + name + '/src/sbml/packages'
   bindDir = './' + name + '/src/bindings'
   #check directories exist
@@ -47,6 +49,9 @@ else:
   os.chdir(thisDir)
   os.chdir(cmnDir)
   createCommonFiles.main(packageDefn)
+  os.chdir(thisDir)
+  os.chdir(valDir)
+  createValidatorFiles.main(packageDefn)
   os.chdir(thisDir)
   createCMakeFiles.main(packageDefn)
   os.chdir(thisDir)

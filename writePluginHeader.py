@@ -18,9 +18,16 @@ def writeClassDefn(fileOut, nameOfClass, pkg, members):
   writeGetFunctions(fileOut, pkg, members, nameOfClass)
   generalFunctions.writeSetDocHeader(fileOut)
   # TO DO - these properly
+  generalFunctions.writeInternalStart(fileOut)
   fileOut.write('\tvirtual void connectToParent (SBase* sbase);\n\n\n')
+  generalFunctions.writeInternalEnd(fileOut)
+  generalFunctions.writeInternalStart(fileOut)
   fileOut.write('\tvirtual void enablePackageInternal(const std::string& pkgURI,\n')
   fileOut.write('\t                                   const std::string& pkgPrefix, bool flag);\n\n\n')
+  generalFunctions.writeInternalEnd(fileOut)
+  generalFunctions.writeInternalStart(fileOut)
+  fileOut.write('\tvirtual bool accept (SBMLVisitor& v) const;\n\n')
+  generalFunctions.writeInternalEnd(fileOut)
   writeClassEnd(fileOut, members)
 
 def writeClassEnd(fileOut, members):
