@@ -124,7 +124,7 @@ def writeError(fileOut, element, pkg, offset):
   fileOut.write('\n\n');
   fileOut.write('typedef enum\n')
   fileOut.write('{\n')
-  fileOut.write('\t{0}Unknown                  = {1}\n\n\n'.format(pkg, offset+10100));
+  fileOut.write('\t{0}UnknownError                  = {1}\n\n\n'.format(pkg, offset+10100));
   fileOut.write('}')
   fileOut.write('  {0}SBMLErrorCode_t;\n'.format(pkg))
   fileOut.write('\nEND_C_DECLS\n')
@@ -143,7 +143,7 @@ def writeErrorTable(fileOut, element, pkg, offset):
   fileOut.write('{\n')
   fileOut.write('\t//{0}\n'.format(offset+10100));
   fileOut.write('\t{')
-  fileOut.write('\t{0}Unknown,\n'.format(pkg));
+  fileOut.write('\t{0}UnknownError,\n'.format(pkg));
   fileOut.write('\t\t"Unknown error from {0}",\n'.format(pkg.lower()))
   fileOut.write('\t\tLIBSBML_CAT_GENERAL_CONSISTENCY,\n')
   fileOut.write('\t\tLIBSBML_SEV_ERROR,\n')
