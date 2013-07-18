@@ -10,37 +10,6 @@ import createNewElementDictObj
 
 
 
-def createQual():
-  # for each sbml class create the sbml obj and the overall description object
-  #QualitativeSpecies
-  sbml_qs = createNewElementDictObj.createQualSpecies()
-  qs = dict({'name': 'QualitativeSpecies', 'typecode': 'SBML_QUAL_QUALITATIVE_SPECIES', 'isListOf': True})
-  #Transition
-  sbml_tr = createNewElementDictObj.createQualTransition()
-  tr = dict({'name': 'Transition', 'typecode': 'SBML_QUAL_TRANSITION', 'isListOf': True})
-  #Input
-  sbml_inp = createNewElementDictObj.createQualInput()
-  inp = dict({'name': 'Input', 'typecode': 'SBML_QUAL_INPUT'})
-  #Output
-  sbml_out = createNewElementDictObj.createQualOutput()
-  out = dict({'name': 'Output', 'typecode': 'SBML_QUAL_OUTPUT'})
-  #FunctionTerm
-  sbml_ft = createNewElementDictObj.createQualFunctionTerm()
-  ft = dict({'name': 'FunctionTerm', 'typecode': 'SBML_QUAL_FUNCTION_TERM'})
-  #DefaultTerm
-  sbml_dt = createNewElementDictObj.createQualDefaultTerm()
-  dt = dict({'name': 'DefaultTerm', 'typecode': 'SBML_QUAL_DEFAULT_TERM'})
-  # create a list of teh sbml classes
-  sbml_classes = [sbml_qs, sbml_tr, sbml_inp, sbml_out, sbml_ft, sbml_dt]
-  # create a list of the types
-  elem = [qs, tr, inp, out, ft, dt]
-  # define information about plugins
-  model_elem = [qs, tr]
-  model_plug = dict({'sbase': 'Model', 'extension': model_elem}) 
-  plug = [model_plug]
-  #create teh overall package description
-  package = dict({'name' : 'Qual', 'elements': elem, 'plugins': plug, 'number': 1100, 'sbmlElements': sbml_classes, 'offset': 3000000})
-  return package
 
 #note arrays is not finished - NEED To create the objects
 def createArrays():
@@ -64,7 +33,7 @@ def createArrays():
   package = dict({'name' : 'Arrays', 'elements': elem, 'plugins': plug, 'number': 1200})
   return package
 
-#distrib
+#distrib - not complete at present
 def createDistrib():
   # for each sbml class create the sbml obj and the overall description object
   #Draw
@@ -101,7 +70,64 @@ def createDistrib():
   #create the overall package description
   package = dict({'name' : 'Distrib', 'elements': elem, 'plugins': plug, 'number': 1300, 'sbmlElements': sbml_classes})
   return package
+  
+  
+def createGroups():
+  # for each sbml class create the sbml obj and the overall description object
+  #Member
+  sbml_mem = createNewElementDictObj.createGroupsMember()
+  mem = dict({'name': sbml_mem['name'], 'typecode': sbml_mem['typecode'], 'isListOf': True})
+  #MemberConstrainst
+  sbml_mc = createNewElementDictObj.createGroupsMemberConstraint()
+  mc = dict({'name': sbml_mc['name'], 'typecode': sbml_mc['typecode'], 'isListOf': True})
+  #Group
+  sbml_gp = createNewElementDictObj.createGroupsGroup()
+  gp = dict({'name': sbml_gp['name'], 'typecode': sbml_gp['typecode'], 'isListOf': True})
+  # create a list of the sbml classes
+  sbml_classes = [sbml_mem, sbml_mc, sbml_gp]
+  # create a list of the types
+  elem = [mem, mc, gp]
+  # define information about plugins
+  model_elem = [gp]
+  model_plug = dict({'sbase': 'Model', 'extension': model_elem}) 
+  plug = [model_plug]
+  #create the overall package description
+  package = dict({'name' : 'Groups', 'elements': elem, 'plugins': plug, 'number': 200, 'sbmlElements': sbml_classes, 'offset': 4000000})
+  return package
+  
 
+def createQual():
+  # for each sbml class create the sbml obj and the overall description object
+  #QualitativeSpecies
+  sbml_qs = createNewElementDictObj.createQualSpecies()
+  qs = dict({'name': 'QualitativeSpecies', 'typecode': 'SBML_QUAL_QUALITATIVE_SPECIES', 'isListOf': True})
+  #Transition
+  sbml_tr = createNewElementDictObj.createQualTransition()
+  tr = dict({'name': 'Transition', 'typecode': 'SBML_QUAL_TRANSITION', 'isListOf': True})
+  #Input
+  sbml_inp = createNewElementDictObj.createQualInput()
+  inp = dict({'name': 'Input', 'typecode': 'SBML_QUAL_INPUT'})
+  #Output
+  sbml_out = createNewElementDictObj.createQualOutput()
+  out = dict({'name': 'Output', 'typecode': 'SBML_QUAL_OUTPUT'})
+  #FunctionTerm
+  sbml_ft = createNewElementDictObj.createQualFunctionTerm()
+  ft = dict({'name': 'FunctionTerm', 'typecode': 'SBML_QUAL_FUNCTION_TERM'})
+  #DefaultTerm
+  sbml_dt = createNewElementDictObj.createQualDefaultTerm()
+  dt = dict({'name': 'DefaultTerm', 'typecode': 'SBML_QUAL_DEFAULT_TERM'})
+  # create a list of teh sbml classes
+  sbml_classes = [sbml_qs, sbml_tr, sbml_inp, sbml_out, sbml_ft, sbml_dt]
+  # create a list of the types
+  elem = [qs, tr, inp, out, ft, dt]
+  # define information about plugins
+  model_elem = [qs, tr]
+  model_plug = dict({'sbase': 'Model', 'extension': model_elem}) 
+  plug = [model_plug]
+  #create teh overall package description
+  package = dict({'name' : 'Qual', 'elements': elem, 'plugins': plug, 'number': 1100, 'sbmlElements': sbml_classes, 'offset': 3000000})
+  return package
+  
 def createPackage(name):
   if (name == 'qual'):
 	package = createQual()
@@ -109,6 +135,8 @@ def createPackage(name):
 #    package = createArrays()
   elif (name == 'distrib'):
     package = createDistrib()
+  elif (name == 'groups'):
+    package = createGroups()
   else:
     package = None
   return package
