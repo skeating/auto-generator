@@ -62,7 +62,7 @@ The overall element is then created as a dictionary containing
 Thus the dictionary object for an Input class in package Qual is defined as
 
   element = dict({'name': 'Input', 'package': 'Qual', 'typecode': 'SBML_QUAL_INPUT', 
-                  'hasListOf': True, 'attribs':attributes, 'hasChildren':False. 'hasMath':False}) 
+                  'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
 				  
 *****************************************************
 
