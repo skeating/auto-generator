@@ -99,50 +99,28 @@ def createCompExtModDef() :
   return element
   ##end of comp
 
-## distrib  - inaccurate at present
+## distrib
 def createDistribInput() :
-  attributes = []
+  id = dict({'type': 'string', 'reqd' : True, 'name':'id'})
+  name = dict({'type': 'string', 'reqd' : False, 'name':'name'})
+  ind = dict({'type': 'uint', 'reqd' : True, 'name' : 'index'})
+  attributes = [id, name, ind]
   element = dict({'name': 'DistribInput', 'package': 'Distrib', 'typecode': 'SBML_DISTRIB_INPUT', 'hasListOf': True, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
   return element
   
-def createDistribPredefinedPDF() :
-  name = dict({'type': 'string', 'reqd' : True, 'name':'xmlns'})
-  attributes = [name]
-  element = dict({'name': 'PredefinedPDF', 'package': 'Distrib', 'typecode': 'SBML_DISTRIB_PREDEFINED_PDF', 'hasListOf': False, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
-  return element
-
-def createDistribExplicitPMF() :
-  name = dict({'type': 'string', 'reqd' : True, 'name':'xmlns'})
-  attributes = [name]
-  element = dict({'name': 'ExplicitPMF', 'package': 'Distrib', 'typecode': 'SBML_DISTRIB_EXPLICT_PMF', 'hasListOf': False, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
-  return element
-
-def createDistribExplicitPDF() :
-  math = dict({'type': 'element', 'reqd' : True, 'name':'math', 'element': 'Math'})
-  attributes = [math]
-  element = dict({'name': 'ExplicitPDF', 'package': 'Distrib', 'typecode': 'SBML_DISTRIB_EXPLICT_PDF', 'hasListOf': False, 'attribs':attributes, 'hasChildren':False, 'hasMath':True}) 
-  return element
-
 def createDistribDraw() :
   loInputs = dict({'type': 'lo_element', 'reqd' : False, 'name':'distribInput', 'element': 'DistribInput'})
-  predefined = dict({'type': 'element', 'reqd' : False, 'name':'predefinedPDF', 'element': 'PredefinedPDF'})
-  explicitPMF = dict({'type': 'element', 'reqd' : False, 'name':'explicitPMF', 'element': 'ExplicitPMF'})
-  explicitPDF = dict({'type': 'element', 'reqd' : False, 'name':'explicitPDF', 'element': 'ExplicitPDF'})
-  attributes = [loInputs, predefined, explicitPMF, explicitPDF]
+  dist = dict({'type': 'element', 'reqd' : True, 'name':'Distribution', 'element': 'Distribution'})
+  attributes = [loInputs, dist]
   element = dict({'name': 'DrawFromDistribution', 'package': 'Distrib', 'typecode': 'SBML_DISTRIB_DRAW_FROM_DISTRIBUTION', 'hasListOf': False, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
   return element
   
-def createDistribUncertML() :
-  name = dict({'type': 'string', 'reqd' : True, 'name':'xmlns'})
-  attributes = [name]
-  element = dict({'name': 'UncertML', 'package': 'Distrib', 'typecode': 'SBML_DISTRIB_UNCERTML', 'hasListOf': False, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
-  return element
-
-def createDistribUncertMath() :
-  math = dict({'type': 'element', 'reqd' : True, 'name':'math', 'element': 'Math'})
-  index = dict({'type': 'int', 'reqd' : False, 'name':'index'})
-  attributes = [index, math]
-  element = dict({'name': 'UncertMath', 'package': 'Distrib', 'typecode': 'SBML_DISTRIB_UNCERT_MATH', 'hasListOf': False, 'attribs':attributes, 'hasChildren':False, 'hasMath':True}) 
+def createDistribUncertainty() :
+  id = dict({'type': 'string', 'reqd' : False, 'name':'id'})
+  name = dict({'type': 'string', 'reqd' : False, 'name':'name'})
+  dist = dict({'type': 'element', 'reqd' : True, 'name':'AbstractUncertainty', 'element': 'AbstractUncertainty'})
+  attributes = [id, name, dist]
+  element = dict({'name': 'Uncertainty', 'package': 'Distrib', 'typecode': 'SBML_DISTRIB_UNCERTAINTY', 'hasListOf': False, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
   return element
 #end of distrib
 
