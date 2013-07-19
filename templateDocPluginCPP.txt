@@ -73,12 +73,12 @@ $PKGNAMESBMLDocumentPlugin::readAttributes (const XMLAttributes& attributes,
         getErrorLog()->contains(XMLAttributeTypeMismatch))
     {
 			getErrorLog()->remove(XMLAttributeTypeMismatch);
-      getErrorLog()->logPackageError("$LOWERPKGNAME", $PKGNAMEUnknown,
+      getErrorLog()->logPackageError("$LOWERPKGNAME", $PKGNAMEUnknownError,
         getPackageVersion(), getLevel(), getVersion());
     }
     else
     {
-      getErrorLog()->logPackageError("$LOWERPKGNAME", $PKGNAMEUnknown,
+      getErrorLog()->logPackageError("$LOWERPKGNAME", $PKGNAMEUnknownError,
         getPackageVersion(), getLevel(), getVersion());
     }
   }

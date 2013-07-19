@@ -241,6 +241,8 @@ $PKGNAMEValidator::validate (const SBMLDocument& d)
     }
   }
 
+  /* ADD ANY OTHER OBJECTS THAT HAVE PLUGINS */
+  
   return (unsigned int)mFailures.size();
 }
 

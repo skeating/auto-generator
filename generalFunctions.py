@@ -258,7 +258,7 @@ def writeAcceptCPPCode(outFile, element, hasChildren):
       outFile.write('\treturn v.visit(*this);\n')
   else:
       outFile.write('\tv.visit(*this);\n')
-      outFile.write('\n\* VISIT CHILDREN */\n\n')
+      outFile.write('\n/* VISIT CHILDREN */\n\n')
       outFile.write('\tv.leave(*this);\n\n')
       outFile.write('\treturn true;\n')
   outFile.write('}\n\n\n')
@@ -689,7 +689,7 @@ def writeReadAttributesCPPCode(outFile, element, attribs, pkg, isListOf):
 	outFile.write('\t\t\t\tconst std::string details =\n')
 	outFile.write('\t\t\t\t      getErrorLog()->getError(n)->getMessage();\n')
 	outFile.write('\t\t\t\tgetErrorLog()->remove(UnknownPackageAttribute);\n')
-	outFile.write('\t\t\t\tgetErrorLog()->logPackageError("{0}", UnknwonError,\n'.format(pkg.lower()))
+	outFile.write('\t\t\t\tgetErrorLog()->logPackageError("{0}", {1}UnknownError,\n'.format(pkg.lower(), pkg))
 	outFile.write('\t\t\t\t          getPackageVersion(), sbmlLevel, sbmlVersion, details);\n')
 	outFile.write('\t\t\t}\n')
 	outFile.write('\t\t\telse if (getErrorLog()->getError(n)->getErrorId() == UnknownCoreAttribute)\n')
