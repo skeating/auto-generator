@@ -110,7 +110,7 @@ def createDistribInput() :
   
 def createDistribDraw() :
   loInputs = dict({'type': 'lo_element', 'reqd' : False, 'name':'distribInput', 'element': 'DistribInput'})
-  dist = dict({'type': 'element', 'reqd' : True, 'name':'Distribution', 'element': 'Distribution'})
+  dist = dict({'type': 'element', 'reqd' : True, 'name':'UncertML', 'element': 'UncertMLNode'})
   attributes = [loInputs, dist]
   element = dict({'name': 'DrawFromDistribution', 'package': 'Distrib', 'typecode': 'SBML_DISTRIB_DRAW_FROM_DISTRIBUTION', 'hasListOf': False, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
   return element
@@ -118,7 +118,7 @@ def createDistribDraw() :
 def createDistribUncertainty() :
   id = dict({'type': 'string', 'reqd' : False, 'name':'id'})
   name = dict({'type': 'string', 'reqd' : False, 'name':'name'})
-  dist = dict({'type': 'element', 'reqd' : True, 'name':'AbstractUncertainty', 'element': 'AbstractUncertainty'})
+  dist = dict({'type': 'element', 'reqd' : True, 'name':'UncertML', 'element': 'UncertMLNode'})
   attributes = [id, name, dist]
   element = dict({'name': 'Uncertainty', 'package': 'Distrib', 'typecode': 'SBML_DISTRIB_UNCERTAINTY', 'hasListOf': False, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
   return element
@@ -180,6 +180,132 @@ def createGroupsGroup() :
   return element
 #end of groups
 
+#layout
+def createLayoutBB() :
+  id = dict({'type': 'SId', 'reqd' : False, 'name':'id'})
+  name = dict({'type': 'element', 'reqd' : True, 'name':'position', 'element': 'Point'})
+  dist = dict({'type': 'element', 'reqd' : True, 'name':'dimensions', 'element': 'Dimensions'})
+  attributes = [id, name, dist]
+  element = dict({'name': 'BoundingBox', 'package': 'Layout', 'typecode': 'SBML_LAYOUT_BOUNDINGBOX', 'hasListOf': False, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
+  return element
+
+def createLayoutCompGlyph() :
+  id = dict({'type': 'SIdRef', 'reqd' : False, 'name':'compartment'})
+  x = dict({'type': 'double', 'reqd' : False, 'name':'order'})
+  attributes = [id, x]
+  element = dict({'name': 'CompartmentGlyph', 'package': 'Layout', 'typecode': 'SBML_LAYOUT_COMPARTMENTGLYPH', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+def createLayoutCubicBez() :
+  name = dict({'type': 'element', 'reqd' : True, 'name':'basePoint1', 'element': 'Point'})
+  dist = dict({'type': 'element', 'reqd' : True, 'name':'basePoint2', 'element': 'Point'})
+  attributes = [name, dist]
+  element = dict({'name': 'CubicBezier', 'package': 'Layout', 'typecode': 'SBML_LAYOUT_CUBICBEZIER', 'hasListOf': False, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
+  return element
+
+def createLayoutCurve() :
+  name = dict({'type': 'lo_element', 'reqd' : True, 'name':'curveSegment', 'element': 'LineSegment'})
+  attributes = [name]
+  element = dict({'name': 'Curve', 'package': 'Layout', 'typecode': 'SBML_LAYOUT_CURVE', 'hasListOf': False, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
+  return element
+
+def createLayoutDimensions() :
+  id = dict({'type': 'SId', 'reqd' : False, 'name':'id'})
+  x = dict({'type': 'double', 'reqd' : True, 'name':'width'})
+  y = dict({'type': 'double', 'reqd' : True, 'name':'height'})
+  z = dict({'type': 'double', 'reqd' : False, 'name':'depth'})
+  attributes = [id, x, y, z]
+  element = dict({'name': 'Dimensions', 'package': 'Layout', 'typecode': 'SBML_LAYOUT_DIMENSIONS', 'hasListOf': False, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+def createLayoutGraphObj() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  name = dict({'type': 'string', 'reqd' : False, 'name':'metaidRef'})
+  dist = dict({'type': 'element', 'reqd' : True, 'name':'boundingBox', 'element': 'BoundingBox'})
+  attributes = [id, name, dist]
+  element = dict({'name': 'GraphicalObject', 'package': 'Layout', 'typecode': 'SBML_LAYOUT_GRAPHICALOBJECT', 'hasListOf': False, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
+  return element
+
+def createLayoutLayout() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  name = dict({'type': 'string', 'reqd' : False, 'name':'metaidRef'})
+  dist = dict({'type': 'element', 'reqd' : True, 'name':'dimensions', 'element': 'Dimensions'})
+  loCG = dict({'type': 'lo_element', 'reqd' : False, 'name':'compartmentGlyph', 'element': 'CompartmentGlyph'})
+  loSG = dict({'type': 'lo_element', 'reqd' : False, 'name':'speciesGlyph', 'element': 'SpeciesGlyph'})
+  loRG = dict({'type': 'lo_element', 'reqd' : False, 'name':'reactionGlyph', 'element': 'ReactionGlyph'})
+  loTG = dict({'type': 'lo_element', 'reqd' : False, 'name':'textGlyph', 'element': 'TextGlyph'})
+  loAddG = dict({'type': 'lo_element', 'reqd' : False, 'name':'graphicalObject', 'element': 'GraphicalObject'})
+  attributes = [id, name, dist, loCG, loSG, loRG, loTG, loAddG]
+  element = dict({'name': 'Layout', 'package': 'Layout', 'typecode': 'SBML_LAYOUT_LAYOUT', 'hasListOf': True, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
+  return element
+
+def createLayoutLineSeg() :
+  id = dict({'type': 'string', 'reqd' : True, 'name':'xsi:type'})
+  name = dict({'type': 'element', 'reqd' : True, 'name':'start', 'element': 'Point'})
+  dist = dict({'type': 'element', 'reqd' : True, 'name':'end', 'element': 'Point'})
+  attributes = [id, name, dist]
+  element = dict({'name': 'LineSegment', 'package': 'Layout', 'typecode': 'SBML_LAYOUT_LINESEGMENT', 'hasListOf': True, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
+  return element
+
+def createLayoutPoint() :
+  id = dict({'type': 'SId', 'reqd' : False, 'name':'id'})
+  x = dict({'type': 'double', 'reqd' : True, 'name':'x'})
+  y = dict({'type': 'double', 'reqd' : True, 'name':'y'})
+  z = dict({'type': 'double', 'reqd' : False, 'name':'z'})
+  attributes = [id, x, y, z]
+  element = dict({'name': 'Point', 'package': 'Layout', 'typecode': 'SBML_LAYOUT_POINT', 'hasListOf': False, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+def createLayoutReactionGlyph() :
+  id = dict({'type': 'SIdRef', 'reqd' : True, 'name':'reaction'})
+  loSRG = dict({'type': 'lo_element', 'reqd' : True, 'name':'speciesReference', 'element':'SpeciesReferenceGlyph'})
+  curve = dict({'type': 'element', 'reqd' : False, 'name':'curve', 'element': 'Curve'})
+  attributes = [id, loSRG, curve]
+  element = dict({'name': 'ReactionGlyph', 'package': 'Layout', 'typecode': 'SBML_LAYOUT_REACTIONGLYPH', 'hasListOf': True, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
+  return element
+   
+def createLayoutSpeciesGlyph() :
+  id = dict({'type': 'SIdRef', 'reqd' : False, 'name':'species'})
+  attributes = [id]
+  element = dict({'name': 'SpeciesGlyph', 'package': 'Layout', 'typecode': 'SBML_LAYOUT_SPECIESGLYPH', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+def createLayoutSpeciesRefGlyph() :
+  id = dict({'type': 'SIdRef', 'reqd' : True, 'name':'speciesGlyph'})
+  name = dict({'type': 'SIdRef', 'reqd' : False, 'name':'speciesReference'})
+  dist = dict({'type': 'string', 'reqd' : False, 'name':'roleType'})
+  curve = dict({'type': 'element', 'reqd' : False, 'name':'curve', 'element': 'Curve'})
+  attributes = [id, name, dist, curve]
+  element = dict({'name': 'SpeciesReferenceGlyph', 'package': 'Layout', 'typecode': 'SBML_LAYOUT_SPECIESREFERENCEGLYPH', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+  
+def createLayoutTextGlyph() :
+  id = dict({'type': 'SIdRef', 'reqd' : False, 'name':'graphicalObject'})
+  name = dict({'type': 'string', 'reqd' : False, 'name':'text'})
+  dist = dict({'type': 'SIdRef', 'reqd' : False, 'name':'originOfText'})
+  attributes = [id, name, dist]
+  element = dict({'name': 'TextGlyph', 'package': 'Layout', 'typecode': 'SBML_LAYOUT_TEXTGLYPH', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+  
+def createLayoutRefGlyph() :
+  id = dict({'type': 'SIdRef', 'reqd' : True, 'name':'glyph'})
+  name = dict({'type': 'SIdRef', 'reqd' : False, 'name':'reference'})
+  dist = dict({'type': 'string', 'reqd' : False, 'name':'role'})
+  attributes = [id, name, dist]
+  element = dict({'name': 'ReferenceGlyph', 'package': 'Layout', 'typecode': 'SBML_LAYOUT_REFERENCEGLYPH', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+def createLayoutGeneralGlyph() :
+  id = dict({'type': 'SIdRef', 'reqd' : False, 'name':'reference'})
+  sub = dict({'type': 'lo_element', 'reqd' : False, 'name':'subGlyph', 'element':'GraphicalObject'})
+  ref = dict({'type': 'lo_element', 'reqd' : False, 'name':'referenceGlyph', 'element':'ReferenceGlyph'})
+  curve = dict({'type': 'element', 'reqd' : False, 'name':'curve', 'element': 'Curve'})
+  attributes = [id, sub, ref, curve]
+  element = dict({'name': 'GeneralGlyph', 'package': 'Layout', 'typecode': 'SBML_LAYOUT_GENERALGLYPH', 'hasListOf': True, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
+  return element
+
+  #end of layout
+  
   #qual
 def createQualSpecies() :
   id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})

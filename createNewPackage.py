@@ -33,7 +33,7 @@ def createArrays():
   package = dict({'name' : 'Arrays', 'elements': elem, 'plugins': plug, 'number': 1200})
   return package
 
-#distrib - not complete at present
+#distrib - in line with v0.12
 def createDistrib():
   # for each sbml class create the sbml obj and the overall description object
   #Draw
@@ -82,6 +82,66 @@ def createGroups():
   #create the overall package description
   package = dict({'name' : 'Groups', 'elements': elem, 'plugins': plug, 'number': 200, 'sbmlElements': sbml_classes, 'offset': 4000000})
   return package
+
+  
+def createLayout():
+  # for each sbml class create the sbml obj and the overall description object
+  #BoundingBox
+  sbml_bb = createNewElementDictObj.createLayoutBB()
+  bb = dict({'name': sbml_bb['name'], 'typecode': sbml_bb['typecode'], 'isListOf': False})
+  #CompartmentGlyph
+  sbml_cg = createNewElementDictObj.createLayoutCompGlyph()
+  cg = dict({'name': sbml_cg['name'], 'typecode': sbml_cg['typecode'], 'isListOf': True})
+  #CubicBezier
+  sbml_cbez = createNewElementDictObj.createLayoutCubicBez()
+  cbez = dict({'name': sbml_cbez['name'], 'typecode': sbml_cbez['typecode'], 'isListOf': False})
+  #Curve
+  sbml_cur = createNewElementDictObj.createLayoutCurve()
+  cur = dict({'name': sbml_cur['name'], 'typecode': sbml_cur['typecode'], 'isListOf': False})
+  #Dimensions
+  sbml_dim = createNewElementDictObj.createLayoutDimensions()
+  dim = dict({'name': sbml_dim['name'], 'typecode': sbml_dim['typecode'], 'isListOf': False})
+  #GraphicalObject
+  sbml_go = createNewElementDictObj.createLayoutGraphObj()
+  go = dict({'name': sbml_go['name'], 'typecode': sbml_go['typecode'], 'isListOf': False})
+  #Layout
+  sbml_lay = createNewElementDictObj.createLayoutLayout()
+  lay = dict({'name': sbml_lay['name'], 'typecode': sbml_lay['typecode'], 'isListOf': True})
+  #LineSegment
+  sbml_ls = createNewElementDictObj.createLayoutLineSeg()
+  ls = dict({'name': sbml_ls['name'], 'typecode': sbml_ls['typecode'], 'isListOf': True})
+  #Point
+  sbml_pt = createNewElementDictObj.createLayoutPoint()
+  pt = dict({'name': sbml_pt['name'], 'typecode': sbml_pt['typecode'], 'isListOf': False})
+  #ReactionGlyph
+  sbml_rg = createNewElementDictObj.createLayoutReactionGlyph()
+  rg = dict({'name': sbml_rg['name'], 'typecode': sbml_rg['typecode'], 'isListOf': True})
+  #SpeciesGlyph
+  sbml_sg = createNewElementDictObj.createLayoutSpeciesGlyph()
+  sg = dict({'name': sbml_sg['name'], 'typecode': sbml_sg['typecode'], 'isListOf': True})
+  #SpeciesReferenceGlyph
+  sbml_srg = createNewElementDictObj.createLayoutSpeciesRefGlyph()
+  srg = dict({'name': sbml_srg['name'], 'typecode': sbml_srg['typecode'], 'isListOf': True})
+  #TextGlyph
+  sbml_tg = createNewElementDictObj.createLayoutTextGlyph()
+  tg = dict({'name': sbml_tg['name'], 'typecode': sbml_tg['typecode'], 'isListOf': True})
+  #ReferenceGlyph
+  sbml_refg = createNewElementDictObj.createLayoutRefGlyph()
+  refg = dict({'name': sbml_refg['name'], 'typecode': sbml_refg['typecode'], 'isListOf': True})
+  #GeneralGlyph
+  sbml_gg = createNewElementDictObj.createLayoutGeneralGlyph()
+  gg = dict({'name': sbml_gg['name'], 'typecode': sbml_gg['typecode'], 'isListOf': True})
+  # create a list of the sbml classes
+  sbml_classes = [sbml_bb, sbml_cg, sbml_cbez, sbml_cur, sbml_dim, sbml_go, sbml_lay, sbml_ls, sbml_pt, sbml_rg, sbml_sg, sbml_srg, sbml_tg, sbml_refg, sbml_gg]
+  # create a list of the types
+  elem = [bb, cg, cbez, cur, dim, go, lay, ls, pt, rg, sg, srg, tg, refg, gg]
+  # define information about plugins
+  model_elem = [lay]
+  model_plug = dict({'sbase': 'Model', 'extension': model_elem}) 
+  plug = [model_plug]
+  #create the overall package description
+  package = dict({'name' : 'Layout', 'elements': elem, 'plugins': plug, 'number': 100, 'sbmlElements': sbml_classes, 'offset': 6000000})
+  return package
   
 
 def createQual():
@@ -125,6 +185,8 @@ def createPackage(name):
     package = createDistrib()
   elif (name == 'groups'):
     package = createGroups()
+  elif (name == 'layout'):
+    package = createLayout()
   else:
     package = None
   return package
