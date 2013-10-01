@@ -21,6 +21,7 @@ def createExtensionTypes(nameOfPackage, pkg, plugins, classes):
   fileOut.write('#define {0}_H\n\n'.format(nameOfClass))
   fileOut.write('#include <sbml/packages/{0}/common/{0}fwd.h>\n\n'.format(pkg))
   fileOut.write('#include <sbml/packages/{0}/extension/{1}Extension.h>\n'.format(pkg, nameOfPackage))
+  fileOut.write('#include <sbml/packages/{0}/extension/{1}SBMLDocumentPlugin.h>\n'.format(pkg, nameOfPackage))
   for i in range (0, len(plugins)):
     fileOut.write('#include <sbml/packages/{0}/extension/{1}{2}Plugin.h>\n'.format(pkg, nameOfPackage, plugins[i]['sbase']))
   fileOut.write('\n')
