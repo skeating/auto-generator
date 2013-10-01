@@ -191,7 +191,10 @@ def writeInitFunction(fileOut, pkg, nameOfClass, plugins):
   for i in range (0, len(plugins)):
     plug_ext = plugins[i]
     plug = plug_ext['sbase']
-    fileOut.write('\tSBaseExtensionPoint {0}ExtPoint("core", SBML_{1});\n'.format(plug.lower(), plug.upper()))
+    if plug == 'SBase':
+      fileOut.write('\tSBaseExtensionPoint {0}ExtPoint("all", SBML_GENERIC_{1});\n'.format(plug.lower(), plug.upper()))
+    else:
+      fileOut.write('\tSBaseExtensionPoint {0}ExtPoint("core", SBML_{1});\n'.format(plug.lower(), plug.upper()))
   fileOut.write('\n')
   fileOut.write('\tSBasePluginCreator<{0}SBMLDocumentPlugin, {0}Extension> sbmldocPluginCreator(sbmldocExtPoint, packageURIs);\n'.format(pkg))
   for i in range (0, len(plugins)):
