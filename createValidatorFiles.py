@@ -242,7 +242,7 @@ def createConstraintsFile(pkg, type):
   output.write('#include <sbml/packages/{0}/validator/{1}SBMLError.h>\n\n'.format(pkg.lower(), pkg))
   output.write('#endif  /* AddingConstrainstToValidator */\n\n')
   output.write('#include <sbml/validator/ConstraintMacros.h>\n\n')
-  output.write('/** @cond doxygen-ignored */\n\n')
+  output.write('/** @cond doxygenIgnored */\n\n')
   output.write('using namespace std;\n\n')
   output.write('/** @endcond */\n\n')
   output.write('/** PUT CONSTRAINTS HERE */\n\n')

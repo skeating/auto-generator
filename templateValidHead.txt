@@ -75,7 +75,7 @@ public:
 
 
 protected:
-  /** @cond doxygen-libsbml-internal */
+  /** @cond doxygenLibsbmlInternal */
 
   $PKGNAMEValidatorConstraints* m$PKGNAMEConstraints;
 

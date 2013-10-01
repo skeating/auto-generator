@@ -9,10 +9,10 @@ import sys
 import strFunctions
 
 def writeInternalStart(outFile):
-  outFile.write('\t/** @cond doxygen-libsbml-internal */\n\n')
+  outFile.write('\t/** @cond doxygenLibsbmlInternal */\n\n')
   
 def writeInternalEnd(outFile):
-  outFile.write('\t/** @endcond doxygen-libsbml-internal */\n\n\n')
+  outFile.write('\t/** @endcond doxygenLibsbmlInternal */\n\n\n')
 
 def writeListOf(element):
   last = len(element)-1
