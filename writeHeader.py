@@ -295,7 +295,7 @@ def writeListOfSubFunctions(attrib, output, element):
   output.write('\t */\n')
   output.write('\t{0}* create{0}();\n\n\n'.format(attrib['element']))
   writeListOfHeader.writeRemoveFunctions(output, attrib['element'], True, element)
- 
+
 #write class
 def writeClass(attributes, header, nameOfElement, nameOfPackage, hasChildren, hasMath):
   header.write('class LIBSBML_EXTERN {0} :'.format(nameOfElement))
@@ -304,6 +304,8 @@ def writeClass(attributes, header, nameOfElement, nameOfPackage, hasChildren, ha
   header.write('public:\n\n')
   writeConstructors(nameOfElement, nameOfPackage, header)
   writeAttributeFunctions(attributes, header, nameOfElement)
+  if hasChildren == True:
+    generalFunctions.writeGetAllElements(header)    
   generalFunctions.writeCommonHeaders(header, nameOfElement, attributes, False, hasChildren, hasMath)
   generalFunctions.writeInternalHeaders(header, hasChildren)
   header.write('protected:\n\n')

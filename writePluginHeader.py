@@ -76,6 +76,7 @@ def writeGetFunctions(fileOut, pkg, members, plugin):
   fileOut.write('\t// Functions for interacting with the members of the plugin\n')
   fileOut.write('\t//\n')
   fileOut.write('\t//---------------------------------------------------------------\n\n')
+  generalFunctions.writeGetAllElements(fileOut)
   for i in range (0, len(members)):
     mem = members[i]
     if mem['isListOf'] == True:

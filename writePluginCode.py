@@ -162,6 +162,7 @@ def writeGetFunctions(fileOut, pkg, members, nameOfClass):
   fileOut.write('// Functions for interacting with the members of the plugin\n')
   fileOut.write('//\n')
   fileOut.write('//---------------------------------------------------------------\n\n')
+  generalFunctions.writeGetAllElementsCodePlug(fileOut, nameOfClass, members)
   for i in range (0, len(members)):
     mem = members[i]
     if mem['isListOf'] == True:

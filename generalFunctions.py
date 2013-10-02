@@ -925,3 +925,34 @@ def writeProtectedCPPCode(outFile, element, attribs, False, hasChildren, hasMath
   if hasMath == True:
     writeReadOtherXMLCPPCode(outFile, element)
   writeWriteAttributesCPPCode(outFile, element, attribs)
+
+  
+#write get all elements function
+def writeGetAllElements(output):
+  output.write('\t/**\n\t * Returns a List of all child SBase objects, ')
+  output.write('including those nested to an\n\t * arbitary depth.\n\t *\n')
+  output.write('\t * @return a List* of pointers to all child objects.\n\t */\n')
+  output.write('\t virtual List* getAllElements(ElementFilter * filter = NULL);\n\n\n')  
+ 
+ 
+def writeGetAllElementsCode(output, element, attrib):
+  output.write('List*\n')
+  output.write('{0}::getAllElements(ElementFilter* filter)\n'.format(element))
+  output.write('{\n')
+  output.write('\tList* ret = new List();\n')
+  output.write('\tList* sublist = NULL;\n\n')
+  for i in range(0, len(attrib)):
+    if attrib[i]['type'] == 'element':
+	  output.write('\tADD_FILTERED_ELEMENT(ret, sublist, m{0}, filter);\n'.format(strFunctions.cap(attrib[i]['name'])))
+  output.write('\n\tADD_FILTERED_FROM_PLUGIN(ret, sublist, filter);\n\n')
+  output.write('\treturn ret;\n}\n\n\n')
+
+def writeGetAllElementsCodePlug(output, element, members):
+  output.write('List*\n')
+  output.write('{0}::getAllElements(ElementFilter* filter)\n'.format(element))
+  output.write('{\n')
+  output.write('\tList* ret = new List();\n')
+  output.write('\tList* sublist = NULL;\n\n')
+  for i in range(0, len(members)):
+    output.write('\tADD_FILTERED_LIST(ret, sublist, m{0}s, filter);\n'.format(strFunctions.cap(members[i]['name'])))
+  output.write('\n\treturn ret;\n}\n\n\n')

@@ -432,7 +432,7 @@ def writeListOfSubFunctions(attrib, output, element, pkgName):
   output.write('\treturn {0};\n'.format(strFunctions.objAbbrev(attrib['element'])))
   output.write('}\n\n\n')
 
-
+  
 def createCode(element):
   nameOfElement = element['name']
   nameOfPackage = element['package']
@@ -448,6 +448,8 @@ def createCode(element):
   writeIncludes(code, nameOfElement, nameOfPackage, hasMath)
   writeConstructors(nameOfElement, nameOfPackage, code, attributes, hasChildren, hasMath)
   writeAttributeCode(attributes, code, nameOfElement, nameOfPackage)
+  if hasChildren == True:
+    generalFunctions.writeGetAllElementsCode(code, nameOfElement, attributes)
   generalFunctions.writeCommonCPPCode(code, nameOfElement, sbmltypecode, attributes, False, hasChildren, hasMath) 
   generalFunctions.writeInternalCPPCode(code, nameOfElement, attributes, hasChildren, hasMath) 
   generalFunctions.writeProtectedCPPCode(code, nameOfElement, attributes, False, hasChildren, hasMath, nameOfPackage, isListOf) 
