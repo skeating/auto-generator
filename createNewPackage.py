@@ -33,6 +33,32 @@ def createArrays():
   package = dict({'name' : 'Arrays', 'elements': elem, 'plugins': plug, 'number': 1200})
   return package
 
+# fbc - not fully working as I did not specifically use this for fbc
+def createFbc():
+  # for each sbml class create the sbml obj and the overall description object
+  #FluxBound
+  sbml_bound = createNewElementDictObj.createFBCObj()
+  bound = dict({'name': sbml_bound['name'], 'typecode': sbml_bound['typecode'], 'isListOf': True})
+  #Objective
+  sbml_obj = createNewElementDictObj.createFBCObjective()
+  obj = dict({'name': sbml_obj['name'], 'typecode': sbml_obj['typecode'], 'isListOf': True})
+  #FluxObjective
+  sbml_flux_obj = createNewElementDictObj.createFBCFluxObjective()
+  flux_obj = dict({'name': sbml_flux_obj['name'], 'typecode': sbml_flux_obj['typecode'], 'isListOf': True})
+  # create a list of the sbml classes
+  sbml_classes = [sbml_bound, sbml_obj, sbml_flux_obj]
+  # create a list of the types
+  elem = [bound, obj, flux_obj]
+  # define information about plugins
+  model_elem = [bound, obj]
+  model_plug = dict({'sbase': 'Model', 'extension': model_elem}) 
+  species_plug = dict({'sbase': 'Species', 'extension': []})  
+  plug = [model_plug, species_plug]
+  #create the overall package description
+  package = dict({'name' : 'Fbc', 'elements': elem, 'plugins': plug, 'number': 800, 'sbmlElements': sbml_classes, 'offset': 2000000})
+  return package
+    
+  
 #distrib - in line with v0.12
 def createDistrib():
   # for each sbml class create the sbml obj and the overall description object
