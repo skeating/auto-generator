@@ -64,7 +64,7 @@ def createValidatorFile(pkg, classes):
     else:
 	  break
   for i in range (0, len(classes)):
-    output.write('\tConstraintSet<{0}>      m{0};\n'.format(classes[i]['name']))
+    output.write('  ConstraintSet<{0}>      m{0};\n'.format(classes[i]['name']))
   for line in input:
     if line[0:13] != 'TEMPLATE_STOP':
 	  line = replaceTags(line, pkg)
@@ -72,10 +72,10 @@ def createValidatorFile(pkg, classes):
     else:
 	  break
   for i in range (0, len(classes)):
-    output.write('\tif (dynamic_cast< TConstraint<{0}>* >(c) != NULL)\n'.format(classes[i]['name']))
-    output.write('\t{\n')
-    output.write('\t\tm{0}.add( static_cast< TConstraint<{0}>* >(c) );\n'.format(classes[i]['name']))
-    output.write('\t\treturn;\n\t}\n\n')
+    output.write('  if (dynamic_cast< TConstraint<{0}>* >(c) != NULL)\n'.format(classes[i]['name']))
+    output.write('  {\n')
+    output.write('    m{0}.add( static_cast< TConstraint<{0}>* >(c) );\n'.format(classes[i]['name']))
+    output.write('    return;\n  }\n\n')
   for line in input:
     if line[0:13] != 'TEMPLATE_STOP':
 	  line = replaceTags(line, pkg)
@@ -83,28 +83,28 @@ def createValidatorFile(pkg, classes):
     else:
 	  break
   for i in range (0, len(classes)):
-    output.write('\tbool visit (const {0} &x)\n'.format(classes[i]['name']))
-    output.write('\t{\n')
-    output.write('\t\tv.m{0}Constraints->m{1}.applyTo(m, x);\n'.format(pkg, classes[i]['name']))
-    output.write('\t\treturn !v.m{0}Constraints->m{1}.empty();\n'.format(pkg, classes[i]['name']))
-    output.write('\t}\n\n')
-  output.write('\tvirtual bool visit(const SBase &x)\n')
-  output.write('\t{\n')
-  output.write('\t\tif (&x == NULL || x.getPackageName() != "{0}")\n'.format(pkg.lower()))
-  output.write('\t\t{\n\t\t\treturn SBMLVisitor::visit(x);\n\t\t}\n\n')
-  output.write('\t\tint code = x.getTypeCode();\n\n')
-  output.write('\t\tconst ListOf* list = dynamic_cast<const ListOf*>(&x);\n\n')
-  output.write('\t\tif (list != NULL)\n')
-  output.write('\t\t{\n')
-  output.write('\t\t\treturn SBMLVisitor::visit(x);\n')
-  output.write('\t\t}\n')
-  output.write('\t\telse\n')
-  output.write('\t\t{\n')
+    output.write('  bool visit (const {0} &x)\n'.format(classes[i]['name']))
+    output.write('  {\n')
+    output.write('    v.m{0}Constraints->m{1}.applyTo(m, x);\n'.format(pkg, classes[i]['name']))
+    output.write('    return !v.m{0}Constraints->m{1}.empty();\n'.format(pkg, classes[i]['name']))
+    output.write('  }\n\n')
+  output.write('  virtual bool visit(const SBase &x)\n')
+  output.write('  {\n')
+  output.write('    if (&x == NULL || x.getPackageName() != "{0}")\n'.format(pkg.lower()))
+  output.write('    {\n      return SBMLVisitor::visit(x);\n    }\n\n')
+  output.write('    int code = x.getTypeCode();\n\n')
+  output.write('    const ListOf* list = dynamic_cast<const ListOf*>(&x);\n\n')
+  output.write('    if (list != NULL)\n')
+  output.write('    {\n')
+  output.write('      return SBMLVisitor::visit(x);\n')
+  output.write('    }\n')
+  output.write('    else\n')
+  output.write('    {\n')
   for i in range (0, len(classes)):
-    output.write('\t\t\telse if (code == {0})\n'.format(classes[i]['typecode']))
-    output.write('\t\t\t{\n')
-    output.write('\t\t\t\treturn visit((const {0}&)x);\n'.format(classes[i]['name']))
-    output.write('\t\t\t}\n')
+    output.write('      else if (code == {0})\n'.format(classes[i]['typecode']))
+    output.write('      {\n')
+    output.write('        return visit((const {0}&)x);\n'.format(classes[i]['name']))
+    output.write('      }\n')
   for line in input:
     if line[0:13] != 'TEMPLATE_STOP':
 	  line = replaceTags(line, pkg)
@@ -124,7 +124,7 @@ def writeError(fileOut, element, pkg, offset):
   fileOut.write('\n\n');
   fileOut.write('typedef enum\n')
   fileOut.write('{\n')
-  fileOut.write('\t{0}UnknownError                  = {1}\n\n\n'.format(pkg, offset+10100));
+  fileOut.write('  {0}UnknownError                  = {1}\n\n\n'.format(pkg, offset+10100));
   fileOut.write('}')
   fileOut.write('  {0}SBMLErrorCode_t;\n'.format(pkg))
   fileOut.write('\nEND_C_DECLS\n')
@@ -141,16 +141,16 @@ def writeErrorTable(fileOut, element, pkg, offset):
   generalFunctions.writeInternalStart(fileOut)
   fileOut.write('static const packageErrorTableEntry {0}ErrorTable[] = \n'.format(pkg.lower()))
   fileOut.write('{\n')
-  fileOut.write('\t//{0}\n'.format(offset+10100));
-  fileOut.write('\t{')
-  fileOut.write('\t{0}UnknownError,\n'.format(pkg));
-  fileOut.write('\t\t"Unknown error from {0}",\n'.format(pkg.lower()))
-  fileOut.write('\t\tLIBSBML_CAT_GENERAL_CONSISTENCY,\n')
-  fileOut.write('\t\tLIBSBML_SEV_ERROR,\n')
-  fileOut.write('\t\t"Unknown error from {0}",\n'.format(pkg.lower()))
-  fileOut.write('\t\t{ " "\n')
-  fileOut.write('\t\t}\n')
-  fileOut.write('\t}\n\n')
+  fileOut.write('  //{0}\n'.format(offset+10100));
+  fileOut.write('  {')
+  fileOut.write('  {0}UnknownError,\n'.format(pkg));
+  fileOut.write('    "Unknown error from {0}",\n'.format(pkg.lower()))
+  fileOut.write('    LIBSBML_CAT_GENERAL_CONSISTENCY,\n')
+  fileOut.write('    LIBSBML_SEV_ERROR,\n')
+  fileOut.write('    "Unknown error from {0}",\n'.format(pkg.lower()))
+  fileOut.write('    { " "\n')
+  fileOut.write('    }\n')
+  fileOut.write('  }\n\n')
   fileOut.write('};\n\n')
   fileOut.write('\nLIBSBML_CPP_NAMESPACE_END\n\n')
   generalFunctions.writeInternalEnd(fileOut)
@@ -182,15 +182,15 @@ def writeConsistencyHeader(fileOut, element, pkg, type):
   fileOut.write('class {0}: public {1}Validator\n'.format(element, pkg))
   fileOut.write('{\n')
   fileOut.write('public:\n\n')
-  fileOut.write('\t{0} () :\n'.format(element))
+  fileOut.write('  {0} () :\n'.format(element))
   if type == "":
-	fileOut.write('\t\t{0}Validator(LIBSBML_CAT_GENERAL_CONSISTENCY)'.format(pkg))
+	fileOut.write('    {0}Validator(LIBSBML_CAT_GENERAL_CONSISTENCY)'.format(pkg))
   elif type == "Identifier":
-	fileOut.write('\t\t{0}Validator(LIBSBML_CAT_IDENTIFIER_CONSISTENCY)'.format(pkg))
+	fileOut.write('    {0}Validator(LIBSBML_CAT_IDENTIFIER_CONSISTENCY)'.format(pkg))
   fileOut.write(' { }\n\n')
-  fileOut.write('\tvirtual ~{0} () '.format(element))
+  fileOut.write('  virtual ~{0} () '.format(element))
   fileOut.write('{ }\n\n')
-  fileOut.write('\t virtual void init ();\n')
+  fileOut.write('   virtual void init ();\n')
   fileOut.write('};\n\n')
   fileOut.write('LIBSBML_CPP_NAMESPACE_END\n\n')
   fileOut.write('#endif  /* __cplusplus*/\n')  

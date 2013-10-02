@@ -19,7 +19,7 @@ def writeCode(name):
 	fileHeaders.addLicence(fileOut)
 	fileOut.write('\n')
 	fileOut.write('#ifdef USE_{0}\n'.format(capName))
-	fileOut.write('\t{0}Extension::init();\n'.format(strFunctions.cap(name)))
+	fileOut.write('  {0}Extension::init();\n'.format(strFunctions.cap(name)))
 	fileOut.write('#endif\n')
 	
 	
@@ -31,7 +31,7 @@ def writeHeader(name):
 	fileHeaders.addLicence(fileOut)
 	fileOut.write('\n')
 	fileOut.write('#ifdef USE_{0}\n'.format(capName))
-	fileOut.write('\t#include <sbml/packages/{0}/extension/{1}Extension.h>\n'.format(name, strFunctions.cap(name)))
+	fileOut.write('  #include <sbml/packages/{0}/extension/{1}Extension.h>\n'.format(name, strFunctions.cap(name)))
 	fileOut.write('#endif\n\n')
 	
 def main(name):

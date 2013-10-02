@@ -27,7 +27,7 @@ def createExtensionTypes(nameOfPackage, pkg, plugins, classes):
   fileOut.write('\n')
   for i in range (0, len(classes)):
     fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg, classes[i]['name']))
-  fileOut.write('\n#endif\t/* {0}_H */\n\n'.format(nameOfClass))
+  fileOut.write('\n#endif  /* {0}_H */\n\n'.format(nameOfClass))
 
 def createFWD(pkg, classes):
   nameOfClass = pkg + 'fwd'
@@ -52,10 +52,10 @@ def createFWD(pkg, classes):
   fileOut.write('#endif  /* __cplusplus */	\n\n')
   fileOut.write('LIBSBML_CPP_NAMESPACE_BEGIN\n\n')
   for i in range (0, len(classes)):
-    fileOut.write('typedef CLASS_OR_STRUCT {0}\t\t{0}_t;\n'.format(classes[i]['name']))
+    fileOut.write('typedef CLASS_OR_STRUCT {0}    {0}_t;\n'.format(classes[i]['name']))
   fileOut.write('\nLIBSBML_CPP_NAMESPACE_END\n\n')
   fileOut.write('#undef CLASS_OR_STRUCT\n\n')
-  fileOut.write('\n#endif\t/* {0}_H */\n\n'.format(nameOfClass))
+  fileOut.write('\n#endif  /* {0}_H */\n\n'.format(nameOfClass))
 
 def main(package):
   nameOfPackage = package['name']
