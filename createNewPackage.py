@@ -213,6 +213,8 @@ def createPackage(name):
     package = createGroups()
   elif (name == 'layout'):
     package = createLayout()
+  elif (name == 'fbc'):
+    package = createFbc()
   else:
     package = None
   return package

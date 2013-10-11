@@ -131,7 +131,7 @@ def createFBCObj() :
   operation = dict({'type': 'string', 'reqd' : False, 'name':'operation'})
   value = dict({'type': 'double', 'reqd' : True, 'name':'value'})
   attributes = [id, reaction, operation, value]
-  element = dict({'name': 'FluxBound', 'package': 'Fbc', 'typecode': 'SBML_FBC_FLUXBOUND', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False}) 
+  element = dict({'name': 'FluxBound', 'package': 'Fbc', 'typecode': 'SBML_FBC_FLUXBOUND', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
   return element
 
 def createFBCObjective() :
@@ -139,14 +139,14 @@ def createFBCObjective() :
   id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
   loFluxes = dict({'type': 'lo_element', 'reqd' : True, 'name':'fluxes', 'element': 'FluxObjective'})
   attributes = [type, id, loFluxes]
-  element = dict({'name': 'Objective', 'package': 'Fbc', 'typecode': 'SBML_FBC_OBJECTIVE', 'hasListOf': True, 'attribs':attributes, 'hasChildren':True}) 
+  element = dict({'name': 'Objective', 'package': 'Fbc', 'typecode': 'SBML_FBC_OBJECTIVE', 'hasListOf': True, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
   return element
 
 def createFBCFluxObjective() :
   reaction = dict({'type': 'SIdRef', 'reqd' : True, 'name':'reaction'})
   coeff = dict({'type': 'double', 'reqd' : True, 'name':'coefficient'})
   attributes = [reaction, coeff]
-  element = dict({'name': 'FluxObjective', 'package': 'Fbc', 'typecode': 'SBML_FBC_FLUX_OBJECTIVE', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False}) 
+  element = dict({'name': 'FluxObjective', 'package': 'Fbc', 'typecode': 'SBML_FBC_FLUX_OBJECTIVE', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
   return element
 #end of fbc
 
