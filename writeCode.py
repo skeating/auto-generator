@@ -448,6 +448,8 @@ def createCode(element):
   writeIncludes(code, nameOfElement, nameOfPackage, hasMath)
   writeConstructors(nameOfElement, nameOfPackage, code, attributes, hasChildren, hasMath)
   writeAttributeCode(attributes, code, nameOfElement, nameOfPackage)
+  if hasMath == True or generalFunctions.hasSIdRef(attributes) == True:
+    generalFunctions.writeRenameSIdCode(code, nameOfElement, attributes, hasMath)
   if hasChildren == True:
     generalFunctions.writeGetAllElementsCode(code, nameOfElement, attributes)
   generalFunctions.writeCommonCPPCode(code, nameOfElement, sbmltypecode, attributes, False, hasChildren, hasMath) 

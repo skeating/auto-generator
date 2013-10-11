@@ -304,6 +304,8 @@ def writeClass(attributes, header, nameOfElement, nameOfPackage, hasChildren, ha
   header.write('public:\n\n')
   writeConstructors(nameOfElement, nameOfPackage, header)
   writeAttributeFunctions(attributes, header, nameOfElement)
+  if hasMath == True or generalFunctions.hasSIdRef(attributes) == True:
+    generalFunctions.writeRenameSIdHeader(header)
   if hasChildren == True:
     generalFunctions.writeGetAllElements(header)    
   generalFunctions.writeCommonHeaders(header, nameOfElement, attributes, False, hasChildren, hasMath)

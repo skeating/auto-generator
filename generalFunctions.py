@@ -956,3 +956,45 @@ def writeGetAllElementsCodePlug(output, element, members):
   for i in range(0, len(members)):
     output.write('  ADD_FILTERED_LIST(ret, sublist, m{0}s, filter);\n'.format(strFunctions.cap(members[i]['name'])))
   output.write('\n  return ret;\n}\n\n\n')
+
+def hasSIdRef(attributes):
+  hasSidRefs = False;
+  for i in range (0, len(attributes)):
+    if attributes[i]['type'] == 'SIdRef':
+      hasSidRefs = True;
+  return hasSidRefs	  
+  
+def writeRenameSIdHeader(output):
+  output.write('  /**\n')
+  output.write('   * Renames all the @c SIdRef attributes on this element, including any\n')
+  output.write('   * found in MathML content (if such exists).\n')
+  output.write('   *\n')
+  output.write('   * This method works by looking at all attributes and (if appropriate)\n')
+  output.write('   * mathematical formulas, comparing the identifiers to the value of @p\n')
+  output.write('   * oldid.  If any matches are found, the matching identifiers are replaced\n')
+  output.write('   * with @p newid.  The method does @em not descend into child elements.\n')
+  output.write('   *\n')
+  output.write('   * @param oldid the old identifier\n')
+  output.write('   * @param newid the new identifier\n')
+  output.write('   */\n')
+  output.write('   virtual void renameSIdRefs(std::string oldid, std::string newid);\n\n\n')
+
+def writeRenameSIdCode(output, element, attributes, hasMath):
+  output.write('/*\n')
+  output.write(' * rename attributes that are SIdRefs or instances in math\n')
+  output.write(' */\n')
+  output.write('void\n')
+  output.write('{0}::renameSIdRefs(std::string oldid, std::string newid)\n'.format(element))
+  output.write('{\n')
+  for i in range (0, len(attributes)):
+    if attributes[i]['type'] == 'SIdRef':
+	  output.write('  if (isSet{0}() == true && m{0} == oldid)\n'.format(strFunctions.cap(attributes[i]['name'])))
+	  output.write('  {\n')
+	  output.write('    set{0}(newid);\n'.format(strFunctions.cap(attributes[i]['name'])))
+	  output.write('  }\n\n')
+  if hasMath == True:
+    output.write('  if (isSetMath() == true)\n')
+    output.write('  {\n')
+    output.write('    getMath()->renameSIdRefs(oldid, newid);\n')
+    output.write('  }\n\n')
+  output.write('}\n\n\n')
