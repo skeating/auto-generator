@@ -4,7 +4,7 @@ How to create code with auto-generator
 
 UPDATE: July 13th
 
-This is now integrated and will pull all teh files together.
+This is now integrated and will pull all the files together.
 
 What as user would need to do: 
 
