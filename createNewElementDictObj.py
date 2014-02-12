@@ -24,16 +24,19 @@ def createNewDictObj() :
 
   #arrays - inaccurate at present
 def createArraysDim() :
-  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  id = dict({'type': 'SId', 'reqd' : False, 'name':'id'})
   name = dict({'type': 'string', 'reqd' : False, 'name':'name'})
   size = dict({'type': 'SIdRef', 'reqd' : True, 'name':'size'})
-  attributes = [id, name, size ]
+  dim = dict({'type': 'uint', 'reqd' : True, 'name':'dim'})
+  attributes = [id, name, size, dim ]
   element = dict({'name': 'Dimension', 'package': 'Arrays', 'typecode': 'SBML_ARRAYS_DIMENSION', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
   return element
 
 def createArraysIndex() :
+  name = dict({'type': 'string', 'reqd' : True, 'name':'referencedAttribute'})
+  dim = dict({'type': 'uint', 'reqd' : True, 'name':'dim'})
   math = dict({'type': 'element', 'reqd' : True, 'name':'math', 'element': 'Math'})
-  attributes = [math ]
+  attributes = [name, dim, math ]
   element = dict({'name': 'Index', 'package': 'Arrays', 'typecode': 'SBML_ARRAYS_INDEX', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':True}) 
   return element
 #end of arrays
@@ -305,6 +308,150 @@ def createLayoutGeneralGlyph() :
   return element
 
   #end of layout
+
+#multi
+def createCompartmentReference():
+  att1 = dict({'type': 'SId', 'reqd' : False, 'name':'id'})
+  att2 = dict({'type': 'string', 'reqd' : False, 'name':'name'})
+  att3 = dict({'type': 'SIdRef', 'reqd' : True, 'name':'compartment'})
+  attributes = [att1, att2, att3]
+  element = dict({'name': 'CompartmentReference', 'package': 'Multi', 'typecode': 'SBML_MULTI_COMPARTMENT_REFERENCE', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+def createDenotedSpeciesTypeComponentIndex():
+  att1 = dict({'type': 'SIdRef', 'reqd' : True, 'name':'speciesTypeComponentIndex'})
+  attributes = [att1]
+  element = dict({'name': 'DenotedSpeciesTypeComponentIndex', 'package': 'Multi', 'typecode': 'SBML_MULTI_DENOTED_SPECIES_TYPE_COMPONENT_INDEX', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+def createInSpeciesTypeBond():
+  att1 = dict({'type': 'SId', 'reqd' : False, 'name':'id'})
+  att2 = dict({'type': 'string', 'reqd' : False, 'name':'name'})
+  att3 = dict({'type': 'SIdRef', 'reqd' : True, 'name':'bindingSite1'})
+  att4 = dict({'type': 'SIdRef', 'reqd' : True, 'name':'bindingSite2'})
+  attributes = [att1, att2, att3, att4]
+  element = dict({'name': 'InSpeciesTypeBond', 'package': 'Multi', 'typecode': 'SBML_MULTI_IN_SPECIES_TYPE_BOND', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+def createMultiSpeciesType():
+  att1 = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  att2 = dict({'type': 'string', 'reqd' : False, 'name':'name'})
+  att3 = dict({'type': 'bool', 'reqd' : True, 'name':'isBindingSite'})
+  att4 = dict({'type': 'SIdRef', 'reqd' : False, 'name':'compartment'})
+  child1 = dict({'type': 'lo_element', 'reqd': False, 'name': 'speciesFeatureType', 'element': 'SpeciesFeatureType'})
+  child2 = dict({'type': 'lo_element', 'reqd': False, 'name': 'speciesTypeInstance', 'element': 'SpeciesTypeInstance'})
+  child3 = dict({'type': 'lo_element', 'reqd': False, 'name': 'speciesTypeComponentIndex', 'element': 'SpeciesTypeComponentIndex'})
+  child4 = dict({'type': 'lo_element', 'reqd': False, 'name': 'inSpeciesTypeBond', 'element': 'InSpeciesTypeBond'})
+  attributes = [att1, att2, att3, att4, child1, child2, child3, child4]
+  element = dict({'name': 'MultiSpeciesType', 'package': 'Multi', 'typecode': 'SBML_MULTI_SPECIES_TYPE', 'hasListOf': True, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
+  return element
+  
+def createOutwardBindingSite():
+  att1 = dict({'type': 'BindingStatus', 'reqd' : True, 'name':'bindingStatus'})
+  att2 = dict({'type': 'SIdRef', 'reqd' : True, 'name':'component'})
+  attributes = [att1, att2]
+  element = dict({'name': 'OutwardBindingSite', 'package': 'Multi', 'typecode': 'SBML_MULTI_OUTWARD_BINDING_SITE', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+def createPossibleSpeciesFeatureValue():
+  att1 = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  att2 = dict({'type': 'string', 'reqd' : False, 'name':'name'})
+  att3 = dict({'type': 'SIdRef', 'reqd' : False, 'name':'numericValue'})
+  attributes = [att1, att2, att3]
+  element = dict({'name': 'PossibleSpeciesFeatureValue', 'package': 'Multi', 'typecode': 'SBML_MULTI_POSSIBLE_SPECIES_FEATURE_VALUE', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+def createSpeciesFeature():
+  att1 = dict({'type': 'SId', 'reqd' : False, 'name':'id'})
+  att2 = dict({'type': 'SIdRef', 'reqd' : True, 'name':'speciesFeatureType'})
+  att3 = dict({'type': 'uint', 'reqd' : True, 'name':'occur'})
+  att4 = dict({'type': 'SIdRef', 'reqd' : False, 'name':'component'})
+  child1 = dict({'type': 'lo_element', 'reqd': False, 'name': 'speciesFeatureValue', 'element': 'SpeciesFeatureValue'})
+  attributes = [att1, att2, att3, att4, child1]
+  element = dict({'name': 'SpeciesFeature', 'package': 'Multi', 'typecode': 'SBML_MULTI_SPECIES_FEATURE', 'hasListOf': True, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
+  return element
+  
+def createSpeciesFeatureChange():
+  att1 = dict({'type': 'SId', 'reqd' : False, 'name':'id'})
+  att2 = dict({'type': 'SIdRef', 'reqd' : True, 'name':'reactantSpeciesFeature'})
+  att3 = dict({'type': 'SIdRef', 'reqd' : True, 'name':'productSpeciesFeature'})
+  attributes = [att1, att2, att3]
+  element = dict({'name': 'SpeciesFeatureChange', 'package': 'Multi', 'typecode': 'SBML_MULTI_SPECIES_FEATURE_CHANGE', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+def createSpeciesFeatureType():
+  att1 = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  att2 = dict({'type': 'string', 'reqd' : False, 'name':'name'})
+  att3 = dict({'type': 'uint', 'reqd' : True, 'name':'occur'})
+  child1 = dict({'type': 'lo_element', 'reqd': False, 'name': 'possibleSpeciesFeatureValue', 'element': 'PossibleSpeciesFeatureValue'})
+  attributes = [att1, att2, att3, child1]
+  element = dict({'name': 'SpeciesFeatureType', 'package': 'Multi', 'typecode': 'SBML_MULTI_SPECIES_FEATURE_TYPE', 'hasListOf': True, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
+  return element
+
+def createSpeciesFeatureValue():
+  att1 = dict({'type': 'SIdRef', 'reqd' : True, 'name':'value'})
+  attributes = [att1]
+  element = dict({'name': 'SpeciesFeatureValue', 'package': 'Multi', 'typecode': 'SBML_MULTI_SPECIES_FEATURE_VALUE', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+def createSpeciesTypeComponentIndex():
+  att1 = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  att2 = dict({'type': 'SIdRef', 'reqd' : True, 'name':'component'})
+  att3 = dict({'type': 'uint', 'reqd' : True, 'name':'occur'})
+  att4 = dict({'type': 'SIdRef', 'reqd' : False, 'name':'identifyingParent'})
+  child1 = dict({'type': 'lo_element', 'reqd': False, 'name': 'denotedSpeciesTypeComponentIndex', 'element': 'DenotedSpeciesTypeComponentIndex'})
+  attributes = [att1, att2, att3, att4, child1]
+  element = dict({'name': 'SpeciesTypeComponentIndex', 'package': 'Multi', 'typecode': 'SBML_MULTI_SPECIES_TYPE_COMPONENT_INDEX', 'hasListOf': True, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
+  return element
+
+def createSpeciesTypeComponentMapInProduct():
+  att1 = dict({'type': 'SIdRef', 'reqd' : True, 'name':'reactant'})
+  att2 = dict({'type': 'SIdRef', 'reqd' : True, 'name':'reactantComponent'})
+  att3 = dict({'type': 'SIdRef', 'reqd' : True, 'name':'productComponent'})
+  child1 = dict({'type': 'lo_element', 'reqd': False, 'name': 'speciesFeatureChange', 'element': 'SpeciesFeatureChange'})
+  attributes = [att1, att2, att3, child1]
+  element = dict({'name': 'SpeciesTypeComponentMapInProduct', 'package': 'Multi', 'typecode': 'SBML_MULTI_SPECIES_TYPE_COMPONENT_MAP_IN_PRODUCT', 'hasListOf': True, 'attribs':attributes, 'hasChildren':True, 'hasMath':False}) 
+  return element
+ 
+def createSpeciesTypeInstance():
+  att1 = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  att2 = dict({'type': 'string', 'reqd' : False, 'name':'name'})
+  att3 = dict({'type': 'SIdRef', 'reqd' : True, 'name':'speciesType'})
+  att4 = dict({'type': 'SIdRef', 'reqd' : False, 'name':'compartmentReference'})
+  att5 = dict({'type': 'uint', 'reqd' : True, 'name':'occur'})
+  attributes = [att1, att2, att3, att4, att5]
+  element = dict({'name': 'SpeciesTypeInstance', 'package': 'Multi', 'typecode': 'SBML_MULTI_SPECIES_TYPE_INSTANCE', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+#these are hacks for the plugins as I have not yet implemented attributes on plugins
+def createCompartmentPlugin():
+  att1 = dict({'type': 'SIdRef', 'reqd' : False, 'name':'compartmentType'})
+  att2 = dict({'type': 'bool', 'reqd' : True, 'name':'isType'})
+  attributes = [att1, att2]
+  element = dict({'name': 'CompPlugin', 'package': 'Multi', 'typecode': 'HACK', 'hasListOf': False, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+def createSpeciesPlugin():
+  att1 = dict({'type': 'SIdRef', 'reqd' : False, 'name':'speciesType'})
+  attributes = [att1]
+  element = dict({'name': 'SpeciesPlugin', 'package': 'Multi', 'typecode': 'HACK', 'hasListOf': False, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+def createReactionPlugin():
+  att1 = dict({'type': 'SIdRef', 'reqd' : False, 'name':'compartmentType'})
+  att2 = dict({'type': 'bool', 'reqd' : False, 'name':'isIntraSpeciesReaction'})
+  attributes = [att2]
+  element = dict({'name': 'ReactPlugin', 'package': 'Multi', 'typecode': 'HACK', 'hasListOf': False, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+def createSimplePlugin():
+  att1 = dict({'type': 'SIdRef', 'reqd' : False, 'name':'compartmentReference'})
+  att2 = dict({'type': 'bool', 'reqd' : True, 'name':'isType'})
+  attributes = [att1]
+  element = dict({'name': 'SimplePlugin', 'package': 'Multi', 'typecode': 'HACK', 'hasListOf': False, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+
+#end of multi  
   
   #qual
 def createQualSpecies() :
