@@ -13,25 +13,26 @@ import createNewElementDictObj
 
 #note arrays is not finished - NEED To create the objects
 def createArrays():
-  dim = dict({'name': 'Dimension', 'typecode': 'SBML_ARRAYS_DIMENSION', 'isListOf': True})
-  ind = dict({'name': 'Index', 'typecode': 'SBML_ARRAYS_INDEX', 'isListOf': True})
-  elem = [dim, ind]
-  both = [dim, ind]
-  dim_only = [dim]
-  ind_only = [ind]
-  param_plug = dict({'sbase': 'Parameter', 'extension': dim_only}) 
-  comp_plug = dict({'sbase': 'Compartment', 'extension': dim_only}) 
-  sp_plug = dict({'sbase': 'Species', 'extension': dim_only}) 
-  react_plug = dict({'sbase': 'Reaction', 'extension': dim_only}) 
-  event_plug = dict({'sbase': 'Event', 'extension': dim_only}) 
-  con_plug = dict({'sbase': 'Constraint', 'extension': dim_only}) 
-  ea_plug = dict({'sbase': 'EventAssignment', 'extension': ind_only}) 
-  sr_plug = dict({'sbase': 'SpeciesReference', 'extension': both}) 
-  rule_plug = dict({'sbase': 'Rule', 'extension': both}) 
-  ia_plug = dict({'sbase': 'InitialAssignment', 'extension': both}) 
-  plug = [param_plug, comp_plug, sp_plug, react_plug, event_plug, con_plug, ea_plug, sr_plug, rule_plug, ia_plug]
-  package = dict({'name' : 'Arrays', 'elements': elem, 'plugins': plug, 'number': 1200})
+  # for each sbml class create the sbml obj and the overall description object
+  #dimension
+  sbml_dim = createNewElementDictObj.createArraysDim()
+  dim = dict({'name': sbml_dim['name'], 'typecode': sbml_dim['typecode'], 'isListOf': True})
+  #index
+  sbml_index = createNewElementDictObj.createArraysIndex()
+  dim = dict({'name': sbml_index['name'], 'typecode': sbml_index['typecode'], 'isListOf': True})
+  index = dict({'name': 'Dimension', 'typecode': 'SBML_ARRAYS_DIMENSION', 'isListOf': True})
+  # create a list of the sbml classes
+  sbml_classes = [sbml_dim, sbml_index]
+  # create a list of the types
+  elem = [dim, index]
+  # define information about plugins
+  sb_elem = [dim, index]
+  sb_plug = dict({'sbase': 'SBase', 'extension': sb_elem})  
+  plug = [sb_plug]
+  #create the overall package description
+  package = dict({'name' : 'Arrays', 'elements': elem, 'plugins': plug, 'number': 1200, 'sbmlElements': sbml_classes, 'offset': 8000000})
   return package
+
 
 # fbc - not fully working as I did not specifically use this for fbc
 def createFbc():
@@ -168,38 +169,147 @@ def createLayout():
   #create the overall package description
   package = dict({'name' : 'Layout', 'elements': elem, 'plugins': plug, 'number': 100, 'sbmlElements': sbml_classes, 'offset': 6000000})
   return package
-  
+ 
+def createMulti():
+  sbml_classes = []
+  elements = []
+  model_elem = []
+  compartment_elem = []
+  species_elem = []
+  reaction_elem = []
+  simpleSR_elem = []
+  sR_elem = []
+  sbml_class = createNewElementDictObj.createPossibleSpeciesFeatureValue()
+  sbml = dict({'name': sbml_class['name'], 'typecode': sbml_class['typecode'], 'isListOf': True})
+  sbml_classes.append(sbml_class)
+  elements.append(sbml)
+  sbml_class = createNewElementDictObj.createSpeciesFeatureValue()
+  sbml = dict({'name': sbml_class['name'], 'typecode': sbml_class['typecode'], 'isListOf': True})
+  sbml_classes.append(sbml_class)
+  elements.append(sbml)
+  sbml_class = createNewElementDictObj.createCompartmentReference()
+  sbml = dict({'name': sbml_class['name'], 'typecode': sbml_class['typecode'], 'isListOf': True})
+  sbml_classes.append(sbml_class)
+  elements.append(sbml)
+  compartment_elem.append(sbml)
+  sbml_class = createNewElementDictObj.createSpeciesTypeInstance()
+  sbml = dict({'name': sbml_class['name'], 'typecode': sbml_class['typecode'], 'isListOf': True})
+  sbml_classes.append(sbml_class)
+  elements.append(sbml)
+  sbml_class = createNewElementDictObj.createInSpeciesTypeBond()
+  sbml = dict({'name': sbml_class['name'], 'typecode': sbml_class['typecode'], 'isListOf': True})
+  sbml_classes.append(sbml_class)
+  elements.append(sbml)
+  sbml_class = createNewElementDictObj.createDenotedSpeciesTypeComponentIndex()
+  sbml = dict({'name': sbml_class['name'], 'typecode': sbml_class['typecode'], 'isListOf': True})
+  sbml_classes.append(sbml_class)
+  elements.append(sbml)
+  sbml_class = createNewElementDictObj.createOutwardBindingSite()
+  sbml = dict({'name': sbml_class['name'], 'typecode': sbml_class['typecode'], 'isListOf': True})
+  sbml_classes.append(sbml_class)
+  elements.append(sbml)
+  species_elem.append(sbml)
+  sbml_class = createNewElementDictObj.createSpeciesFeatureChange()
+  sbml = dict({'name': sbml_class['name'], 'typecode': sbml_class['typecode'], 'isListOf': True})
+  sbml_classes.append(sbml_class)
+  elements.append(sbml)
+  sbml_class = createNewElementDictObj.createSpeciesFeatureType()
+  sbml = dict({'name': sbml_class['name'], 'typecode': sbml_class['typecode'], 'isListOf': True})
+  sbml_classes.append(sbml_class)
+  elements.append(sbml)
+  sbml_class = createNewElementDictObj.createSpeciesTypeComponentIndex()
+  sbml = dict({'name': sbml_class['name'], 'typecode': sbml_class['typecode'], 'isListOf': True})
+  sbml_classes.append(sbml_class)
+  elements.append(sbml)
+  sbml_class = createNewElementDictObj.createSpeciesFeature()
+  sbml = dict({'name': sbml_class['name'], 'typecode': sbml_class['typecode'], 'isListOf': True})
+  sbml_classes.append(sbml_class)
+  elements.append(sbml)
+  species_elem.append(sbml)
+  sbml_class = createNewElementDictObj.createSpeciesTypeComponentMapInProduct()
+  sbml = dict({'name': sbml_class['name'], 'typecode': sbml_class['typecode'], 'isListOf': True})
+  sbml_classes.append(sbml_class)
+  elements.append(sbml)
+  sR_elem.append(sbml)
+  sbml_class = createNewElementDictObj.createMultiSpeciesType()
+  sbml = dict({'name': sbml_class['name'], 'typecode': sbml_class['typecode'], 'isListOf': True})
+  sbml_classes.append(sbml_class)
+  elements.append(sbml)  
+  model_elem.append(sbml)
+  #hacks for plugin attributes
+  sbml_class = createNewElementDictObj.createCompartmentPlugin()
+  sbml = dict({'name': sbml_class['name'], 'typecode': sbml_class['typecode'], 'isListOf': True})
+  sbml_classes.append(sbml_class)
+  elements.append(sbml)  
+  sbml_class = createNewElementDictObj.createSpeciesPlugin()
+  sbml = dict({'name': sbml_class['name'], 'typecode': sbml_class['typecode'], 'isListOf': True})
+  sbml_classes.append(sbml_class)
+  elements.append(sbml)  
+  sbml_class = createNewElementDictObj.createReactionPlugin()
+  sbml = dict({'name': sbml_class['name'], 'typecode': sbml_class['typecode'], 'isListOf': True})
+  sbml_classes.append(sbml_class)
+  elements.append(sbml)  
+  sbml_class = createNewElementDictObj.createSimplePlugin()
+  sbml = dict({'name': sbml_class['name'], 'typecode': sbml_class['typecode'], 'isListOf': True})
+  sbml_classes.append(sbml_class)
+  elements.append(sbml)    
+  plug = []
+  plugin = dict({'sbase': 'Model', 'extension': model_elem}) 
+  plug.append(plugin)
+  plugin = dict({'sbase': 'Compartment', 'extension': compartment_elem}) 
+  plug.append(plugin)
+  plugin = dict({'sbase': 'Species', 'extension': species_elem}) 
+  plug.append(plugin)
+  plugin = dict({'sbase': 'Reaction', 'extension': reaction_elem}) 
+  plug.append(plugin)
+  plugin = dict({'sbase': 'SimpleSpeciesReference', 'extension': simpleSR_elem}) 
+  plug.append(plugin)
+  plugin = dict({'sbase': 'SpeciesReference', 'extension': sR_elem}) 
+  plug.append(plugin)
+  package = dict({'name' : 'Multi', 'elements': elements, 'plugins': plug, 'number': 1400, 'sbmlElements': sbml_classes, 'offset': 7000000})
+  return package 
 
 def createQual():
+  sbml_classes = []
+  elements = []
+  model_elem = []
   # for each sbml class create the sbml obj and the overall description object
   #QualitativeSpecies
-  sbml_qs = createNewElementDictObj.createQualSpecies()
-  qs = dict({'name': 'QualitativeSpecies', 'typecode': 'SBML_QUAL_QUALITATIVE_SPECIES', 'isListOf': True})
+  sbml_class = createNewElementDictObj.createQualSpecies()
+  sbml = dict({'name': sbml_class['name'], 'typecode': sbml_class['typecode'], 'isListOf': True})
+  sbml_classes.append(sbml_class)
+  elements.append(sbml)
+  model_elem.append(sbml)
   #Transition
-  sbml_tr = createNewElementDictObj.createQualTransition()
-  tr = dict({'name': 'Transition', 'typecode': 'SBML_QUAL_TRANSITION', 'isListOf': True})
+  sbml_class = createNewElementDictObj.createQualTransition()
+  sbml = dict({'name': sbml_class['name'], 'typecode': sbml_class['typecode'], 'isListOf': True})
+  sbml_classes.append(sbml_class)
+  elements.append(sbml)
+  model_elem.append(sbml)
   #Input
-  sbml_inp = createNewElementDictObj.createQualInput()
-  inp = dict({'name': 'Input', 'typecode': 'SBML_QUAL_INPUT'})
+  sbml_class = createNewElementDictObj.createQualInput()
+  sbml = dict({'name': sbml_class['name'], 'typecode': sbml_class['typecode'], 'isListOf': True})
+  sbml_classes.append(sbml_class)
+  elements.append(sbml)
   #Output
-  sbml_out = createNewElementDictObj.createQualOutput()
-  out = dict({'name': 'Output', 'typecode': 'SBML_QUAL_OUTPUT'})
+  sbml_class = createNewElementDictObj.createQualOutput()
+  sbml = dict({'name': sbml_class['name'], 'typecode': sbml_class['typecode'], 'isListOf': True})
+  sbml_classes.append(sbml_class)
+  elements.append(sbml)
   #FunctionTerm
-  sbml_ft = createNewElementDictObj.createQualFunctionTerm()
-  ft = dict({'name': 'FunctionTerm', 'typecode': 'SBML_QUAL_FUNCTION_TERM'})
+  sbml_class = createNewElementDictObj.createQualFunctionTerm()
+  sbml = dict({'name': sbml_class['name'], 'typecode': sbml_class['typecode'], 'isListOf': False})
+  sbml_classes.append(sbml_class)
+  elements.append(sbml)
   #DefaultTerm
-  sbml_dt = createNewElementDictObj.createQualDefaultTerm()
-  dt = dict({'name': 'DefaultTerm', 'typecode': 'SBML_QUAL_DEFAULT_TERM'})
-  # create a list of teh sbml classes
-  sbml_classes = [sbml_qs, sbml_tr, sbml_inp, sbml_out, sbml_ft, sbml_dt]
-  # create a list of the types
-  elem = [qs, tr, inp, out, ft, dt]
-  # define information about plugins
-  model_elem = [qs, tr]
+  sbml_class = createNewElementDictObj.createQualDefaultTerm()
+  sbml = dict({'name': sbml_class['name'], 'typecode': sbml_class['typecode'], 'isListOf': False})
+  sbml_classes.append(sbml_class)
+  elements.append(sbml)
   model_plug = dict({'sbase': 'Model', 'extension': model_elem}) 
   plug = [model_plug]
   #create teh overall package description
-  package = dict({'name' : 'Qual', 'elements': elem, 'plugins': plug, 'number': 1100, 'sbmlElements': sbml_classes, 'offset': 3000000})
+  package = dict({'name' : 'Qual', 'elements': elements, 'plugins': plug, 'number': 1100, 'sbmlElements': sbml_classes, 'offset': 3000000})
   return package
   
 def createPackage(name):
@@ -215,6 +325,10 @@ def createPackage(name):
     package = createLayout()
   elif (name == 'fbc'):
     package = createFbc()
+  elif (name == 'multi'):
+    package = createMulti()
+  elif (name == "arrays"):
+    package = createArrays()
   else:
     package = None
   return package
