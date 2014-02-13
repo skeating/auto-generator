@@ -13,8 +13,8 @@ import strFunctions
 
 def writeConstructors(element, package, output):
   indent = strFunctions.getIndent(element)
-  output.write('/**\n')
-  output.write(' * write comments\n')
+  output.write('/*\n')
+  output.write(' * \n')
   output.write(' */\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('{0}_t *\n'.format(element))
@@ -34,8 +34,8 @@ def writeConstructors(element, package, output):
 #  output.write('{\n')
 #  output.write('  return new {0}(sbmlns);\n'.format(element))
 #  output.write('}\n\n\n')
-  output.write('/**\n')
-  output.write(' * write comments\n')
+  output.write('/*\n')
+  output.write(' * \n')
   output.write(' */\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('void\n')
@@ -45,8 +45,8 @@ def writeConstructors(element, package, output):
   output.write('  if ({0} != NULL)\n'.format(strFunctions.objAbbrev(element)))
   output.write('    delete {0};\n'.format(strFunctions.objAbbrev(element)))
   output.write('}\n\n\n')
-  output.write('/**\n')
-  output.write(' * write comments\n')
+  output.write('/*\n')
+  output.write(' *\n')
   output.write(' */\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('{0}_t *\n'.format(element))
@@ -87,8 +87,8 @@ def writeGetFunction(attrib, output, element):
   if attrib['type'] == 'element' or attrib['type'] == 'lo_element':
     return
   varname = strFunctions.objAbbrev(element)
-  output.write('/**\n')
-  output.write(' * write comments\n')
+  output.write('/*\n')
+  output.write(' *\n')
   output.write(' */\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('{0}\n'.format(attTypeCode))
@@ -118,8 +118,8 @@ def writeIsSetFunction(attrib, output, element):
   if attrib['type'] == 'element' or attrib['type'] == 'lo_element':
     return
   varname = strFunctions.objAbbrev(element)
-  output.write('/**\n')
-  output.write(' * write comments\n')
+  output.write('/*\n')
+  output.write(' *\n')
   output.write(' */\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('int\n')
@@ -140,8 +140,8 @@ def writeSetFunction(attrib, output, element):
   if attrib['type'] == 'element' or attrib['type'] == 'lo_element':
     return
   varname = strFunctions.objAbbrev(element)
-  output.write('/**\n')
-  output.write(' * write comments\n')
+  output.write('/*\n')
+  output.write(' *\n')
   output.write(' */\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('int\n')
@@ -162,8 +162,8 @@ def writeUnsetFunction(attrib, output, element):
   if attrib['type'] == 'element' or attrib['type'] == 'lo_element':
     return
   varname = strFunctions.objAbbrev(element)
-  output.write('/**\n')
-  output.write(' * write comments\n')
+  output.write('/*\n')
+  output.write(' *\n')
   output.write(' */\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('int\n')
@@ -176,8 +176,8 @@ def writeUnsetFunction(attrib, output, element):
  
 def writeHasReqdAttrFunction(output, element):
   varname = strFunctions.objAbbrev(element)
-  output.write('/**\n')
-  output.write(' * write comments\n')
+  output.write('/*\n')
+  output.write(' *\n')
   output.write(' */\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('int\n')
@@ -190,8 +190,8 @@ def writeHasReqdAttrFunction(output, element):
     
 def writeListOfCode(output, element):
   loelement = generalFunctions.writeListOf(element)
-  output.write('/**\n')
-  output.write(' * write comments\n')
+  output.write('/*\n')
+  output.write(' *\n')
   output.write(' */\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('{0}_t *\n'.format(element))
@@ -202,8 +202,8 @@ def writeListOfCode(output, element):
   output.write('    return NULL;\n\n')
   output.write('  return (sid != NULL) ? static_cast <{0} *>(lo)->get(sid) : NULL;\n'.format(loelement))
   output.write('}\n\n\n')
-  output.write('/**\n')
-  output.write(' * write comments\n')
+  output.write('/*\n')
+  output.write(' *\n')
   output.write(' */\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('{0}_t *\n'.format(element))

@@ -253,7 +253,8 @@ def writeTypeDefns(fileOut, nameOfClass, nameOfPkg, elements, number):
     for i in range (1, len(elements)):
       el = elements[i];
       el_ty = el['typecode']
-      fileOut.write('  , {0:<30} = {1}\n'.format(el_ty, number+i))
+      if el_ty != 'HACK':
+        fileOut.write('  , {0:<30} = {1}\n'.format(el_ty, number+i))
     fileOut.write('}')
     fileOut.write(' SBML{0}TypeCode_t;\n\n\n'.format(nameOfPkg))
 

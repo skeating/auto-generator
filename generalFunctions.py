@@ -16,7 +16,9 @@ def writeInternalEnd(outFile):
 
 def writeListOf(element):
   last = len(element)-1
-  if element[last] != 's':
+  if element[last] == 'x':
+    element = element + 'es'
+  elif element[last] != 's':
     element = element + 's'
   element = 'ListOf' + element
   return element
@@ -71,8 +73,12 @@ def parseAttribute(attrib):
   elif attrib['type'] == 'lo_element':
     attType = 'lo_element'
     attTypeCode = attrib['element']
-    attName = attName + 's'
-    capAttName = capAttName + 's'
+    if attName.endswith('x'):
+      attName = attName + 'es'
+      capAttName = capAttName + 'es'
+    else:
+      attName = attName + 's'
+      capAttName = capAttName + 's'
     num = False
   else:
     attType = 'FIX ME'
@@ -425,8 +431,11 @@ def writeReadAttribute(output, attrib, element, pkg):
     output.write('    {\n')
     output.write('      logEmptyString(m{0}, getLevel(), getVersion(), "<{1}>");\n'.format(capAttName, element))
     output.write('    }\n')
-    output.write('    else if (SyntaxChecker::isValidSBMLSId(m{0}) == false)\n'.format(capAttName))
-    output.write('    {\n      logError(InvalidIdSyntax);\n    }\n')
+    output.write('    else if (SyntaxChecker::isValidSBMLSId(m{0}) == false && getErrorLog() != NULL)\n'.format(capAttName))
+    output.write('    {\n')
+    output.write('      getErrorLog()->logError(InvalidIdSyntax, getLevel(), getVersion(), \n')
+    output.write('        "The syntax of the attribute {0}=\'" + m{1} + "\' does not conform.");\n'.format(attName, capAttName))
+    output.write('    }\n')
     if use == 'required':
 	  output.write('  }\n')
 	  output.write('  else\n')
@@ -446,8 +455,11 @@ def writeReadAttribute(output, attrib, element, pkg):
     output.write('    {\n')
     output.write('      logEmptyString(m{0}, getLevel(), getVersion(), "<{1}>");\n'.format(capAttName, element))
     output.write('    }\n')
-    output.write('    else if (SyntaxChecker::isValidSBMLSId(m{0}) == false)\n'.format(capAttName))
-    output.write('    {\n      logError(InvalidIdSyntax);\n    }\n')
+    output.write('    else if (SyntaxChecker::isValidSBMLSId(m{0}) == false && getErrorLog() != NULL)\n'.format(capAttName))
+    output.write('    {\n')
+    output.write('      getErrorLog()->logError(InvalidIdSyntax, getLevel(), getVersion(), \n')
+    output.write('        "The syntax of the attribute {0}=\'" + m{1} + "\' does not conform.");\n'.format(attName, capAttName))
+    output.write('    }\n')
     if use == 'required':
 	  output.write('  }\n')
 	  output.write('  else\n')
@@ -676,10 +688,10 @@ def writeReadAttributesCPPCode(outFile, element, attribs, pkg, isListOf):
   outFile.write('  unsigned int numErrs;\n\n')
   if isListOf == True:
 	outFile.write('  /* look to see whether an unknown attribute error was logged\n')
-	outFile.write('   * during the read of the listOf{0}s - which will have\n'.format(element))
+	outFile.write('   * during the read of the {0} - which will have\n'.format(strFunctions.listOfName(element)))
 	outFile.write('   * happened immediately prior to this read\n  */\n\n')
 	outFile.write('  if (getErrorLog() != NULL &&\n')
-	outFile.write('      static_cast<ListOf{0}s*>(getParentSBMLObject())->size() < 2)\n'.format(element))
+	outFile.write('      static_cast<{0}*>(getParentSBMLObject())->size() < 2)\n'.format(strFunctions.cap(strFunctions.listOfName(element))))
 	outFile.write('  {\n')
 	outFile.write('    numErrs = getErrorLog()->getNumErrors();\n')
 	outFile.write('    for (int n = numErrs-1; n >= 0; n--)\n')
@@ -977,14 +989,14 @@ def writeRenameSIdHeader(output):
   output.write('   * @param oldid the old identifier\n')
   output.write('   * @param newid the new identifier\n')
   output.write('   */\n')
-  output.write('   virtual void renameSIdRefs(std::string oldid, std::string newid);\n\n\n')
+  output.write('   virtual void renameSIdRefs(const std::string& oldid, const std::string& newid);\n\n\n')
 
 def writeRenameSIdCode(output, element, attributes, hasMath):
   output.write('/*\n')
   output.write(' * rename attributes that are SIdRefs or instances in math\n')
   output.write(' */\n')
   output.write('void\n')
-  output.write('{0}::renameSIdRefs(std::string oldid, std::string newid)\n'.format(element))
+  output.write('{0}::renameSIdRefs(const std::string& oldid, const std::string& newid)\n'.format(element))
   output.write('{\n')
   for i in range (0, len(attributes)):
     if attributes[i]['type'] == 'SIdRef':

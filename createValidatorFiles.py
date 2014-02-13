@@ -64,7 +64,8 @@ def createValidatorFile(pkg, classes):
     else:
 	  break
   for i in range (0, len(classes)):
-    output.write('  ConstraintSet<{0}>      m{0};\n'.format(classes[i]['name']))
+    if classes[i]['typecode'] != 'HACK':
+      output.write('  ConstraintSet<{0}>      m{0};\n'.format(classes[i]['name']))
   for line in input:
     if line[0:13] != 'TEMPLATE_STOP':
 	  line = replaceTags(line, pkg)
@@ -72,10 +73,11 @@ def createValidatorFile(pkg, classes):
     else:
 	  break
   for i in range (0, len(classes)):
-    output.write('  if (dynamic_cast< TConstraint<{0}>* >(c) != NULL)\n'.format(classes[i]['name']))
-    output.write('  {\n')
-    output.write('    m{0}.add( static_cast< TConstraint<{0}>* >(c) );\n'.format(classes[i]['name']))
-    output.write('    return;\n  }\n\n')
+    if classes[i]['typecode'] != 'HACK':
+      output.write('  if (dynamic_cast< TConstraint<{0}>* >(c) != NULL)\n'.format(classes[i]['name']))
+      output.write('  {\n')
+      output.write('    m{0}.add( static_cast< TConstraint<{0}>* >(c) );\n'.format(classes[i]['name']))
+      output.write('    return;\n  }\n\n')
   for line in input:
     if line[0:13] != 'TEMPLATE_STOP':
 	  line = replaceTags(line, pkg)
@@ -83,11 +85,12 @@ def createValidatorFile(pkg, classes):
     else:
 	  break
   for i in range (0, len(classes)):
-    output.write('  bool visit (const {0} &x)\n'.format(classes[i]['name']))
-    output.write('  {\n')
-    output.write('    v.m{0}Constraints->m{1}.applyTo(m, x);\n'.format(pkg, classes[i]['name']))
-    output.write('    return !v.m{0}Constraints->m{1}.empty();\n'.format(pkg, classes[i]['name']))
-    output.write('  }\n\n')
+    if classes[i]['typecode'] != 'HACK':
+      output.write('  bool visit (const {0} &x)\n'.format(classes[i]['name']))
+      output.write('  {\n')
+      output.write('    v.m{0}Constraints->m{1}.applyTo(m, x);\n'.format(pkg, classes[i]['name']))
+      output.write('    return !v.m{0}Constraints->m{1}.empty();\n'.format(pkg, classes[i]['name']))
+      output.write('  }\n\n')
   output.write('  virtual bool visit(const SBase &x)\n')
   output.write('  {\n')
   output.write('    if (&x == NULL || x.getPackageName() != "{0}")\n'.format(pkg.lower()))
@@ -100,11 +103,17 @@ def createValidatorFile(pkg, classes):
   output.write('    }\n')
   output.write('    else\n')
   output.write('    {\n')
+  order = 0
   for i in range (0, len(classes)):
-    output.write('      else if (code == {0})\n'.format(classes[i]['typecode']))
-    output.write('      {\n')
-    output.write('        return visit((const {0}&)x);\n'.format(classes[i]['name']))
-    output.write('      }\n')
+    if classes[i]['typecode'] != 'HACK':
+      if order == 0:
+        output.write('      if (code == {0})\n'.format(classes[i]['typecode']))
+        order = order + 1
+      else:
+        output.write('      else if (code == {0})\n'.format(classes[i]['typecode']))
+      output.write('      {\n')
+      output.write('        return visit((const {0}&)x);\n'.format(classes[i]['name']))
+      output.write('      }\n')
   for line in input:
     if line[0:13] != 'TEMPLATE_STOP':
 	  line = replaceTags(line, pkg)

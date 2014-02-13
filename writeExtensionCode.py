@@ -8,6 +8,7 @@
 import sys
 import fileHeaders
 import generalFunctions
+import writeBindingsFiles
 
 def writeClass(fileOut, nameOfClass, pkg, elements):
   writeRequiredMethods(fileOut, nameOfClass, pkg, elements)
@@ -194,7 +195,7 @@ def writeInitFunction(fileOut, pkg, nameOfClass, plugins):
     if plug == 'SBase':
       fileOut.write('  SBaseExtensionPoint {0}ExtPoint("all", SBML_GENERIC_{1});\n'.format(plug.lower(), plug.upper()))
     else:
-      fileOut.write('  SBaseExtensionPoint {0}ExtPoint("core", SBML_{1});\n'.format(plug.lower(), plug.upper()))
+      fileOut.write('  SBaseExtensionPoint {0}ExtPoint("core", SBML_{1});\n'.format(plug.lower(), writeBindingsFiles.createSBase(plug.upper())))
   fileOut.write('\n')
   fileOut.write('  SBasePluginCreator<{0}SBMLDocumentPlugin, {0}Extension> sbmldocPluginCreator(sbmldocExtPoint, packageURIs);\n'.format(pkg))
   for i in range (0, len(plugins)):
@@ -279,7 +280,7 @@ def writeRequiredMethods(fileOut, nameOfClass, pkg, elements):
   fileOut.write(' */\n\n')
   fileOut.write('/*------------------ (START) ----------------------------------*/\n\n')
   fileOut.write('/*\n')
-  fileOut.write('/* Returns the package name of this extension.\n')
+  fileOut.write(' * Returns the package name of this extension.\n')
   fileOut.write(' */\n')
   fileOut.write('const std::string&\n')
   fileOut.write('{0}::getPackageName ()\n'.format(nameOfClass))
@@ -334,8 +335,9 @@ def writeRequiredMethods(fileOut, nameOfClass, pkg, elements):
     fileOut.write('    "{0}"\n'.format(name))
     for i in range (1, len(elements)):
       el = elements[i]
-      name = el['name']
-      fileOut.write('  , "{0}"\n'.format(name))
+      if el['typecode'] != 'HACK':
+        name = el['name']
+        fileOut.write('  , "{0}"\n'.format(name))
     fileOut.write('};\n\n\n')
   fileOut.write('/*\n')
   fileOut.write(' * Instantiate SBMLExtensionNamespaces<{0}>\n'.format(nameOfClass))
@@ -351,6 +353,10 @@ def writeTypeDefns(fileOut, nameOfClass, pkg, elements, number):
     el = elements[0];
     el_ty_min = el['typecode']
     el = elements[length-1]
+    i = 1
+    while el['typecode'] == 'HACK':
+      i = i + 1
+      el = elements[length-i]
     el_ty_max = el['typecode']
     fileOut.write('/*\n')
     fileOut.write(' * This method takes a type code from the {0} package and returns a string representing \n'.format(pkg))

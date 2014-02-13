@@ -21,10 +21,10 @@ def writeIncludes(fileOut, element, pkg, hasMath=False):
   if hasMath == True:
     fileOut.write('#include <sbml/math/MathML.h>\n')
   fileOut.write('\n\n');
-#  fileOut.write('#if WIN32 && !defined(CYGWIN)\n')
-#  fileOut.write('  #define isnan _isnan\n')
-#  fileOut.write('#endif\n')
-#  fileOut.write('\n\n');
+  #  fileOut.write('#if WIN32 && !defined(CYGWIN)\n')
+  #  fileOut.write('  #define isnan _isnan\n')
+  #  fileOut.write('#endif\n')
+  #  fileOut.write('\n\n');
   fileOut.write('using namespace std;\n')
   fileOut.write('\n\n');
   fileOut.write('LIBSBML_CPP_NAMESPACE_BEGIN\n')
@@ -33,8 +33,9 @@ def writeIncludes(fileOut, element, pkg, hasMath=False):
 # writes list of attributes
 def writeAttributes(attrs, output, constType=0, pkg=""):
   for i in range(0, len(attrs)):
-    writeAtt(attrs[i]['type'], attrs[i]['name'], output, constType, pkg)  
-#  output.write('\n')
+    writeAtt(attrs[i]['type'], attrs[i]['name'], output, constType, pkg)
+  #  output.write('\n')
+
 
 def writeAtt(atttype, name, output, constType, pkg):
   if atttype == 'SId' or atttype == 'SIdRef' or atttype == 'UnitSId' or atttype == 'UnitSIdRef' or atttype == 'string':
@@ -42,7 +43,10 @@ def writeAtt(atttype, name, output, constType, pkg):
   elif atttype == 'element':
     output.write('   ,m{0} (NULL)\n'.format(strFunctions.cap(name)))
   elif atttype == 'lo_element':
-    output.write('   ,m{0}s ('.format(strFunctions.cap(name)))
+    if name.endswith('x'):
+      output.write('   ,m{0}es ('.format(strFunctions.cap((name))))
+    else:
+      output.write('   ,m{0}s ('.format(strFunctions.cap(name)))
     if constType == 0:
       output.write(')\n')
     elif constType == 1:
@@ -60,36 +64,39 @@ def writeAtt(atttype, name, output, constType, pkg):
     output.write('   ,mIsSet{0} (false)\n'.format(strFunctions.cap(name)))
   else:
     output.write('  FIX ME   {0};\n'.format(name))
- 
+
 
 def writeCopyAttributes(attrs, output, tabs, name):
   for i in range(0, len(attrs)):
     attName = strFunctions.cap(attrs[i]['name'])
     atttype = attrs[i]['type']
     if atttype != 'lo_element':
-	  if atttype != 'element':
-		output.write('{0}m{1}  = {2}.m{1};\n'.format(tabs, strFunctions.cap(attrs[i]['name']), name))
-	  else:
-		output.write('{0}if ({2}.m{1} != NULL)\n'.format(tabs, strFunctions.cap(attrs[i]['name']), name))
-		output.write('{0}'.format(tabs))
-		output.write('{\n')
-		output.write('{0}  m{1} = {2}.m{1}->deepCopy();\n'.format(tabs, strFunctions.cap(attrs[i]['name']), name))
-		output.write('{0}'.format(tabs))
-		output.write('}\n')
-		output.write('{0}else\n'.format(tabs))
-		output.write('{0}'.format(tabs))
-		output.write('{\n')
-		output.write('{0}  m{1} = NULL;\n'.format(tabs, strFunctions.cap(attrs[i]['name'])))
-		output.write('{0}'.format(tabs))
-		output.write('}\n')
+      if atttype != 'element':
+        output.write('{0}m{1}  = {2}.m{1};\n'.format(tabs, attName, name))
+      else:
+        output.write('{0}if ({2}.m{1} != NULL)\n'.format(tabs, strFunctions.cap(attrs[i]['name']), name))
+        output.write('{0}'.format(tabs))
+        output.write('{\n')
+        output.write('{0}  m{1} = {2}.m{1}->deepCopy();\n'.format(tabs, strFunctions.cap(attrs[i]['name']), name))
+        output.write('{0}'.format(tabs))
+        output.write('}\n')
+        output.write('{0}else\n'.format(tabs))
+        output.write('{0}'.format(tabs))
+        output.write('{\n')
+        output.write('{0}  m{1} = NULL;\n'.format(tabs, strFunctions.cap(attrs[i]['name'])))
+        output.write('{0}'.format(tabs))
+        output.write('}\n')
     else:
-      output.write('{0}m{1}s  = {2}.m{1}s;\n'.format(tabs, strFunctions.cap(attrs[i]['name']), name))  	
+      if attName.endswith('x'):
+        output.write('{0}m{1}es  = {2}.m{1}es;\n'.format(tabs, attName, name))
+      else:
+        output.write('{0}m{1}s  = {2}.m{1}s;\n'.format(tabs, attName, name))
     if atttype == 'double' or atttype == 'int' or atttype == 'uint' or atttype == 'bool':
-      output.write('{0}mIsSet{1}  = {2}.mIsSet{1};\n'.format(tabs, strFunctions.cap(attrs[i]['name']), name))    
+      output.write('{0}mIsSet{1}  = {2}.mIsSet{1};\n'.format(tabs, attName, name))
 
 
 def writeConstructors(element, package, output, attrs, hasChildren=False, hasMath=False):
-  output.write('/*\n' )
+  output.write('/*\n')
   output.write(' * Creates a new {0}'.format(element))
   output.write(' with the given level, version, and package version.\n */\n')
   output.write('{0}::{0} (unsigned int level, unsigned int version, unsigned int pkgVersion)\n'.format(element))
@@ -102,7 +109,7 @@ def writeConstructors(element, package, output, attrs, hasChildren=False, hasMat
     output.write('\n  // connect to child objects\n')
     output.write('  connectToChild();\n')
   output.write('}\n\n\n')
-  output.write('/*\n' )
+  output.write('/*\n')
   output.write(' * Creates a new {0}'.format(element))
   output.write(' with the given {0}PkgNamespaces object.\n */\n'.format(package))
   output.write('{0}::{0} ({1}PkgNamespaces* {2}ns)\n'.format(element, package, package.lower()))
@@ -117,7 +124,7 @@ def writeConstructors(element, package, output, attrs, hasChildren=False, hasMat
   output.write('\n  // load package extensions bound with this object (if any) \n')
   output.write('  loadPlugins({0}ns);\n'.format(package.lower()))
   output.write('}\n\n\n')
-  output.write('/*\n' )
+  output.write('/*\n')
   output.write(' * Copy constructor for {0}.\n */\n'.format(element))
   output.write('{0}::{0} (const {0}& orig)\n'.format(element, package, package.lower()))
   output.write('  : SBase(orig)\n')
@@ -134,7 +141,7 @@ def writeConstructors(element, package, output, attrs, hasChildren=False, hasMat
     output.write('    connectToChild();\n')
   output.write('  }\n')
   output.write('}\n\n\n')
-  output.write('/*\n' )
+  output.write('/*\n')
   output.write(' * Assignment for {0}.\n */\n'.format(element))
   output.write('{0}&\n{0}::operator=(const {0}& rhs)\n'.format(element))
   output.write('{\n')
@@ -152,21 +159,20 @@ def writeConstructors(element, package, output, attrs, hasChildren=False, hasMat
   output.write('  }\n')
   output.write('  return *this;\n')
   output.write('}\n\n\n')
-  output.write('/*\n' )
+  output.write('/*\n')
   output.write(' * Clone for {0}.\n */\n'.format(element))
   output.write('{0}*\n{0}::clone () const\n'.format(element))
   output.write('{\n')
   output.write('  return new {0}(*this);\n'.format(element))
   output.write('}\n\n\n')
-  output.write('/*\n' )
+  output.write('/*\n')
   output.write(' * Destructor for {0}.\n */\n'.format(element))
   output.write('{0}::~{0} ()\n'.format(element))
   output.write('{\n')
   if hasMath == True:
     output.write('  delete mMath;\n')
   output.write('}\n\n\n')
- 
-  
+
 
 def writeGetCode(attrib, output, element):
   att = generalFunctions.parseAttribute(attrib)
@@ -185,8 +191,8 @@ def writeGetCode(attrib, output, element):
   output.write('{\n')
   output.write('  return m{0};\n'.format(capAttName))
   output.write('}\n\n\n')
-   
-  
+
+
 def writeIsSetCode(attrib, output, element):
   att = generalFunctions.parseAttribute(attrib)
   attName = att[0]
@@ -211,16 +217,15 @@ def writeIsSetCode(attrib, output, element):
   elif attType == 'boolean':
     output.write('  return mIsSet{0};\n'.format(capAttName))
   output.write('}\n\n\n')
-   
-  
-  
+
+
 def writeSetCode(attrib, output, element):
   att = generalFunctions.parseAttribute(attrib)
   attName = att[0]
   capAttName = att[1]
   attType = att[2]
   if attType == 'string':
-    attTypeCode = 'const std::string&' 
+    attTypeCode = 'const std::string&'
   else:
     attTypeCode = att[3]
   num = att[4]
@@ -234,7 +239,7 @@ def writeSetCode(attrib, output, element):
   output.write('{\n')
   if attType == 'string':
     if attName == 'id':
-      output.write('  return SyntaxChecker::checkAndSetSId({0}, m{1});\n'.format(attName, capAttName ))
+      output.write('  return SyntaxChecker::checkAndSetSId({0}, m{1});\n'.format(attName, capAttName))
     else:
       output.write('  if (&({0}) == NULL)\n'.format(attName))
       output.write('  {\n    return LIBSBML_INVALID_ATTRIBUTE_VALUE;\n  }\n')
@@ -279,9 +284,8 @@ def writeSetCode(attrib, output, element):
     output.write('    }\n')
     output.write('    return LIBSBML_OPERATION_SUCCESS;\n  }\n')
   output.write('}\n\n\n')
-   
-  
-  
+
+
 def writeUnsetCode(attrib, output, element):
   att = generalFunctions.parseAttribute(attrib)
   attName = att[0]
@@ -322,7 +326,7 @@ def writeUnsetCode(attrib, output, element):
     output.write('  m{0} = NULL;\n'.format(capAttName))
     output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
   output.write('}\n\n\n')
-   
+
 # for each attribute write a set/get/isset/unset
 def writeAttributeCode(attrs, output, element, pkgName):
   for i in range(0, len(attrs)):
@@ -336,6 +340,7 @@ def writeAttributeCode(attrs, output, element, pkgName):
   for i in range(0, len(attrs)):
     if attrs[i]['type'] == 'lo_element':
       writeListOfSubFunctions(attrs[i], output, element, pkgName)
+
 
 def writeListOfSubFunctions(attrib, output, element, pkgName):
   loname = generalFunctions.writeListOf(attrib['element'])
@@ -369,7 +374,8 @@ def writeListOfSubFunctions(attrib, output, element, pkgName):
   output.write(' * Adds a copy the given \"{0}\" to this {1}.\n'.format(attrib['element'], element))
   output.write(' */\n')
   output.write('int\n')
-  output.write('{0}::add{1}(const {1}* {2})\n'.format(element, attrib['element'], strFunctions.objAbbrev(attrib['element'])))
+  output.write(
+    '{0}::add{1}(const {1}* {2})\n'.format(element, attrib['element'], strFunctions.objAbbrev(attrib['element'])))
   output.write('{\n')
   output.write('  if ({0} == NULL)\n'.format(strFunctions.objAbbrev(attrib['element'])))
   output.write('  {\n')
@@ -387,7 +393,9 @@ def writeListOfSubFunctions(attrib, output, element, pkgName):
   output.write('  {\n')
   output.write('    return LIBSBML_VERSION_MISMATCH;\n')
   output.write('  }\n')
-  output.write('  else if (matchesRequiredSBMLNamespacesForAddition(static_cast<const SBase *>({0})) == false)\n'.format(strFunctions.objAbbrev(attrib['element'])))
+  output.write(
+    '  else if (matchesRequiredSBMLNamespacesForAddition(static_cast<const SBase *>({0})) == false)\n'.format(
+      strFunctions.objAbbrev(attrib['element'])))
   output.write('  {\n')
   output.write('    return LIBSBML_NAMESPACES_MISMATCH;\n')
   output.write('  }\n')
@@ -415,15 +423,16 @@ def writeListOfSubFunctions(attrib, output, element, pkgName):
   output.write('  try\n')
   output.write('  {\n')
   output.write('    {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(pkgName.upper(), pkgName.lower()))
-  output.write('    {0} = new {1}({2}ns);\n'.format(strFunctions.objAbbrev(attrib['element']), attrib['element'], pkgName.lower()))
+  output.write(
+    '    {0} = new {1}({2}ns);\n'.format(strFunctions.objAbbrev(attrib['element']), attrib['element'], pkgName.lower()))
   output.write('  }\n')
   output.write('  catch (...)\n')
   output.write('  {\n')
-  output.write('    /* here we do not create a default object as the level/version must\n' )
-  output.write('     * match the parent object\n' )
-  output.write('     *\n' )
-  output.write('     * do nothing\n' )
-  output.write('     */\n' )
+  output.write('    /* here we do not create a default object as the level/version must\n')
+  output.write('     * match the parent object\n')
+  output.write('     *\n')
+  output.write('     * do nothing\n')
+  output.write('     */\n')
   output.write('  }\n\n')
   output.write('  if({0} != NULL)\n'.format(strFunctions.objAbbrev(attrib['element'])))
   output.write('  {\n')
@@ -432,7 +441,7 @@ def writeListOfSubFunctions(attrib, output, element, pkgName):
   output.write('  return {0};\n'.format(strFunctions.objAbbrev(attrib['element'])))
   output.write('}\n\n\n')
 
-  
+
 def createCode(element):
   nameOfElement = element['name']
   nameOfPackage = element['package']
@@ -452,11 +461,12 @@ def createCode(element):
     generalFunctions.writeRenameSIdCode(code, nameOfElement, attributes, hasMath)
   if hasChildren == True:
     generalFunctions.writeGetAllElementsCode(code, nameOfElement, attributes)
-  generalFunctions.writeCommonCPPCode(code, nameOfElement, sbmltypecode, attributes, False, hasChildren, hasMath) 
-  generalFunctions.writeInternalCPPCode(code, nameOfElement, attributes, hasChildren, hasMath) 
-  generalFunctions.writeProtectedCPPCode(code, nameOfElement, attributes, False, hasChildren, hasMath, nameOfPackage, isListOf) 
+  generalFunctions.writeCommonCPPCode(code, nameOfElement, sbmltypecode, attributes, False, hasChildren, hasMath)
+  generalFunctions.writeInternalCPPCode(code, nameOfElement, attributes, hasChildren, hasMath)
+  generalFunctions.writeProtectedCPPCode(code, nameOfElement, attributes, False, hasChildren, hasMath, nameOfPackage,
+                                         isListOf)
   if isListOf == True:
-	writeListOfCode.createCode(element, code)
+    writeListOfCode.createCode(element, code)
   writeCCode.createCode(element, code)
 
 #if len(sys.argv) != 2:

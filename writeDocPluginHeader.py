@@ -60,7 +60,7 @@ def writeOtherFunctions(fileOut, nameOfClass, pkg):
   fileOut.write('   * @returns @c true if flattening for composed models has been implemented,\n')
   fileOut.write('   * false otherwise.\n')
   fileOut.write('   */\n')
-  fileOut.write('  virtual bool isFlatteningImplemented() const;\n\n\n')
+  fileOut.write('  virtual bool isCompFlatteningImplemented() const;\n\n\n')
   generalFunctions.writeInternalEnd(fileOut)
   generalFunctions.writeInternalStart(fileOut)
   fileOut.write('  /**\n   * ' )

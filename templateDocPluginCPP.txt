@@ -98,7 +98,7 @@ $PKGNAMESBMLDocumentPlugin::readAttributes (const XMLAttributes& attributes,
 
 
 bool
-$PKGNAMESBMLDocumentPlugin::isFlatteningImplemented() const
+$PKGNAMESBMLDocumentPlugin::isCompFlatteningImplemented() const
 {
   return false;
 }
