@@ -234,11 +234,11 @@ def writeUnsetFunction(attrib, output, element):
 def writeAttributeFunctions(attrs, output, element):
   for i in range(0, len(attrs)):
     writeGetFunction(attrs[i], output, element)
-#  for i in range(0, len(attrs)):
+  for i in range(0, len(attrs)):
     writeIsSetFunction(attrs[i], output, element)
-#  for i in range(0, len(attrs)):
+  for i in range(0, len(attrs)):
     writeSetFunction(attrs[i], output, element)
-#  for i in range(0, len(attrs)):
+  for i in range(0, len(attrs)):
     writeUnsetFunction(attrs[i], output, element)
   for i in range(0, len(attrs)):
     if attrs[i]['type'] == 'lo_element':
