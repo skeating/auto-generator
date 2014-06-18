@@ -425,6 +425,7 @@ def writeListOfSubFunctions(attrib, output, element, pkgName):
   output.write('    {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(pkgName.upper(), pkgName.lower()))
   output.write(
     '    {0} = new {1}({2}ns);\n'.format(strFunctions.objAbbrev(attrib['element']), attrib['element'], pkgName.lower()))
+  output.write('    delete {}ns;\n'.format(pkgName.lower()))
   output.write('  }\n')
   output.write('  catch (...)\n')
   output.write('  {\n')

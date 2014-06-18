@@ -307,6 +307,7 @@ def writeConnectCPPCode(outFile, element, attribs):
   outFile.write(' */\n')
   outFile.write('void\n{0}::connectToChild()\n'.format(element))
   outFile.write('{\n')
+  outFile.write('  SBase::connectToChild();\n')
   for i in range (0, len(attribs)):
     if attribs[i]['type'] == 'lo_element':
       outFile.write('  m{0}s.connectToParent(this);\n'.format(strFunctions.cap(attribs[i]['name'])))
@@ -378,6 +379,7 @@ def writeCreateObjectCPPCode(outFile, element, attribs, pkg):
 		outFile.write('  {\n')
 		outFile.write('    object = &m{0}s;\n'.format(strFunctions.cap(attribs[i]['name'])))
 		outFile.write('  }\n')
+  outFile.write('  delete {}ns;\n'.format(pkg.lower()))
   outFile.write('\n  return object;\n')
   outFile.write('}\n\n\n')
   writeInternalEnd(outFile)

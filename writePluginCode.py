@@ -240,6 +240,8 @@ def writeFunctions(fileOut, object, nameOfClass, pkg):
   fileOut.write('{\n')
   fileOut.write('  {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(pkg.upper(), pkg.lower()))
   fileOut.write('  m{0} = new {0}({1}ns);\n\n'.format(object, pkg.lower()))
+  fileOut.write('  m{0}->setSBMLDocument(this->getSBMLDocument());\n\n'.format(object))
+  fileOut.write('  delete {}ns;\n\n'.format(pkg.lower()))
   fileOut.write('  return m{0};\n'.format(object))
   fileOut.write('}\n\n\n')
 
