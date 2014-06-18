@@ -123,7 +123,61 @@ def createValidatorFile(pkg, classes):
   input.close()
   output.close()
 
-def writeError(fileOut, element, pkg, offset):
+def writeErrors(header, table, spec, element, pkg, offset, classes):
+    writeErrorStart(header, element)
+    writeErrorTableStart(table, element, pkg)
+    writeGeneralErrors(header, table, spec, pkg, offset)
+
+    writeErrorEnd(header, element, pkg)
+    writeErrorTableEnd(table, element)
+
+def writeGeneralErrors(header, table, spec, pkg, offset):
+    errorNum = offset+10100
+    header.write('  {0}UnknownError                  = {1}\n\n'.format(pkg, errorNum));
+    table.write('  //{0}\n'.format(errorNum));
+    table.write('  {')
+    table.write('  {0}UnknownError,\n'.format(pkg));
+    table.write('    "Unknown error from {0}",\n'.format(pkg.lower()))
+    table.write('    LIBSBML_CAT_GENERAL_CONSISTENCY,\n')
+    table.write('    LIBSBML_SEV_ERROR,\n')
+    table.write('    "Unknown error from {0}",\n'.format(pkg.lower()))
+    table.write('    { " "\n')
+    table.write('    }\n')
+    table.write('  },\n')
+
+    errorNum = errorNum+1
+    header.write('  {0}NSUndeclared                  = {1}\n\n\n'.format(pkg, errorNum));
+    table.write('  //{0}\n'.format(errorNum));
+    table.write('  {')
+    table.write('  {0}NSUndeclared,\n'.format(pkg));
+    table.write('    \"The {0} ns is not correctly declared\",\n'.format(pkg.lower()))
+    table.write('    LIBSBML_CAT_GENERAL_CONSISTENCY,\n')
+    table.write('    LIBSBML_SEV_ERROR,\n')
+    table.write('   To conform to Version 1 of the {0}\n'.format(pkg))
+    table.write('    { " "\n')
+    table.write('    }\n')
+    table.write('  },\n\n')
+
+
+def writeErrorStart(fileOut, element):
+  fileOut.write('\n\n');
+  fileOut.write('#ifndef {0}_H__\n'.format(element))
+  fileOut.write('#define {0}_H__\n'.format(element))
+  fileOut.write('\n\n');
+  fileOut.write('\nLIBSBML_CPP_NAMESPACE_BEGIN\n')
+  fileOut.write('\nBEGIN_C_DECLS\n')
+  fileOut.write('\n\n');
+  fileOut.write('typedef enum\n')
+  fileOut.write('{\n')
+
+def writeErrorEnd(fileOut, element, pkg):
+  fileOut.write('}')
+  fileOut.write('  {0}SBMLErrorCode_t;\n'.format(pkg))
+  fileOut.write('\nEND_C_DECLS\n')
+  fileOut.write('\nLIBSBML_CPP_NAMESPACE_END\n\n')
+  fileOut.write('#endif  /*  {0}_h__  */\n\n'.format(element))
+
+def writeError(fileOut, element, pkg, offset, classes):
   fileOut.write('\n\n');
   fileOut.write('#ifndef {0}_H__\n'.format(element))
   fileOut.write('#define {0}_H__\n'.format(element))
@@ -140,7 +194,7 @@ def writeError(fileOut, element, pkg, offset):
   fileOut.write('\nLIBSBML_CPP_NAMESPACE_END\n\n')
   fileOut.write('#endif  /*  {0}_h__  */\n\n'.format(element))
 
-def writeErrorTable(fileOut, element, pkg, offset):
+def writeErrorTable(fileOut, element, pkg, offset, classes):
   fileOut.write('\n\n');
   fileOut.write('#ifndef {0}_H__\n'.format(element))
   fileOut.write('#define {0}_H__\n'.format(element))
@@ -166,19 +220,40 @@ def writeErrorTable(fileOut, element, pkg, offset):
   fileOut.write('#endif  /*  {0}_h__  */\n\n'.format(element))
 
 
-def createErrorFiles(pkg, offset):
+def writeErrorTableStart(fileOut, element, pkg):
+  fileOut.write('\n\n');
+  fileOut.write('#ifndef {0}_H__\n'.format(element))
+  fileOut.write('#define {0}_H__\n'.format(element))
+  fileOut.write('\n\n');
+  fileOut.write('#include <sbml/packages/{0}/validator/{1}SBMLError.h>\n\n'.format(pkg.lower(), pkg))
+  fileOut.write('LIBSBML_CPP_NAMESPACE_BEGIN\n\n')
+  generalFunctions.writeInternalStart(fileOut)
+  fileOut.write('static const packageErrorTableEntry {0}ErrorTable[] = \n'.format(pkg.lower()))
+  fileOut.write('{\n')
+
+def writeErrorTableEnd(fileOut, element):
+  fileOut.write('};\n\n')
+  fileOut.write('\nLIBSBML_CPP_NAMESPACE_END\n\n')
+  generalFunctions.writeInternalEnd(fileOut)
+  fileOut.write('#endif  /*  {0}_h__  */\n\n'.format(element))
+
+
+def createErrorFiles(pkg, offset, classes):
   nameOfElement = pkg + 'SBMLError'
   fileName = nameOfElement + '.h'
   output = open(fileName, 'w')
   fileHeaders.addFilename(output, fileName, nameOfElement)
   fileHeaders.addLicence(output)
-  writeError(output, nameOfElement, pkg, offset)
+#  writeError(output, nameOfElement, pkg, offset, classes)
   nameOfElement1 = pkg + 'SBMLErrorTable'
   fileName1 = nameOfElement1 + '.h'
   output1 = open(fileName1, 'w')
   fileHeaders.addFilename(output1, fileName1, nameOfElement1)
   fileHeaders.addLicence(output1)
-  writeErrorTable(output1, nameOfElement1, pkg, offset)
+  fileName2 = nameOfElement + '.txt'
+  output2 = open(fileName2, 'w')
+#  writeErrorTable(output1, nameOfElement1, pkg, offset, classes)
+  writeErrors(output, output1, output2, nameOfElement, pkg,offset, classes)
 
 def writeConsistencyHeader(fileOut, element, pkg, type):
   fileOut.write('\n\n');
@@ -263,12 +338,12 @@ def main(package):
   nameOfPackage = package['name']
   classes = package['sbmlElements']
   offset = package['offset']
-  createValidatorHeader(nameOfPackage)
-  createValidatorFile(nameOfPackage, classes)
-  createErrorFiles(nameOfPackage, offset)
-  createConsistencyFiles(nameOfPackage, "")
-  createConsistencyFiles(nameOfPackage, "Identifier")
-  os.chdir('constraints')
-  createConstraintsFile(nameOfPackage, "")
-  createConstraintsFile(nameOfPackage, "Identifier")
+#  createValidatorHeader(nameOfPackage)
+#  createValidatorFile(nameOfPackage, classes)
+  createErrorFiles(nameOfPackage, offset, classes)
+#  createConsistencyFiles(nameOfPackage, "")
+#  createConsistencyFiles(nameOfPackage, "Identifier")
+#  os.chdir('constraints')
+#  createConstraintsFile(nameOfPackage, "")
+#  createConstraintsFile(nameOfPackage, "Identifier")
   
