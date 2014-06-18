@@ -312,11 +312,26 @@ def createQual():
   package = dict({'name' : 'Qual', 'elements': elements, 'plugins': plug, 'number': 1100, 'sbmlElements': sbml_classes, 'offset': 3000000})
   return package
   
+def createRender():
+  sbml_classes = []
+  elements = []
+  model_elem = []
+  # for each sbml class create the sbml obj and the overall description object
+  #ColorDefinitiom
+  sbml_class = createNewElementDictObj.createRenderColorDefinition()
+  sbml = dict({'name': sbml_class['name'], 'typecode': sbml_class['typecode'], 'isListOf': True})
+  sbml_classes.append(sbml_class)
+  elements.append(sbml)
+#  model_elem.append(sbml)
+#  model_plug = dict({'sbase': 'Model', 'extension': model_elem}) 
+  plug = []
+  #create teh overall package description
+  package = dict({'name' : 'Render', 'elements': elements, 'plugins': plug, 'number': 1500, 'sbmlElements': sbml_classes, 'offset': 9000000})
+  return package
+  
 def createPackage(name):
   if (name == 'qual'):
 	package = createQual()
-#  elif (name == 'arrays'):
-#    package = createArrays()
   elif (name == 'distrib'):
     package = createDistrib()
   elif (name == 'groups'):
@@ -329,6 +344,8 @@ def createPackage(name):
     package = createMulti()
   elif (name == "arrays"):
     package = createArrays()
+  elif (name == "render"):
+    package = createRender()
   else:
     package = None
   return package

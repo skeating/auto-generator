@@ -27,14 +27,14 @@ def createArraysDim() :
   id = dict({'type': 'SId', 'reqd' : False, 'name':'id'})
   name = dict({'type': 'string', 'reqd' : False, 'name':'name'})
   size = dict({'type': 'SIdRef', 'reqd' : True, 'name':'size'})
-  dim = dict({'type': 'uint', 'reqd' : True, 'name':'dim'})
+  dim = dict({'type': 'uint', 'reqd' : True, 'name':'arrayDimension'})
   attributes = [id, name, size, dim ]
   element = dict({'name': 'Dimension', 'package': 'Arrays', 'typecode': 'SBML_ARRAYS_DIMENSION', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False}) 
   return element
 
 def createArraysIndex() :
   name = dict({'type': 'string', 'reqd' : True, 'name':'referencedAttribute'})
-  dim = dict({'type': 'uint', 'reqd' : True, 'name':'dim'})
+  dim = dict({'type': 'uint', 'reqd' : True, 'name':'arrayDimension'})
   math = dict({'type': 'element', 'reqd' : True, 'name':'math', 'element': 'Math'})
   attributes = [name, dim, math ]
   element = dict({'name': 'Index', 'package': 'Arrays', 'typecode': 'SBML_ARRAYS_INDEX', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':True}) 
@@ -510,3 +510,13 @@ def createQualDefaultTerm() :
   return element
 #end of qual
 
+#render
+
+def createRenderColorDefinition():
+  id = dict({'type': 'SId', 'reqd' : False, 'name':'id'})
+  value = dict({'type': 'string', 'reqd' : False, 'name':'value'})
+  attributes = [id, value]
+  element = dict({'name': 'ColorDefinition', 'package': 'Render', 'typecode': 'SBML_RENDER_COLORDEFINITION', 'hasListOf': True, 'attribs':   attributes, 'hasChildren':False, 'hasMath':False}) 
+  return element
+   
+#end of render
