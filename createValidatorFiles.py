@@ -338,12 +338,12 @@ def main(package):
   nameOfPackage = package['name']
   classes = package['sbmlElements']
   offset = package['offset']
-#  createValidatorHeader(nameOfPackage)
-#  createValidatorFile(nameOfPackage, classes)
+  createValidatorHeader(nameOfPackage)
+  createValidatorFile(nameOfPackage, classes)
   createErrorFiles(nameOfPackage, offset, classes)
-#  createConsistencyFiles(nameOfPackage, "")
-#  createConsistencyFiles(nameOfPackage, "Identifier")
-#  os.chdir('constraints')
-#  createConstraintsFile(nameOfPackage, "")
-#  createConstraintsFile(nameOfPackage, "Identifier")
+  createConsistencyFiles(nameOfPackage, "")
+  createConsistencyFiles(nameOfPackage, "Identifier")
+  os.chdir('constraints')
+  createConstraintsFile(nameOfPackage, "")
+  createConstraintsFile(nameOfPackage, "Identifier")
   
