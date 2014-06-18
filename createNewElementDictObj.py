@@ -22,7 +22,7 @@ def createNewDictObj() :
   element = dict({'name': 'Input', 'package': 'Qual', 'typecode': 'SBML_QUAL_INPUT', 'hasListOf': True, 'attribs':attributes}) 
   return element
 
-  #arrays - inaccurate at present
+  #arrays
 def createArraysDim() :
   id = dict({'type': 'SId', 'reqd' : False, 'name':'id'})
   name = dict({'type': 'string', 'reqd' : False, 'name':'name'})
