@@ -27,7 +27,10 @@ def writeOtherFunctions(fileOut, nameOfClass, members):
   for i in range (0, len(members)):
     mem = members[i]
     if mem['isListOf'] == True:
-      fileOut.write('  m{0}s.setSBMLDocument(d);\n'.format(mem['name']))
+        fileOut.write('  if (getNum{}s() > 0)\n'.format(mem['name']))
+        fileOut.write('  {\n')
+        fileOut.write('    m{0}s.setSBMLDocument(d);\n'.format(mem['name']))
+        fileOut.write('  }\n')
     else:
       fileOut.write('  if (isSet{0}() == true)\n'.format(mem['name']))
       fileOut.write('  {\n')
@@ -44,7 +47,10 @@ def writeOtherFunctions(fileOut, nameOfClass, members):
   for i in range (0, len(members)):
     mem = members[i]
     if mem['isListOf'] == True:
-      fileOut.write('  m{0}s.connectToParent(sbase);\n'.format(mem['name']))
+        fileOut.write('  if (getNum{}s() > 0)\n'.format(mem['name']))
+        fileOut.write('  {\n')
+        fileOut.write('    m{0}s.connectToParent(sbase);\n'.format(mem['name']))
+        fileOut.write('  }\n')
     else:
       fileOut.write('  if (isSet{0}() == true)\n'.format(mem['name']))
       fileOut.write('  {\n')
@@ -61,7 +67,10 @@ def writeOtherFunctions(fileOut, nameOfClass, members):
   for i in range (0, len(members)):
     mem = members[i]
     if mem['isListOf'] == True:
-      fileOut.write('  m{0}s.enablePackageInternal(pkgURI, pkgPrefix, flag);\n'.format(mem['name']))
+        fileOut.write('  if (getNum{}s() > 0)\n'.format(mem['name']))
+        fileOut.write('  {\n')
+        fileOut.write('    m{0}s.enablePackageInternal(pkgURI, pkgPrefix, flag);\n'.format(mem['name']))
+        fileOut.write('  }\n')
     else:
       fileOut.write('  if (isSet{0}() == true)\n'.format(mem['name']))
       fileOut.write('  {\n')
@@ -327,6 +336,7 @@ def writeLOFunctions(fileOut, object, nameOfClass, pkg):
   fileOut.write('  {\n')
   fileOut.write('    {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(pkg.upper(), pkg.lower()))
   fileOut.write('    {0} = new {1}({2}ns);\n'.format(ob, object, pkg.lower()))
+  fileOut.write('    delete {}ns;\n'.format(pkg.lower()))
   fileOut.write('  }\n')
   fileOut.write('  catch(...)\n')
   fileOut.write('  {\n')
@@ -410,6 +420,7 @@ def writeRequiredMethods(fileOut, nameOfClass, members, pkg):
     else:
       writeCreateObject(fileOut, mem, ifCount, pkg)
     ifCount = ifCount + 1
+  fileOut.write('\n    delete {}ns;\n'.format(pkg.lower()))
   fileOut.write('  } \n\n')
   fileOut.write('  return object; \n')
   fileOut.write('}\n\n\n')
