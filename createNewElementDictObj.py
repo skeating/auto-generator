@@ -510,7 +510,7 @@ def createQualDefaultTerm() :
   return element
 #end of qual
 
-#render
+#render - not complete !!
 
 def createRenderColorDefinition():
   id = dict({'type': 'SId', 'reqd' : False, 'name':'id'})
@@ -518,5 +518,18 @@ def createRenderColorDefinition():
   attributes = [id, value]
   element = dict({'name': 'ColorDefinition', 'package': 'Render', 'typecode': 'SBML_RENDER_COLORDEFINITION', 'hasListOf': True, 'attribs':   attributes, 'hasChildren':False, 'hasMath':False}) 
   return element
-   
+
 #end of render
+
+#req
+
+def createReqChangedMath():
+  id = dict({'type': 'SId', 'reqd' : False, 'name':'id'})
+  effect = dict({'type': 'string', 'reqd' : True, 'name':'viableWithoutChange'})
+  name = dict({'type': 'string', 'reqd' : False, 'name':'name'})
+  changed = dict({'type': 'int', 'reqd' : True, 'name':'changedBy'})
+  attributes = [id, name, changed, effect ]
+  element = dict({'name': 'ChangedMath', 'package': 'Req', 'typecode': 'SBML_REQ_CHANGED_MATH', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False})
+  return element
+
+#end of req

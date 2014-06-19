@@ -328,7 +328,25 @@ def createRender():
   #create teh overall package description
   package = dict({'name' : 'Render', 'elements': elements, 'plugins': plug, 'number': 1500, 'sbmlElements': sbml_classes, 'offset': 9000000})
   return package
-  
+
+#req - in line with v0.5
+def createReq():
+  # for each sbml class create the sbml obj and the overall description object
+  #changedMath
+  sbml_draw = createNewElementDictObj.createReqChangedMath()
+  draw = dict({'name': sbml_draw['name'], 'typecode': sbml_draw['typecode'], 'isListOf': True})
+  # create a list of the sbml classes
+  sbml_classes = [sbml_draw]
+  # create a list of the types
+  elem = [draw]
+  # define information about plugins
+  sb_elem = [draw]
+  sb_plug = dict({'sbase': 'SBase', 'extension': sb_elem})
+  plug = [sb_plug]
+  #create the overall package description
+  package = dict({'name' : 'Req', 'elements': elem, 'plugins': plug, 'number': 1600, 'sbmlElements': sbml_classes, 'offset': 1100000})
+  return package
+
 def createPackage(name):
   if (name == 'qual'):
 	package = createQual()
@@ -346,6 +364,8 @@ def createPackage(name):
     package = createArrays()
   elif (name == "render"):
     package = createRender()
+  elif (name == "req"):
+    package = createReq()
   else:
     package = None
   return package
