@@ -33,10 +33,10 @@ def createValidatorHeader(pkg):
   input = open(inputFile, 'r')
   for line in input:
     if line[0:13] != 'TEMPLATE_STOP':
-	  line = replaceTags(line, pkg)
-	  header.write(line)
+      line = replaceTags(line, pkg)
+      header.write(line)
     else:
-	  break
+      break
   header.write('#endif  /* __cplusplus*/\n')  
   header.write('#endif  /* {0}Validator__H */\n'.format(pkg))
   input.close()
@@ -59,19 +59,19 @@ def createValidatorFile(pkg, classes):
   input = open(inputFile, 'r')
   for line in input:
     if line[0:13] != 'TEMPLATE_STOP':
-	  line = replaceTags(line, pkg)
-	  output.write(line)
+      line = replaceTags(line, pkg)
+      output.write(line)
     else:
-	  break
+      break
   for i in range (0, len(classes)):
     if classes[i]['typecode'] != 'HACK':
       output.write('  ConstraintSet<{0}>      m{0};\n'.format(classes[i]['name']))
   for line in input:
     if line[0:13] != 'TEMPLATE_STOP':
-	  line = replaceTags(line, pkg)
-	  output.write(line)
+      line = replaceTags(line, pkg)
+      output.write(line)
     else:
-	  break
+      break
   for i in range (0, len(classes)):
     if classes[i]['typecode'] != 'HACK':
       output.write('  if (dynamic_cast< TConstraint<{0}>* >(c) != NULL)\n'.format(classes[i]['name']))
@@ -80,10 +80,10 @@ def createValidatorFile(pkg, classes):
       output.write('    return;\n  }\n\n')
   for line in input:
     if line[0:13] != 'TEMPLATE_STOP':
-	  line = replaceTags(line, pkg)
-	  output.write(line)
+      line = replaceTags(line, pkg)
+      output.write(line)
     else:
-	  break
+      break
   for i in range (0, len(classes)):
     if classes[i]['typecode'] != 'HACK':
       output.write('  bool visit (const {0} &x)\n'.format(classes[i]['name']))
@@ -116,10 +116,10 @@ def createValidatorFile(pkg, classes):
       output.write('      }\n')
   for line in input:
     if line[0:13] != 'TEMPLATE_STOP':
-	  line = replaceTags(line, pkg)
-	  output.write(line)
+      line = replaceTags(line, pkg)
+      output.write(line)
     else:
-	  break
+      break
   input.close()
   output.close()
 
@@ -268,9 +268,9 @@ def writeConsistencyHeader(fileOut, element, pkg, type):
   fileOut.write('public:\n\n')
   fileOut.write('  {0} () :\n'.format(element))
   if type == "":
-	fileOut.write('    {0}Validator(LIBSBML_CAT_GENERAL_CONSISTENCY)'.format(pkg))
+    fileOut.write('    {0}Validator(LIBSBML_CAT_GENERAL_CONSISTENCY)'.format(pkg))
   elif type == "Identifier":
-	fileOut.write('    {0}Validator(LIBSBML_CAT_IDENTIFIER_CONSISTENCY)'.format(pkg))
+    fileOut.write('    {0}Validator(LIBSBML_CAT_IDENTIFIER_CONSISTENCY)'.format(pkg))
   fileOut.write(' { }\n\n')
   fileOut.write('  virtual ~{0} () '.format(element))
   fileOut.write('{ }\n\n')

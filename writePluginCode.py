@@ -116,7 +116,7 @@ def writeConstructors(fileOut, nameOfClass, pkg, members):
     if mem['isListOf'] == True:
       fileOut.write('  , m{0}s ({1}ns)\n'.format(mem['name'], pkg.lower()))
     else:
-	  fileOut.write('  , m{0}  ( NULL )\n'.format(mem['name']))
+      fileOut.write('  , m{0}  ( NULL )\n'.format(mem['name']))
   fileOut.write('{\n')
   fileOut.write('}\n\n\n')
   fileOut.write('/*\n' )
@@ -129,7 +129,7 @@ def writeConstructors(fileOut, nameOfClass, pkg, members):
     if mem['isListOf'] == True:
       fileOut.write('  , m{0}s ( orig.m{0}s)\n'.format(mem['name']))
     else:
-	  fileOut.write('  , m{0} ( orig.m{0} )\n'.format(mem['name']))
+      fileOut.write('  , m{0} ( orig.m{0} )\n'.format(mem['name']))
   fileOut.write('{\n')
   fileOut.write('}\n\n\n')
   fileOut.write('/*\n' )
@@ -146,7 +146,7 @@ def writeConstructors(fileOut, nameOfClass, pkg, members):
     if mem['isListOf'] == True:
       fileOut.write('    m{0}s = rhs.m{0}s;\n'.format(mem['name']))
     else:
-	  fileOut.write('    m{0} = rhs.m{0};\n'.format(mem['name']))
+      fileOut.write('    m{0} = rhs.m{0};\n'.format(mem['name']))
   fileOut.write('  }\n\n')
   fileOut.write('  return *this;\n')
   fileOut.write('}\n\n\n')

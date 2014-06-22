@@ -349,7 +349,7 @@ def createReq():
 
 def createPackage(name):
   if (name == 'qual'):
-	package = createQual()
+    package = createQual()
   elif (name == 'distrib'):
     package = createDistrib()
   elif (name == 'groups'):
