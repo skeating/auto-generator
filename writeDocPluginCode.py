@@ -28,8 +28,7 @@ def createCode(package):
   input = open(inputFile, 'r')
   for line in input:
     if line[0:13] != 'TEMPLATE_STOP':
-	  line = replaceTags(line, nameOfPackage)
-	  code.write(line)
+      line = replaceTags(line, nameOfPackage)
+      code.write(line)
     else:
-	  break
-  
+      break

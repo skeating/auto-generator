@@ -38,7 +38,7 @@ def writeClassEnd(fileOut, members):
     if mem['isListOf'] == True:
       fileOut.write('  ListOf{0}s m{0}s;\n'.format(mem['name']))
     else:
-	  fileOut.write('  {0}* m{0};\n'.format(mem['name']))
+      fileOut.write('  {0}* m{0};\n'.format(mem['name']))
   fileOut.write('\n')
   generalFunctions.writeInternalEnd(fileOut)
   fileOut.write('};\n\n\n')

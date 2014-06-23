@@ -43,9 +43,9 @@ else:
   os.chdir(sbmlDir)
   elements = packageDefn['sbmlElements']
   for i in range (0, len(elements)):
-	element = elements[i]
-	writeCode.createCode(element)
-	writeHeader.createHeader(element)
+    element = elements[i]
+    writeCode.createCode(element)
+    writeHeader.createHeader(element)
   os.chdir(thisDir)
   os.chdir(cmnDir)
   createCommonFiles.main(packageDefn)
@@ -62,4 +62,4 @@ else:
   createBindingsFiles.main(packageDefn)
   os.chdir(thisDir)
   createArchiveFile.main(name)
-	
+
