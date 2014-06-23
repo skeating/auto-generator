@@ -476,7 +476,7 @@ def createSpatial():
   plug = [model_plug, comp_plug, species_plug, reaction_plug ]
   
   #create the overall package description
-  package = dict({'name' : 'Spatial', 'elements': elem, 'plugins': plug, 'number': 300, 'sbmlElements': sbml_classes, 'offset': 6000000})
+  package = dict({'name' : 'Spatial', 'elements': elem, 'plugins': plug, 'number': 300, 'sbmlElements': sbml_classes, 'offset': 1200000})
   return package
 
 def createPackage(name):
