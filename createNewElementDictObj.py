@@ -525,9 +525,9 @@ def createRenderColorDefinition():
 
 def createReqChangedMath():
   id = dict({'type': 'SId', 'reqd' : False, 'name':'id'})
-  effect = dict({'type': 'string', 'reqd' : True, 'name':'viableWithoutChange'})
+  effect = dict({'type': 'bool', 'reqd' : True, 'name':'viableWithoutChange'})
   name = dict({'type': 'string', 'reqd' : False, 'name':'name'})
-  changed = dict({'type': 'int', 'reqd' : True, 'name':'changedBy'})
+  changed = dict({'type': 'string', 'reqd' : True, 'name':'changedBy'})
   attributes = [id, name, changed, effect ]
   element = dict({'name': 'ChangedMath', 'package': 'Req', 'typecode': 'SBML_REQ_CHANGED_MATH', 'hasListOf': True, 'attribs':attributes, 'hasChildren':False, 'hasMath':False})
   return element
