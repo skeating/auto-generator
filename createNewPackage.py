@@ -347,6 +347,138 @@ def createReq():
   package = dict({'name' : 'Req', 'elements': elem, 'plugins': plug, 'number': 1600, 'sbmlElements': sbml_classes, 'offset': 1100000})
   return package
 
+def createSpatial():
+  # for each sbml class create the sbml obj and the overall description object
+  #CompartmentMapping
+  sbml_cm = createNewElementDictObj.createSpatialCompartmentMapping()
+  cm = dict({'name': sbml_cm['name'], 'typecode': sbml_cm['typecode'], 'isListOf': False})
+  #CoordinateIndex
+  sbml_ci = createNewElementDictObj.createSpatialCoordinateIndex()
+  ci = dict({'name': sbml_ci['name'], 'typecode': sbml_ci['typecode'], 'isListOf': False})
+  #SpatialSymbolReference
+  sbml_ssr = createNewElementDictObj.createSpatialSymbolReference()
+  ssr = dict({'name': sbml_ssr['name'], 'typecode': sbml_ssr['typecode'], 'isListOf': False})
+  #DiffusionCoefficient
+  sbml_dc = createNewElementDictObj.createSpatialDiffusionCoefficient()
+  dc = dict({'name': sbml_dc['name'], 'typecode': sbml_dc['typecode'], 'isListOf': False})
+  #AdvectionCoefficient
+  sbml_ac = createNewElementDictObj.createSpatialAdvectionCoefficient()
+  ac = dict({'name': sbml_ac['name'], 'typecode': sbml_ac['typecode'], 'isListOf': False})
+  #BoundaryCondition
+  sbml_bc = createNewElementDictObj.createSpatialBoundaryCondition()
+  bc = dict({'name': sbml_bc['name'], 'typecode': sbml_bc['typecode'], 'isListOf': False})
+  #Geometry
+  sbml_g = createNewElementDictObj.createSpatialGeometry()
+  g = dict({'name': sbml_g['name'], 'typecode': sbml_g['typecode'], 'isListOf': False})
+  #CoordinateComponent
+  sbml_cc = createNewElementDictObj.createSpatialCoordinateComponent()
+  cc = dict({'name': sbml_cc['name'], 'typecode': sbml_cc['typecode'], 'isListOf': True})
+  #Boundary
+  sbml_b = createNewElementDictObj.createSpatialBoundary()
+  b = dict({'name': sbml_b['name'], 'typecode': sbml_b['typecode'], 'isListOf': False})
+  #DomainType
+  sbml_dt = createNewElementDictObj.createSpatialDomainType()
+  dt = dict({'name': sbml_dt['name'], 'typecode': sbml_dt['typecode'], 'isListOf': True})
+  #Domain
+  sbml_d = createNewElementDictObj.createSpatialDomain()
+  d = dict({'name': sbml_d['name'], 'typecode': sbml_d['typecode'], 'isListOf': True})
+  #InteriorPoint
+  sbml_ip = createNewElementDictObj.createSpatialInteriorPoint()
+  ip = dict({'name': sbml_ip['name'], 'typecode': sbml_ip['typecode'], 'isListOf': True})
+  #AdjacentDomain
+  sbml_ad = createNewElementDictObj.createSpatialAdjacentDomain()
+  ad = dict({'name': sbml_ad['name'], 'typecode': sbml_ad['typecode'], 'isListOf': True})
+  #GeometryDefinition
+  sbml_gd = createNewElementDictObj.createSpatialGeometryDefinition()
+  gd = dict({'name': sbml_gd['name'], 'typecode': sbml_gd['typecode'], 'isListOf': True})
+  #AnalyticGeometry
+  sbml_ag = createNewElementDictObj.createSpatialAnalyticGeometry()
+  ag = dict({'name': sbml_ag['name'], 'typecode': sbml_ag['typecode'], 'isListOf': False})
+  #AnalyticVolume
+  sbml_av = createNewElementDictObj.createSpatialAnalyticVolume()
+  av = dict({'name': sbml_av['name'], 'typecode': sbml_av['typecode'], 'isListOf': True})
+  #SampledFieldGeometry
+  sbml_sfg = createNewElementDictObj.createSpatialSampledFieldGeometry()
+  sfg = dict({'name': sbml_sfg['name'], 'typecode': sbml_sfg['typecode'], 'isListOf': False})
+  #SampledVolume
+  sbml_sv = createNewElementDictObj.createSpatialSampledVolume()
+  sv = dict({'name': sbml_sv['name'], 'typecode': sbml_sv['typecode'], 'isListOf': True})
+  #SampledField
+  sbml_sf = createNewElementDictObj.createSpatialSampledField()
+  sf = dict({'name': sbml_sf['name'], 'typecode': sbml_sf['typecode'], 'isListOf': False})
+  #ImageData
+  sbml_id = createNewElementDictObj.createSpatialImageData()
+  id = dict({'name': sbml_id['name'], 'typecode': sbml_id['typecode'], 'isListOf': False})
+  #CSGeometry
+  sbml_csg = createNewElementDictObj.createSpatialCSGeometry()
+  csg = dict({'name': sbml_csg['name'], 'typecode': sbml_csg['typecode'], 'isListOf': False})
+  #CSGObject
+  sbml_csgo = createNewElementDictObj.createSpatialCSGObject()
+  csgo = dict({'name': sbml_csgo['name'], 'typecode': sbml_csgo['typecode'], 'isListOf': True})
+  #CSGNode
+  sbml_csgn = createNewElementDictObj.createSpatialCSGNode()
+  csgn = dict({'name': sbml_csgn['name'], 'typecode': sbml_csgn['typecode'], 'isListOf': True})
+  #CSGPrimitive
+  sbml_csgp = createNewElementDictObj.createSpatialCSGPrimitive()
+  csgp = dict({'name': sbml_csgp['name'], 'typecode': sbml_csgp['typecode'], 'isListOf': False})
+  #CSGPseudoPrimitive
+  sbml_csgpp = createNewElementDictObj.createSpatialCSGPseudoPrimitive()
+  csgpp = dict({'name': sbml_csgpp['name'], 'typecode': sbml_csgpp['typecode'], 'isListOf': False})
+  #CSGSetOperator
+  sbml_csgso = createNewElementDictObj.createSpatialCSGSetOperator()
+  csgso = dict({'name': sbml_csgso ['name'], 'typecode': sbml_csgso ['typecode'], 'isListOf': False})
+  #CSGTransformation
+  sbml_csgt = createNewElementDictObj.createSpatialCSGTransformation()
+  csgt = dict({'name': sbml_csgt['name'], 'typecode': sbml_csgt['typecode'], 'isListOf': False})
+  #CSGTranslation
+  sbml_csgtr = createNewElementDictObj.createSpatialCSGTranslation()
+  csgtr = dict({'name': sbml_csgtr['name'], 'typecode': sbml_csgtr['typecode'], 'isListOf': False})
+  #CSGRotation
+  sbml_csgr = createNewElementDictObj.createSpatialCSGRotation()
+  csgr = dict({'name': sbml_csgr['name'], 'typecode': sbml_csgr['typecode'], 'isListOf': False})
+  #CSGScale
+  sbml_csgs = createNewElementDictObj.createSpatialCSGScale()
+  csgs = dict({'name': sbml_csgs['name'], 'typecode': sbml_csgs['typecode'], 'isListOf': False})
+  #CSGHomogeneousTransformation
+  sbml_csgh = createNewElementDictObj.createSpatialCSGHomogeneousTransformation()
+  csgh = dict({'name': sbml_csgh['name'], 'typecode': sbml_csgh['typecode'], 'isListOf': False})
+  #TransformationComponent
+  sbml_tc = createNewElementDictObj.createSpatialTransformationComponent()
+  tc = dict({'name': sbml_tc['name'], 'typecode': sbml_tc['typecode'], 'isListOf': False})
+  #ParametricGeometry
+  sbml_pg = createNewElementDictObj.createSpatialParametricGeometry()
+  pg = dict({'name': sbml_pg['name'], 'typecode': sbml_pg['typecode'], 'isListOf': False})
+  #SpatialPoint
+  sbml_sp = createNewElementDictObj.createSpatialPoint()
+  sp = dict({'name': sbml_sp['name'], 'typecode': sbml_sp['typecode'], 'isListOf': True})
+  #ParametricObject
+  sbml_po = createNewElementDictObj.createSpatialParametricObject()
+  po = dict({'name': sbml_po['name'], 'typecode': sbml_po['typecode'], 'isListOf': True})
+  #PolygonObject
+  sbml_pob = createNewElementDictObj.createSpatialPolygonObject()
+  pob = dict({'name': sbml_pob['name'], 'typecode': sbml_pob['typecode'], 'isListOf': False})
+
+  # create a list of the sbml classes
+  sbml_classes = [sbml_cm, sbml_ci, sbml_ssr, sbml_dc, sbml_ac, sbml_bc, sbml_g, sbml_cc, sbml_b, sbml_dt, sbml_d, sbml_ip, sbml_ad, sbml_gd, sbml_ag, sbml_av, sbml_sfg, sbml_sv, sbml_sf, sbml_id, sbml_csg, sbml_csgo, sbml_csgn, sbml_csgp, sbml_csgpp,sbml_csgso,sbml_csgt,sbml_csgr, sbml_csgs, sbml_csgh, sbml_tc,sbml_pg, sbml_sp, sbml_po, sbml_pob]
+  # create a list of the types
+  elem = [cm, ci, ssr, dc, ac, bc, g, cc, b, dt, d, ip, ad, gd, ag, av, sfg, sv, sf, id, csg, csgo, csgn, csgp, csgpp,csgso,csgt,csgr, csgs, csgh, tc,pg, sp, po, pob]
+  
+  # define information about plugins
+  model_elem = [g]
+  model_plug = dict({'sbase': 'Model', 'extension': model_elem}) 
+  comp_elem = [cm]
+  comp_plug = dict({'sbase': 'Compartment', 'extension': comp_elem}) 
+  param_elem = [ssr, dc, ac, bc]
+  param_plug = dict({'sbase': 'Parameter', 'extension': param_elem}) 
+  species_elem = [dict({'name': 'isSpatial', 'typecode': 'boolean', 'isListOf': False})]
+  species_plug = dict({'sbase': 'Species', 'extension': species_elem}) 
+  reaction_plug = dict({'sbase': 'Reaction', 'extension': []}) 
+  plug = [model_plug, comp_plug, species_plug, reaction_plug ]
+  
+  #create the overall package description
+  package = dict({'name' : 'Spatial', 'elements': elem, 'plugins': plug, 'number': 300, 'sbmlElements': sbml_classes, 'offset': 1200000})
+  return package
+
 def createPackage(name):
   if (name == 'qual'):
     package = createQual()
@@ -366,6 +498,8 @@ def createPackage(name):
     package = createRender()
   elif (name == "req"):
     package = createReq()
+  elif (name == "spatial"):
+    package = createSpatial()
   else:
     package = None
   return package
