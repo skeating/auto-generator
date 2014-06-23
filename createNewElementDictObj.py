@@ -533,3 +533,584 @@ def createReqChangedMath():
   return element
 
 #end of req
+
+
+#spatial
+
+def createSpatialCompartmentMapping() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  domainType = dict({'type': 'SIdRef', 'reqd' : True, 'name':'domainType'})
+  unitSize = dict({'type': 'double', 'reqd' : True, 'name':'unitSize'})
+  attributes = [id, domainType, unitSize]
+  element = dict(
+                 {'name': 'CompartmentMapping', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_COMPARTMENTMAPPING', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialSymbolReference() :
+  spatialRef = dict({'type': 'SIdRef', 'reqd' : True, 'name':'spatialRef'})
+  attributes = [spatialRef]
+  element = dict(
+                 {'name': 'SpatialSymbolReference', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_SPATIALSYMBOLREFERENCE', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialCoordinateIndex() :
+  coordinate = dict({'type': 'int', 'reqd' : True, 'name':'coordinate'})
+  attributes = [coordinate]
+  element = dict(
+                 {'name': 'CoordinateIndex', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_COORDINATEINDEX', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialDiffusionCoefficient() :
+  variable = dict({'type': 'SIdRef', 'reqd' : True, 'name':'variable'})
+  type = dict({'type': 'int', 'reqd' : True, 'name':'type'})
+  child1 = dict({'type': 'lo_element', 'reqd': False, 'name': 'coordinateIndex', 'element': 'CoordinateIndex'})
+  attributes = [variable, type, child1 ]
+  element = dict(
+                 {'name': 'DiffusionCoefficient', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_DIFFUSIONCOEFFICIENT', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialAdvectionCoefficient() :
+  variable = dict({'type': 'SIdRef', 'reqd' : True, 'name':'variable'})
+  coordinateIndex = dict({'type': 'int', 'reqd' : True, 'name':'coordinateIndex'})
+  attributes = [variable, coordinateIndex]
+  element = dict(
+                 {'name': 'AdvectionCoefficient', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_ADVECTIONCOEFFICIENT', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialBoundaryCondition() :
+  variable = dict({'type': 'SIdRef', 'reqd' : True, 'name':'variable'})
+  type = dict({'type': 'int', 'reqd' : True, 'name':'type'})
+  coordinateBoundary = dict({'type': 'SIdRef', 'reqd' : False, 'name':'coordinateBoundary'})
+  boundaryDomainType = dict({'type': 'SIdRef', 'reqd' : False, 'name':'boundaryDomainType'})
+  attributes = [variable, type, coordinateBoundary, boundaryDomainType]
+  element = dict(
+                 {'name': 'BoundaryCondition', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_BOUNDARYCONDITION', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialGeometry() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  coordinateSystem = dict({'type': 'int', 'reqd' : True, 'name':'coordinateSystem'})
+  child1 = dict({'type': 'lo_element', 'reqd': False, 'name': 'coordinateComponent', 'element': 'CoordinateComponent'})
+  child2 = dict({'type': 'lo_element', 'reqd': False, 'name': 'domainType', 'element': 'DomainType'})
+  child3 = dict({'type': 'lo_element', 'reqd': False, 'name': 'domain', 'element': 'Domain'})
+  child4 = dict({'type': 'lo_element', 'reqd': False, 'name': 'adjacentDomain', 'element': 'AdjacentDomain'})
+  child5 = dict({'type': 'lo_element', 'reqd': False, 'name': 'geometryDefinition', 'element': 'GeometryDefinition'})
+  attributes = [id, coordinateSystem, child1, child2, child3, child4, child5]
+  element = dict(
+                 {'name': 'Geometry', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_GEOMETRY', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':True, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialCoordinateComponent() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  componentType = dict({'type': 'int', 'reqd' : True, 'name':'componentType'})
+  unit = dict({'type': 'SIdRef', 'reqd' : True, 'name':'unit'})
+  child1 = dict({'type': 'Boundary', 'reqd': True, 'name': 'boundaryMin'})
+  child2 = dict({'type': 'Boundary', 'reqd': True, 'name': 'boundaryMax'})
+  attributes = [id, componentType, unit, child1, child2]
+  element = dict(
+                 {'name': 'CoordinateComponent', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_COORDINATECOMPONENT', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':True, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialBoundary() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  value = dict({'type': 'double', 'reqd' : True, 'name':'value'})
+  attributes = [id, value]
+  element = dict(
+                 {'name': 'Boundary', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_BOUNDARY', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialDomainType() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  spatialDimension = dict({'type': 'int', 'reqd' : True, 'name':'spatialDimension'})
+  attributes = [id, spatialDimension]
+  element = dict(
+                 {'name': 'DomainType', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_DOMAINTYPE', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialDomain() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  domainType = dict({'type': 'SIdRef', 'reqd' : True, 'name':'domainType'})
+  child1 = dict({'type': 'lo_element', 'reqd': False, 'name': 'interiorPoint', 'element': 'InteriorPoint'})
+  attributes = [id, domainType, child1]
+  element = dict(
+                 {'name': 'Domain', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_DOMAIN', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialInteriorPoint() :
+  #id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  coord1 = dict({'type': 'double', 'reqd' : True, 'name':'coord1'})
+  coord2 = dict({'type': 'double', 'reqd' : False, 'name':'coord2'})
+  coord3 = dict({'type': 'double', 'reqd' : False, 'name':'coord3'})
+  attributes = [coord1, coord2, coord3]
+  element = dict(
+                 {'name': 'InteriorPoint', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_INTERIORPOINT', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialAdjacentDomain() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  domain1 = dict({'type': 'SIdRef', 'reqd' : True, 'name':'domain1'})
+  domain2 = dict({'type': 'SIdRef', 'reqd' : True, 'name':'domain2'})
+  attributes = [id, domain1, domain2]
+  element = dict(
+                 {'name': 'AdjacentDomain', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_ADJACENTDOMAINS', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialGeometryDefinition() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  attributes = [id]
+  element = dict(
+                 {'name': 'GeometryDefinition', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_GEOMETRYDEFINITION', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialAnalyticGeometry() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  child1 = dict({'type': 'lo_element', 'reqd': False, 'name': 'AnalyticVolume', 'element': 'AnalyticVolume'})
+  attributes = [id, child1]
+  element = dict(
+                 {'name': 'AnalyticGeometry', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_ANALYTICGEOMETRY', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialAnalyticVolume() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  functionType = dict({'type': 'int', 'reqd' : True, 'name':'functionType'})
+  ordinal = dict({'type': 'int', 'reqd' : False, 'name':'ordinal'})
+  domainType = dict({'type': 'SIdRef', 'reqd' : True, 'name':'domainType'})
+  attributes = [id, functionType, ordinal, domainType]
+  element = dict(
+                 {'name': 'AnalyticVolume', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_ANALYTICVOLUME', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':True
+                  }) 
+  return element
+
+def createSpatialSampledFieldGeometry() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  child1 = dict({'type': 'lo_element', 'reqd': False, 'name': 'sampledVolume', 'element': 'SampledVolume'})
+  child2 = dict({'type': 'SampledField', 'reqd': False, 'name': 'sampledField', 'element': 'SampledField'})
+  attributes = [id, child1, child2]
+  element = dict(
+                 {'name': 'SampledFieldGeometry', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_SAMPLEDFIELDGEOMETRY', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':True, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialSampledVolume() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  domainType = dict({'type': 'SIdRef', 'reqd' : True, 'name':'domainType'})
+  sampledValue = dict({'type': 'double', 'reqd' : True, 'name':'sampledValue'})
+  minValue = dict({'type': 'double', 'reqd' : False, 'name':'minValue'})
+  maxValue = dict({'type': 'double', 'reqd' : False, 'name':'maxValue'})
+  attributes = [id, domainType, sampledValue, minValue, maxValue]
+  element = dict(
+                 {'name': 'SampledVolume', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_SAMPLEDVOLUME', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialSampledField() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  dataType = dict({'type': 'string', 'reqd' : False, 'name':'dataType'})
+  numSamples1 = dict({'type': 'int', 'reqd' : True, 'name':'numSamples1'})
+  numSamples2 = dict({'type': 'int', 'reqd' : False, 'name':'numSamples2'})
+  numSamples3 = dict({'type': 'int', 'reqd' : False, 'name':'numSamples3'})
+  interpolationType = dict({'type': 'string', 'reqd' : False, 'name':'interpolationType'})
+  encoding = dict({'type': 'string', 'reqd' : False, 'name':'encoding'})
+  child1 = dict({'type': 'ImageData', 'reqd': True, 'name': 'imageData', 'element': 'ImageData'})
+  attributes = [id, dataType, numSamples1, numSamples2, numSamples3, interpolationType, encoding, child1]
+  element = dict(
+                 {'name': 'SampledField', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_SAMPLEDFIELD', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':True, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialImageData() :
+  samples = dict({'type': 'int*', 'reqd' : True, 'name':'samples'})
+  samplesLength = dict({'type': 'int', 'reqd' : True, 'name':'samplesLength'})
+  dataType = dict({'type': 'string', 'reqd' : True, 'name':'dataType'})
+  attributes = [samples, samplesLength, dataType]
+  element = dict(
+                 {'name': 'ImageData', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_IMAGEDATA', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialCSGeometry() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  child1 = dict({'type': 'lo_element', 'reqd': False, 'name': 'csgObject', 'element': 'CSGObject'})
+  attributes = [id, child1]
+  element = dict(
+                 {'name': 'CSGeometry', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_CSGGEOMETRY', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialCSGObject() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  domainType = dict({'type': 'SIdRef', 'reqd' : True, 'name':'domainType'})
+  ordinal = dict({'type': 'int', 'reqd' : True, 'name':'ordinal'})
+  attributes = [id, domainType, ordinal]
+  element = dict(
+                 {'name': 'CSGObject', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_CSGOBJECT', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialCSGNode() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  attributes = [id]
+  element = dict(
+                 {'name': 'CSGNode', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_CSGNODE', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialCSGPrimitive() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  primitiveType = dict({'type': 'string', 'reqd' : True, 'name':'primitiveType'})
+  attributes = [id, primitiveType]
+  element = dict(
+                 {'name': 'CSGPrimitive', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_CSGPRIMITIVE', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialCSGPseudoPrimitive() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  csgObjectRef = dict({'type': 'SIdRef', 'reqd' : True, 'name':'csgObjectRef'})
+  attributes = [id, csgObjectRef]
+  element = dict(
+                 {'name': 'CSGPseudoPrimitive', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_CSGPSEUDOPRIMITIVE', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialCSGSetOperator() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  operationType = dict({'type': 'int', 'reqd' : True, 'name':'operationType'})
+  child1 = dict({'type': 'lo_element', 'reqd': False, 'name': 'csgNode', 'element': 'CSGNode'})
+  attributes = [id, operationType, child1]
+  element = dict(
+                 {'name': 'CSGSetOperator', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_CSGSETOPERATOR', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialCSGTransformation() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  child1 = dict({'type': 'CSGNode', 'reqd': False, 'name': 'csgNode', 'element': 'CSGNode'})
+  attributes = [id, child1]
+  element = dict(
+                 {'name': 'CSGTransformation', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_CSGTRANSFORMATION', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':True, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialCSGTranslation() :
+  translateX = dict({'type': 'double', 'reqd' : True, 'name':'translateX'})
+  translateY = dict({'type': 'double', 'reqd' : False, 'name':'translateY'})
+  translateZ = dict({'type': 'double', 'reqd' : False, 'name':'translateZ'})
+  attributes = [translateX, translateY, translateZ]
+  element = dict(
+                 {'name': 'CSGTranslation', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_CSGTRANSLATION', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialCSGRotation() :
+  rotateAxisX = dict({'type': 'double', 'reqd' : True, 'name':'rotateAxisX'})
+  rotateAxisY = dict({'type': 'double', 'reqd' : False, 'name':'rotateAxisY'})
+  rotateAxisZ = dict({'type': 'double', 'reqd' : False, 'name':'rotateAxisZ'})
+  rotateAngleInRadians = dict({'type': 'double', 'reqd' : True, 'name':'rotateAngleInRadians'})
+  attributes = [rotateAxisX, rotateAxisY, rotateAxisZ, rotateAngleInRadians]
+  element = dict(
+                 {'name': 'CSGRotation', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_CSGROTATION', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialCSGScale() :
+  scaleX = dict({'type': 'double', 'reqd' : True, 'name':'scaleX'})
+  scaleY = dict({'type': 'double', 'reqd' : False, 'name':'scaleY'})
+  scaleZ = dict({'type': 'double', 'reqd' : False, 'name':'scaleZ'})
+  attributes = [scaleX, scaleY, scaleZ]
+  element = dict(
+                 {'name': 'CSGScale', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_CSGSCALE', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialCSGHomogeneousTransformation() :
+  forwardTransformation = dict({'type': 'TransformationComponent', 'reqd' : True, 'name':'forwardTransformation', 'element': 'TransformationComponent'})
+  reverseTransformation = dict({'type': 'TransformationComponent', 'reqd' : True, 'name':'reverseTransformation', 'element': 'TransformationComponent'})
+  attributes = [forwardTransformation, reverseTransformation]
+  element = dict(
+                 {'name': 'CSGHomogeneousTransformation', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_CSGHOMOGENEOUSTRANSFORMATION', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialTransformationComponent() :
+  components = dict({'type': 'double*', 'reqd' : True, 'name':'components'})
+  componentsLength = dict({'type': 'double*', 'reqd' : True, 'name':'componentsLength'})
+  attributes = [components, componentsLength]
+  element = dict(
+                 {'name': 'TransformationComponent', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_TRANSFORMATIONCOMPONENTS', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialParametricGeometry() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  child1 = dict({'type': 'lo_element', 'reqd': False, 'name': 'spatialPoint', 'element': 'SpatialPoint'})
+  child2 = dict({'type': 'lo_element', 'reqd': False, 'name': 'parametricObject', 'element': 'ParametricObject'})
+  attributes = [id, child1, child2]
+  element = dict(
+                 {'name': 'ParametricGeometry', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_PARAMETRICGEOMETRY', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialPoint() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  coord1 = dict({'type': 'double', 'reqd' : True, 'name':'coord1'})
+  coord2 = dict({'type': 'double', 'reqd' : False, 'name':'coord2'})
+  coord3 = dict({'type': 'double', 'reqd' : False, 'name':'coord3'})
+  domain = dict({'type': 'SIdRef', 'reqd' : True, 'name':'domain'})
+  attributes = [id, coord1, coord2, coord3, domain]
+  element = dict(
+                 {'name': 'SpatialPoint', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_SPATIALPOINT', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialParametricObject() :
+  id = dict({'type': 'SId', 'reqd' : True, 'name':'id'})
+  polygonType = dict({'type': 'string', 'reqd' : True, 'name':'polygonType'})
+  domain = dict({'type': 'SIdRef', 'reqd' : True, 'name':'domain'})
+  child1 = dict({'type': 'PolygonObject', 'reqd': True, 'name': 'polygonObject', 'element': 'PolygonObject'})
+  attributes = [id, polygonType, domain, child1]
+  element = dict(
+                 {'name': 'ParametricObject', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_PARAMETRICOBJECT', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+def createSpatialPolygonObject() :
+  pointIndex = dict({'type': 'int*', 'reqd' : True, 'name':'pointIndex'})
+  attributes = [pointIndex]
+  element = dict(
+                 {'name': 'PolygonObject', 
+                  'package': 'Spatial', 
+                  'typecode': 'SBML_SPATIAL_POLYGONOBJECT', 
+                  'hasListOf': False, 
+                  'attribs':attributes, 
+                  'hasChildren':False, 
+                  'hasMath':False
+                  }) 
+  return element
+
+#end of spatial
