@@ -17,12 +17,17 @@ import createRegisterFiles
 import createBindingsFiles
 import createArchiveFile
 import createValidatorFiles
+import createPackageFromXml
 
-if len(sys.argv) != 2:
-  print 'Usage: run.py name'
+if len(sys.argv) < 2:
+  print 'Usage: run.py name <fileName>'
 else:
   name = sys.argv[1]
-  packageDefn = createNewPackage.createPackage(name)
+  packageDefn = None
+  if len(sys.argv) == 3:
+    packageDefn = createPackageFromXml.parseDeviserXML(sys.argv[2])
+  else:
+    packageDefn = createNewPackage.createPackage(name)
   if packageDefn == None:
     print 'package definition for {0} not available'.format(name)
     sys.exit(0)
