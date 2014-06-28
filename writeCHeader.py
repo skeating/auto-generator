@@ -31,7 +31,7 @@ def writeConstructors(element, package, output):
   output.write('{0}_clone'.format(element))
   output.write('({0}_t * {1});\n\n\n'.format(element, strFunctions.objAbbrev(element)))
 
-def writeAttributeFunctions(attrs, output, element):
+def writeAttributeFunctions(attrs, output, element, dict):
   for i in range(0, len(attrs)):
     writeGetFunction(attrs[i], output, element)
   for i in range(0, len(attrs)):
@@ -45,38 +45,45 @@ def writeAttributeFunctions(attrs, output, element):
       writeListOfSubElements(attrs[i], output, element)
 
 def writeListOfSubElements(attrib, output, element):
-  loname = generalFunctions.writeListOf(attrib['element'])
+  loname = generalFunctions.writeListOf(strFunctions.cap(attrib['name']))
   output.write('LIBSBML_EXTERN\n')
   output.write('int\n')
-  output.write('{0}_add{1}({0}_t * {2}, '.format(element, attrib['element'], strFunctions.objAbbrev(element)))
+  output.write('{0}_add{1}({0}_t * {2}, '.format(element, strFunctions.cap(attrib['name']), strFunctions.objAbbrev(element)))
   output.write('{0}_t * {1});\n\n\n'.format(attrib['element'], strFunctions.objAbbrev(attrib['element'])))
-  output.write('LIBSBML_EXTERN\n')
-  output.write('{0}_t *\n'.format(attrib['element']))
-  output.write('{0}_create{1}({0}_t * {2}' .format(element, attrib['element'], strFunctions.objAbbrev(element)))
-  output.write(');\n\n\n')
+  if attrib.has_key('abstract') == False or (attrib.has_key('abstract') and attrib['abstract'] == False):
+    output.write('LIBSBML_EXTERN\n')
+    output.write('{0}_t *\n'.format(attrib['element']))
+    output.write('{0}_create{1}({0}_t * {2}' .format(element, strFunctions.cap(attrib['name']), strFunctions.objAbbrev(element)))
+    output.write(');\n\n\n')
+  elif attrib.has_key('concrete'):
+    for elem in attrib['concrete']:
+      output.write('LIBSBML_EXTERN\n')
+      output.write('{0}_t *\n'.format(elem['element']))
+      output.write('{0}_create{1}({0}_t * {2}' .format(element, strFunctions.cap(elem['name']), strFunctions.objAbbrev(element)))
+      output.write(');\n\n\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('ListOf_t *\n')
   output.write('{0}_get{1}({0}_t * {2}) '.format(element, loname, strFunctions.objAbbrev(element)))
   output.write(';\n\n\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('{0}_t *\n'.format(attrib['element']))
-  output.write('{0}_get{1}({0}_t * {2}, '.format(element, attrib['element'], strFunctions.objAbbrev(element)))
+  output.write('{0}_get{1}({0}_t * {2}, '.format(element, strFunctions.cap(attrib['name']), strFunctions.objAbbrev(element)))
   output.write('unsigned int n);\n\n\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('{0}_t *\n'.format(attrib['element']))
-  output.write('{0}_get{1}ById({0}_t * {2}, '.format(element, attrib['element'], strFunctions.objAbbrev(element)))
+  output.write('{0}_get{1}ById({0}_t * {2}, '.format(element, strFunctions.cap(attrib['name']), strFunctions.objAbbrev(element)))
   output.write('const char * sid);\n\n\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('unsigned int\n')
-  output.write('{0}_getNum{1}s({0}_t * {2}' .format(element, attrib['element'], strFunctions.objAbbrev(element)))
+  output.write('{0}_getNum{1}s({0}_t * {2}' .format(element, strFunctions.cap(attrib['name']), strFunctions.objAbbrev(element)))
   output.write(');\n\n\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('{0}_t *\n'.format(attrib['element']))
-  output.write('{0}_remove{1}({0}_t * {2}, '.format(element, attrib['element'], strFunctions.objAbbrev(element)))
+  output.write('{0}_remove{1}({0}_t * {2}, '.format(element, strFunctions.cap(attrib['name']), strFunctions.objAbbrev(element)))
   output.write('unsigned int n);\n\n\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('{0}_t *\n'.format(attrib['element']))
-  output.write('{0}_remove{1}ById({0}_t * {2}, '.format(element, attrib['element'], strFunctions.objAbbrev(element)))
+  output.write('{0}_remove{1}ById({0}_t * {2}, '.format(element, strFunctions.cap(attrib['name']), strFunctions.objAbbrev(element)))
   output.write('const char * sid);\n\n\n')
  # writeListOfHeader.writeGetFunctions(output, attrib['element'], True, element)
  # writeListOfHeader.writeRemoveFunctions(output, attrib['element'], True, element)
@@ -93,12 +100,31 @@ def writeGetFunction(attrib, output, element):
   else:
     attTypeCode = att[3]
   num = att[4]
-  if attrib['type'] == 'element' or attrib['type'] == 'lo_element':
-    return
-  output.write('LIBSBML_EXTERN\n')
-  output.write('{0}\n'.format(attTypeCode))
-  output.write('{0}_get{1}'.format(element, capAttName))
-  output.write('({0}_t * {1});\n\n\n'.format(element, strFunctions.objAbbrev(element)))
+  if attrib['type'] != 'element' and attrib['type'] != 'lo_element' and attrib['type'] != 'XMLNode*':
+    output.write('LIBSBML_EXTERN\n')
+    output.write('{0}\n'.format(attTypeCode))
+    output.write('{0}_get{1}'.format(element, capAttName))
+    output.write('({0}_t * {1});\n\n\n'.format(element, strFunctions.objAbbrev(element)))
+  elif attrib['type'] == 'XMLNode*':
+    output.write('LIBSBML_EXTERN\n')
+    output.write('XMLNode_t*\n')
+    output.write('{0}_get{1}'.format(element, capAttName))
+    output.write('({0}_t * {1});\n\n\n'.format(element, strFunctions.objAbbrev(element)))    
+  elif attrib['type'] == 'element':
+    if attrib['name'] == 'Math' or attrib['name'] == 'math':
+      output.write('LIBSBML_EXTERN\n')
+      output.write('ASTNode_t*\n')
+      output.write('{0}_getMath'.format(element))
+      output.write('({0}_t * {1});\n\n\n'.format(element, strFunctions.objAbbrev(element)))
+    else:
+      output.write('LIBSBML_EXTERN\n')
+      output.write('{0}_t*\n'.format(strFunctions.cap(attrib['element'])))
+      output.write('{0}_get{1}'.format(element, capAttName))
+      output.write('({0}_t * {1});\n\n\n'.format(element, strFunctions.objAbbrev(element)))
+      output.write('LIBSBML_EXTERN\n')
+      output.write('{0}_t*\n'.format(strFunctions.cap(attrib['element'])))
+      output.write('{0}_create{1}'.format(element, capAttName))
+      output.write('({0}_t * {1});\n\n\n'.format(element, strFunctions.objAbbrev(element)))
  
 def writeIsSetFunction(attrib, output, element):
   att = generalFunctions.parseAttributeForC(attrib)
@@ -107,12 +133,11 @@ def writeIsSetFunction(attrib, output, element):
   attType = att[2]
   attTypeCode = att[3]
   num = att[4]
-  if attrib['type'] == 'element' or attrib['type'] == 'lo_element':
-    return
-  output.write('LIBSBML_EXTERN\n')
-  output.write('int\n')
-  output.write('{0}_isSet{1}'.format(element, capAttName))
-  output.write('({0}_t * {1});\n\n\n'.format(element, strFunctions.objAbbrev(element)))
+  if attrib['type'] != 'lo_element':
+    output.write('LIBSBML_EXTERN\n')
+    output.write('int\n')
+    output.write('{0}_isSet{1}'.format(element, capAttName))
+    output.write('({0}_t * {1});\n\n\n'.format(element, strFunctions.objAbbrev(element)))
     
  
 def writeSetFunction(attrib, output, element):
@@ -122,13 +147,31 @@ def writeSetFunction(attrib, output, element):
   attType = att[2]
   attTypeCode = att[3]
   num = att[4]
-  if attrib['type'] == 'element' or attrib['type'] == 'lo_element':
-    return
-  output.write('LIBSBML_EXTERN\n')
-  output.write('int\n')
-  output.write('{0}_set{1}'.format(element, capAttName))
-  output.write('({0}_t * {1},'.format(element, strFunctions.objAbbrev(element)))
-  output.write(' {0} {1});\n\n\n'.format(attTypeCode, attName))
+  if attrib['type'] != 'element' and attrib['type'] != 'lo_element' and attrib['type'] != 'XMLNode*':
+    output.write('LIBSBML_EXTERN\n')
+    output.write('int\n')
+    output.write('{0}_set{1}'.format(element, capAttName))
+    output.write('({0}_t * {1},'.format(element, strFunctions.objAbbrev(element)))
+    output.write(' {0} {1});\n\n\n'.format(attTypeCode, attName))
+  elif attrib['type'] == 'XMLNode*':
+    output.write('LIBSBML_EXTERN\n')
+    output.write('int\n')
+    output.write('{0}_set{1}'.format(element, capAttName))
+    output.write('({0}_t * {1},'.format(element, strFunctions.objAbbrev(element)))
+    output.write(' XMLNode_t* {0});\n\n\n'.format(attName))
+  elif attrib['type'] == 'element':
+    if attrib['name'] == 'Math' or attrib['name'] == 'math':
+      output.write('LIBSBML_EXTERN\n')
+      output.write('int\n')
+      output.write('{0}_setMath'.format(element))
+      output.write('({0}_t * {1},'.format(element, strFunctions.objAbbrev(element)))
+      output.write(' ASTNode_t* {0});\n\n\n'.format(attName))
+    else:
+      output.write('LIBSBML_EXTERN\n')
+      output.write('int\n')
+      output.write('{0}_set{1}'.format(element, capAttName))
+      output.write('({0}_t * {1},'.format(element, strFunctions.objAbbrev(element)))
+      output.write(' {0}_t* {1});\n\n\n'.format(attrib['element'], attName))
     
 def writeUnsetFunction(attrib, output, element):
   att = generalFunctions.parseAttributeForC(attrib)
@@ -158,26 +201,33 @@ def writeHasReqdElementsFunction(output, element):
   output.write('({0}_t * {1});\n\n\n'.format(element, strFunctions.objAbbrev(element)))
 
     
-def writeListOfHeaders(output, element):
+def writeListOfHeaders(output, element, type):
   loelement = generalFunctions.writeListOf(element)
   output.write('LIBSBML_EXTERN\n')
-  output.write('{0}_t *\n'.format(element))
+  output.write('{0}_t *\n'.format(type))
   output.write('{0}_getById'.format(loelement))
   output.write('(ListOf_t * lo, const char * sid);\n\n\n')
   output.write('LIBSBML_EXTERN\n')
-  output.write('{0}_t *\n'.format(element))
+  output.write('{0}_t *\n'.format(type))
   output.write('{0}_removeById'.format(loelement))
   output.write('(ListOf_t * lo, const char * sid);\n\n\n')
  
 # write the header file      
 def createHeader(element, header):
+  type = element['name']
+  name = element['name']
+  if element.has_key('elementName'):
+    name = strFunctions.cap(element['elementName']) 
+  if element.has_key('element'):
+    type = element['element']
+
   writeConstructors(element['name'], element['package'], header)
-  writeAttributeFunctions(element['attribs'], header, element['name'])
+  writeAttributeFunctions(element['attribs'], header, element['name'], element)
   writeHasReqdAttrFunction(header, element['name'])
   if element['hasChildren'] == True or element['hasMath'] == True:
     writeHasReqdElementsFunction(header, element['name'])
   if element['hasListOf'] == True:
-    writeListOfHeaders(header, element['name'])
+    writeListOfHeaders(header, name, type)
  
 
   

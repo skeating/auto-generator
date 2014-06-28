@@ -71,9 +71,15 @@ def writeAtt(attrib, output):
   if attType == 'string':
     output.write('  std::string   m{0};\n'.format(capAttName))
   elif attType == 'element':
-    output.write('  {0} m{1};\n'.format(attTypeCode, capAttName))
+    if attTypeCode == 'ASTNode*' or attName== 'Math':
+      output.write('  ASTNode*      m{0};\n'.format(capAttName))
+    else:
+      output.write('  {0}*      m{1};\n'.format(attrib['element'], capAttName))
+      return
   elif attType == 'lo_element':
-    output.write('  {0}   m{1};\n'.format(generalFunctions.writeListOf(attTypeCode), capAttName))
+    output.write('  {0}   m{1};\n'.format(generalFunctions.writeListOf(capAttName), strFunctions.capp(attName)))
+  elif attTypeCode == 'XMLNode*':
+    output.write('  {0}   m{1};\n'.format('XMLNode*', capAttName))
   elif num == True:
     while len(attTypeCode) < 13:
       attTypeCode = attTypeCode + ' '
@@ -101,15 +107,35 @@ def writeGetFunction(attrib, output, element):
   if attrib['type'] == 'lo_element':
     return
   elif attrib['type'] == 'element':
-    output.write('  /**\n')
-    output.write('   * Returns the \"{0}\"'.format(attName))
-    output.write(' element of this {0}.\n'.format(element))
-    output.write('   *\n')
-    output.write('   * @return the \"{0}\"'.format(attName))
-    output.write(' element of this {0}.\n'.format(element))
-    output.write('   */\n')
-    output.write('  virtual const {0}'.format(attTypeCode))
-    output.write(' get{0}() const;\n\n\n'.format(capAttName))
+    if attrib['name'] == 'Math' or attrib['name'] == 'math':
+      output.write('\t/**\n')
+      output.write('\t * Returns the \"{0}\"'.format(attName))
+      output.write(' element of this {0}.\n'.format(element))
+      output.write('\t *\n')
+      output.write('\t * @return the \"{0}\"'.format(attName))
+      output.write(' element of this {0}.\n'.format(element))
+      output.write('\t */\n')
+      output.write('\tvirtual const ASTNode*')
+      output.write(' get{0}() const;\n\n\n'.format(capAttName))
+    else:
+      output.write('\t/**\n')
+      output.write('\t * Returns the \"{0}\"'.format(attName))
+      output.write(' element of this {0}.\n'.format(element))
+      output.write('\t *\n')
+      output.write('\t * @return the \"{0}\"'.format(attName))
+      output.write(' element of this {0}.\n'.format(element))
+      output.write('\t */\n')
+      output.write('\tvirtual const {0}*'.format(attrib['element']))
+      output.write(' get{0}() const;\n\n\n'.format(capAttName))
+      output.write('\t/**\n')
+      output.write('\t * Creates a new \"{0}\"'.format(attrib['element']))
+      output.write(' and sets it for this {0}.\n'.format(element))
+      output.write('\t *\n')
+      output.write('\t * @return the created \"{0}\"'.format(attrib['element']))
+      output.write(' element of this {0}.\n'.format(element))
+      output.write('\t */\n')
+      output.write('\tvirtual {0}*'.format(attrib['element']))
+      output.write(' create{0}();\n\n\n'.format(capAttName))
   else:
     output.write('  /**\n')
     output.write('   * Returns the value of the \"{0}\"'.format(attName))
@@ -231,7 +257,7 @@ def writeUnsetFunction(attrib, output, element):
    
   
    
-def writeAttributeFunctions(attrs, output, element):
+def writeAttributeFunctions(attrs, output, element, elementDict):
   for i in range(0, len(attrs)):
     writeGetFunction(attrs[i], output, element)
   for i in range(0, len(attrs)):
@@ -242,11 +268,11 @@ def writeAttributeFunctions(attrs, output, element):
     writeUnsetFunction(attrs[i], output, element)
   for i in range(0, len(attrs)):
     if attrs[i]['type'] == 'lo_element':
-      writeListOfSubFunctions(attrs[i], output, element)
+      writeListOfSubFunctions(attrs[i], output, element, elementDict)
       
 
-def writeListOfSubFunctions(attrib, output, element):
-  loname = generalFunctions.writeListOf(attrib['element'])
+def writeListOfSubFunctions(attrib, output, element, elementDict):
+  loname = generalFunctions.writeListOf(strFunctions.cap(attrib['name']))
   output.write('  /**\n')
   output.write('   * Returns the  \"{0}\"'.format(loname))
   output.write(' in this {0} object.\n'.format(element))
@@ -265,7 +291,7 @@ def writeListOfSubFunctions(attrib, output, element):
   output.write('   */\n')
   output.write('  {0}*'.format(loname))
   output.write(' get{0}();\n\n\n'.format(loname))
-  writeListOfHeader.writeGetFunctions(output, attrib['element'], True, element)
+  writeListOfHeader.writeGetFunctions(output, strFunctions.cap(attrib['name']), attrib['element'], True, element)
   output.write('  /**\n')
   output.write('   * Adds a copy the given \"{0}\" to this {1}.\n'.format(attrib['element'], element))
   output.write('   *\n')
@@ -278,32 +304,47 @@ def writeListOfSubFunctions(attrib, output, element):
   output.write('   * @li LIBSBML_OPERATION_SUCCESS\n')
   output.write('   * @li LIBSBML_INVALID_ATTRIBUTE_VALUE\n')
   output.write('   */\n')
-  output.write('  int add{0}(const {0}* {1});\n\n\n'.format(attrib['element'], strFunctions.objAbbrev(attrib['element'])))
+  output.write('\tint add{0}(const {1}* {2});\n\n\n'.format(strFunctions.cap(attrib['name']), attrib['element'], strFunctions.objAbbrev(attrib['element'])))
   output.write('  /**\n')
   output.write('   * Get the number of {0} objects in this {1}.\n'.format(attrib['element'], element))
   output.write('   *\n')
   output.write('   * @return the number of {0} objects in this {1}\n'.format(attrib['element'], element))
   output.write('   */\n')
-  output.write('  unsigned int getNum{0}s() const;\n\n\n'.format(attrib['element']))
-  output.write('  /**\n')
-  output.write('   * Creates a new {0} object, adds it to this {1}s\n'.format(attrib['element'], element))
-  output.write('   * {0} and returns the {1} object created. \n'.format(loname, attrib['element']))
-  output.write('   *\n')
-  output.write('   * @return a new {0} object instance\n'.format(attrib['element']))
-  output.write('   *\n')
-  output.write('   * @see add{0}(const {0}* {1})\n'.format(attrib['element'], strFunctions.objAbbrev(attrib['element'])))
-  output.write('   */\n')
-  output.write('  {0}* create{0}();\n\n\n'.format(attrib['element']))
-  writeListOfHeader.writeRemoveFunctions(output, attrib['element'], True, element)
-
+  output.write('\tunsigned int getNum{0}s() const;\n\n\n'.format(strFunctions.cap(attrib['name'])))
+  if attrib.has_key('abstract') == False or (attrib.has_key('abstract') and attrib['abstract'] == False):
+    output.write('\t/**\n')
+    output.write('\t * Creates a new {0} object, adds it to this {1}s\n'.format(attrib['element'], element))
+    output.write('\t * {0} and returns the {1} object created. \n'.format(loname, attrib['element']))
+    output.write('\t *\n')
+    output.write('\t * @return a new {0} object instance\n'.format(attrib['element']))
+    output.write('\t *\n')
+    output.write('\t * @see add{0}(const {1}* {2})\n'.format(strFunctions.cap(attrib['name']), attrib['element'], strFunctions.objAbbrev(attrib['element'])))
+    output.write('\t */\n')
+    output.write('\t{0}* create{1}();\n\n\n'.format(attrib['element'], strFunctions.cap(attrib['name'])))
+  elif attrib.has_key('concrete'):
+    for elem in attrib['concrete']:
+      output.write('\t/**\n')
+      output.write('\t * Creates a new {0} object, adds it to this {1}s\n'.format(elem['element'], element))
+      output.write('\t * {0} and returns the {1} object created. \n'.format(loname, elem['element']))
+      output.write('\t *\n')
+      output.write('\t * @return a new {0} object instance\n'.format(elem['element']))
+      output.write('\t *\n')
+      output.write('\t * @see add{0}(const {0}* {1})\n'.format(attrib['element'], strFunctions.objAbbrev(attrib['element'])))
+      output.write('\t */\n')
+      output.write('\t{0}* create{1}();\n\n\n'.format(elem['element'], strFunctions.cap(elem['name'])))
+  writeListOfHeader.writeRemoveFunctions(output, strFunctions.cap(attrib['name']), attrib['element'], True, element)
+ 
 #write class
-def writeClass(attributes, header, nameOfElement, nameOfPackage, hasChildren, hasMath):
+def writeClass(attributes, header, nameOfElement, nameOfPackage, hasChildren, hasMath, isListOf, elementDict):
   header.write('class LIBSBML_EXTERN {0} :'.format(nameOfElement))
-  header.write(' public SBase\n{0}\n\n'.format('{'))
+  baseClass = 'SBase'
+  if elementDict.has_key('baseClass'):
+    baseClass = elementDict['baseClass']
+  header.write(' public {0}\n{1}\n\n'.format(baseClass, '{'))
   writeAttributes(attributes, header)
   header.write('public:\n\n')
   writeConstructors(nameOfElement, nameOfPackage, header)
-  writeAttributeFunctions(attributes, header, nameOfElement)
+  writeAttributeFunctions(attributes, header, nameOfElement, elementDict)
   if hasMath == True or generalFunctions.hasSIdRef(attributes) == True:
     generalFunctions.writeRenameSIdHeader(header)
   if hasChildren == True:
@@ -311,7 +352,7 @@ def writeClass(attributes, header, nameOfElement, nameOfPackage, hasChildren, ha
   generalFunctions.writeCommonHeaders(header, nameOfElement, attributes, False, hasChildren, hasMath)
   generalFunctions.writeInternalHeaders(header, hasChildren)
   header.write('protected:\n\n')
-  generalFunctions.writeProtectedHeaders(header, hasChildren, hasMath)
+  generalFunctions.writeProtectedHeaders(header, attributes, hasChildren, hasMath)
   header.write('\n};\n\n')
  
 # write the include files
@@ -370,7 +411,7 @@ def createHeader(element):
   fileHeaders.addFilename(header, headerName, nameOfElement)
   fileHeaders.addLicence(header)
   writeIncludes(header, nameOfElement, nameOfPackage, attributes)
-  writeClass(attributes, header, nameOfElement, nameOfPackage, hasChildren, hasMath)
+  writeClass(attributes, header, nameOfElement, nameOfPackage, hasChildren, hasMath, False, element)
   if isListOf == True:
     writeListOfHeader.createHeader(element, header)
   writeCPPEnd(header)

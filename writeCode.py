@@ -95,12 +95,15 @@ def writeCopyAttributes(attrs, output, tabs, name):
       output.write('{0}mIsSet{1}  = {2}.mIsSet{1};\n'.format(tabs, attName, name))
 
 
-def writeConstructors(element, package, output, attrs, hasChildren=False, hasMath=False):
+def writeConstructors(element, package, output, attrs, hasChildren=False, hasMath=False, elementDict=None):
+  baseClass = 'SBase'
+  if elementDict != None and elementDict.has_key('baseClass'):
+    baseClass = elementDict['baseClass']
   output.write('/*\n')
   output.write(' * Creates a new {0}'.format(element))
   output.write(' with the given level, version, and package version.\n */\n')
   output.write('{0}::{0} (unsigned int level, unsigned int version, unsigned int pkgVersion)\n'.format(element))
-  output.write('  : SBase(level, version)\n')
+  output.write('\t: {0}(level, version)\n'.format(baseClass))
   writeAttributes(attrs, output, 1)
   output.write('{\n')
   output.write('  // set an SBMLNamespaces derived object of this package\n')
@@ -113,7 +116,7 @@ def writeConstructors(element, package, output, attrs, hasChildren=False, hasMat
   output.write(' * Creates a new {0}'.format(element))
   output.write(' with the given {0}PkgNamespaces object.\n */\n'.format(package))
   output.write('{0}::{0} ({1}PkgNamespaces* {2}ns)\n'.format(element, package, package.lower()))
-  output.write('  : SBase({0}ns)\n'.format(package.lower()))
+  output.write('\t: {1}({0}ns)\n'.format(package.lower(), baseClass))
   writeAttributes(attrs, output, 2, package.lower())
   output.write('{\n')
   output.write('  // set the element namespace of this object\n')
@@ -127,7 +130,7 @@ def writeConstructors(element, package, output, attrs, hasChildren=False, hasMat
   output.write('/*\n')
   output.write(' * Copy constructor for {0}.\n */\n'.format(element))
   output.write('{0}::{0} (const {0}& orig)\n'.format(element, package, package.lower()))
-  output.write('  : SBase(orig)\n')
+  output.write('\t: {0}(orig)\n'.format(baseClass))
   output.write('{\n')
   output.write('  if (&orig == NULL)\n')
   output.write('  {\n')
@@ -151,7 +154,7 @@ def writeConstructors(element, package, output, attrs, hasChildren=False, hasMat
   output.write('  }\n')
   output.write('  else if (&rhs != this)\n')
   output.write('  {\n')
-  output.write('    SBase::operator=(rhs);\n')
+  output.write('\t\t{0}::operator=(rhs);\n'.format(baseClass))
   writeCopyAttributes(attrs, output, '    ', 'rhs')
   if hasChildren == True:
     output.write('\n    // connect to child objects\n')
@@ -191,6 +194,17 @@ def writeGetCode(attrib, output, element):
   output.write('{\n')
   output.write('  return m{0};\n'.format(capAttName))
   output.write('}\n\n\n')
+  if attType == 'element' and attName != 'math':
+    output.write('/*\n')
+    output.write(' * Creates a new \"{0}\"'.format(attName))
+    output.write(' element of this {0} and returns it.\n'.format(element))
+    output.write(' */\n')
+    output.write('{0}\n'.format(attTypeCode))
+    output.write('{0}::create{1}()\n'.format(element, capAttName))
+    output.write('{\n')
+    output.write('\tm{0} = new {1}();\n'.format(capAttName, attrib['element']))
+    output.write('\treturn m{0};\n'.format(capAttName))
+    output.write('}\n\n\n')
 
 
 def writeIsSetCode(attrib, output, element):
@@ -210,7 +224,7 @@ def writeIsSetCode(attrib, output, element):
   output.write('{\n')
   if attType == 'string':
     output.write('  return (m{0}.empty() == false);\n'.format(capAttName))
-  elif attType == 'element':
+  elif attType == 'element' or attType == 'XMLNode*':
     output.write('  return (m{0} != NULL);\n'.format(capAttName))
   elif num == True:
     output.write('  return mIsSet{0};\n'.format(capAttName))
@@ -257,6 +271,18 @@ def writeSetCode(attrib, output, element):
     output.write('  m{0} = {1};\n'.format(capAttName, attName))
     output.write('  mIsSet{0} = true;\n'.format(capAttName))
     output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
+  elif attType == 'XMLNode*':
+      output.write('\tif (m{0} == {1})\n'.format(capAttName, attName))
+      output.write('\t{\n\t\treturn LIBSBML_OPERATION_SUCCESS;\n\t}\n')
+      output.write('\telse if ({0} == NULL)\n'.format(attName))
+      output.write('\t{\n')
+      output.write('\t\tdelete m{0};\n'.format(capAttName))
+      output.write('\t\tm{0} = NULL;\n'.format(capAttName))
+      output.write('\t\treturn LIBSBML_OPERATION_SUCCESS;\n\t}\n')
+      output.write('\tdelete m{0};\n'.format(capAttName))
+      output.write('\tm{0} = ({1} != NULL) ?\n'.format(capAttName, attName))
+      output.write('\t\t{0}->clone() : NULL;\n'.format(attName))
+      output.write('\treturn LIBSBML_OPERATION_SUCCESS;\n')
   elif attType == 'element':
     output.write('  if (m{0} == {1})\n'.format(capAttName, attName))
     output.write('  {\n    return LIBSBML_OPERATION_SUCCESS;\n  }\n')
@@ -330,11 +356,14 @@ def writeUnsetCode(attrib, output, element):
 # for each attribute write a set/get/isset/unset
 def writeAttributeCode(attrs, output, element, pkgName):
   for i in range(0, len(attrs)):
-    writeGetCode(attrs[i], output, element)
+	if attrs[i]['type'] != 'lo_element':
+		writeGetCode(attrs[i], output, element)
   for i in range(0, len(attrs)):
-    writeIsSetCode(attrs[i], output, element)
+	if attrs[i]['type'] != 'lo_element':
+		writeIsSetCode(attrs[i], output, element)
   for i in range(0, len(attrs)):
-    writeSetCode(attrs[i], output, element)
+	if attrs[i]['type'] != 'lo_element':
+		writeSetCode(attrs[i], output, element)
   for i in range(0, len(attrs)):
     writeUnsetCode(attrs[i], output, element)
   for i in range(0, len(attrs)):
@@ -343,7 +372,7 @@ def writeAttributeCode(attrs, output, element, pkgName):
 
 
 def writeListOfSubFunctions(attrib, output, element, pkgName):
-  loname = generalFunctions.writeListOf(attrib['element'])
+  loname = generalFunctions.writeListOf(strFunctions.cap(attrib['name']))
   att = generalFunctions.parseAttribute(attrib)
   attName = att[0]
   capAttName = att[1]
@@ -357,7 +386,7 @@ def writeListOfSubFunctions(attrib, output, element, pkgName):
   output.write('const {0}*\n'.format(loname))
   output.write('{0}::get{1}() const\n'.format(element, loname))
   output.write('{\n')
-  output.write('  return &m{0};\n'.format(capAttName))
+  output.write('\treturn &m{0};\n'.format(strFunctions.capp(attName)))
   output.write('}\n\n\n')
   output.write('/*\n')
   output.write(' * Returns the  \"{0}\"'.format(loname))
@@ -366,16 +395,24 @@ def writeListOfSubFunctions(attrib, output, element, pkgName):
   output.write('{0}*\n'.format(loname))
   output.write('{0}::get{1}()\n'.format(element, loname))
   output.write('{\n')
-  output.write('  return &m{0};\n'.format(capAttName))
+  output.write('  return &m{0};\n'.format(strFunctions.capp(attName)))
   output.write('}\n\n\n')
-  writeListOfCode.writeRemoveFunctions(output, attrib['element'], True, element, capAttName)
-  writeListOfCode.writeGetFunctions(output, attrib['element'], True, element, capAttName)
+  writeListOfCode.writeRemoveFunctions(output, strFunctions.cap(attrib['name']), attrib['element'], True, element, capAttName)
+  writeListOfCode.writeGetFunctions(output, strFunctions.cap(attrib['name']), attrib['element'], True, element, capAttName)
   output.write('/*\n')
   output.write(' * Adds a copy the given \"{0}\" to this {1}.\n'.format(attrib['element'], element))
+  output.write(' *\n')
+  output.write(' * @param {0}; the {1} object to add\n'.format(strFunctions.objAbbrev(attrib['element']), attrib['element']))
+  output.write(' *\n')
+  output.write(' * @return integer value indicating success/failure of the\n')
+  output.write(' * function.  @if clike The value is drawn from the\n')
+  output.write(' * enumeration #OperationReturnValues_t. @endif The possible values\n')
+  output.write(' * returned by this function are:\n')
+  output.write(' * @li LIBSBML_OPERATION_SUCCESS\n')
+  output.write(' * @li LIBSBML_INVALID_ATTRIBUTE_VALUE\n')
   output.write(' */\n')
   output.write('int\n')
-  output.write(
-    '{0}::add{1}(const {1}* {2})\n'.format(element, attrib['element'], strFunctions.objAbbrev(attrib['element'])))
+  output.write('{0}::add{1}(const {2}* {3})\n'.format(element, strFunctions.cap(attrib['name']), attrib['element'], strFunctions.objAbbrev(attrib['element'])))
   output.write('{\n')
   output.write('  if ({0} == NULL)\n'.format(strFunctions.objAbbrev(attrib['element'])))
   output.write('  {\n')
@@ -401,46 +438,89 @@ def writeListOfSubFunctions(attrib, output, element, pkgName):
   output.write('  }\n')
   output.write('  else\n'.format(strFunctions.objAbbrev(attrib['element'])))
   output.write('  {\n')
-  output.write('    m{0}.append({1});\n\n'.format(capAttName, strFunctions.objAbbrev(attrib['element'])))
+  output.write('\tm{0}.append({1});\n'.format(strFunctions.capp(attrib['name']),strFunctions.objAbbrev(attrib['element'])))
   output.write('    return LIBSBML_OPERATION_SUCCESS;\n')
   output.write('  }\n')
   output.write('}\n\n\n')
   output.write('/*\n')
   output.write(' * Get the number of {0} objects in this {1}.\n'.format(attrib['element'], element))
+  output.write(' *\n')
+  output.write(' * @return the number of {0} objects in this {1}\n'.format(attrib['element'], element))
   output.write(' */\n')
   output.write('unsigned int\n')
-  output.write('{0}::getNum{1}s() const\n'.format(element, attrib['element']))
+  output.write('{0}::getNum{1}s() const\n'.format(element, strFunctions.cap(attrib['name'])))
   output.write('{\n')
-  output.write('  return m{0}.size();\n'.format(capAttName))
+  output.write('\treturn m{0}.size();\n'.format(strFunctions.capp(attrib['name'])))
   output.write('}\n\n\n')
-  output.write('/*\n')
-  output.write(' * Creates a new {0} object, adds it to this {1}s\n'.format(attrib['element'], element))
-  output.write(' */\n')
-  output.write('{0}*\n'.format(attrib['element']))
-  output.write('{0}::create{1}()\n'.format(element, attrib['element']))
-  output.write('{\n')
-  output.write('  {0}* {1} = NULL;\n\n'.format(attrib['element'], strFunctions.objAbbrev(attrib['element'])))
-  output.write('  try\n')
-  output.write('  {\n')
-  output.write('    {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(pkgName.upper(), pkgName.lower()))
-  output.write(
-    '    {0} = new {1}({2}ns);\n'.format(strFunctions.objAbbrev(attrib['element']), attrib['element'], pkgName.lower()))
-  output.write('    delete {}ns;\n'.format(pkgName.lower()))
-  output.write('  }\n')
-  output.write('  catch (...)\n')
-  output.write('  {\n')
-  output.write('    /* here we do not create a default object as the level/version must\n')
-  output.write('     * match the parent object\n')
-  output.write('     *\n')
-  output.write('     * do nothing\n')
-  output.write('     */\n')
-  output.write('  }\n\n')
-  output.write('  if({0} != NULL)\n'.format(strFunctions.objAbbrev(attrib['element'])))
-  output.write('  {\n')
-  output.write('    m{0}.appendAndOwn({1});\n'.format(capAttName, strFunctions.objAbbrev(attrib['element'])))
-  output.write('  }\n\n')
-  output.write('  return {0};\n'.format(strFunctions.objAbbrev(attrib['element'])))
-  output.write('}\n\n\n')
+  if attrib.has_key('abstract') == False or (attrib.has_key('abstract') and attrib['abstract'] == False):
+      output.write('/*\n')
+      output.write(' * Creates a new {0} object, adds it to this {1}s\n'.format(attrib['element'], element))
+      output.write(' * {0} and returns the {1} object created. \n'.format(element, attrib['element']))
+      output.write(' *\n')
+      output.write(' * @return a new {0} object instance\n'.format(attrib['element']))
+      output.write(' *\n')
+      output.write(' * @see add{0}(const {0}* {1})\n'.format(attrib['element'], strFunctions.objAbbrev(attrib['element'])))
+      output.write(' */\n')
+      output.write('{0}*\n'.format(attrib['element']))
+      output.write('{0}::create{1}()\n'.format(element, strFunctions.cap(attrib['name'])))
+      output.write('{\n')
+      output.write('  {0}* {1} = NULL;\n\n'.format(attrib['element'], strFunctions.objAbbrev(attrib['element'])))
+      output.write('  try\n')
+      output.write('  {\n')
+      output.write('    {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(pkgName.upper(), pkgName.lower()))
+      output.write(
+        '    {0} = new {1}({2}ns);\n'.format(strFunctions.objAbbrev(attrib['element']), attrib['element'], pkgName.lower()))
+      output.write('    delete {}ns;\n'.format(pkgName.lower()))
+      output.write('  }\n')
+      output.write('  catch (...)\n')
+      output.write('  {\n')
+      output.write('    /* here we do not create a default object as the level/version must\n')
+      output.write('     * match the parent object\n')
+      output.write('     *\n')
+      output.write('     * do nothing\n')
+      output.write('     */\n')
+      output.write('  }\n\n')
+      output.write('  if({0} != NULL)\n'.format(strFunctions.objAbbrev(attrib['element'])))
+      output.write('  {\n')
+      output.write('    m{0}.appendAndOwn({1});\n'.format(strFunctions.capp(attrib['name']), strFunctions.objAbbrev(attrib['element'])))
+      output.write('  }\n\n')
+      output.write('  return {0};\n'.format(strFunctions.objAbbrev(attrib['element'])))
+      output.write('}\n\n\n')
+  elif attrib.has_key('concrete'):
+    for elem in attrib['concrete']:
+      output.write('/**\n')
+      output.write(' * Creates a new {0} object, adds it to this {1}s\n'.format(elem['element'], element))
+      output.write(' * {0} and returns the {1} object created. \n'.format(element, elem['element']))
+      output.write(' *\n')
+      output.write(' * @return a new {0} object instance\n'.format(elem['element']))
+      output.write(' *\n')
+      output.write(' * @see add{0}(const {1}* {2})\n'.format(strFunctions.cap(elem['name']), attrib['element'], strFunctions.objAbbrev(attrib['element'])))
+      output.write(' */\n')
+      output.write('{0}* \n'.format(elem['element']))
+      output.write('{0}::create{1}()\n'.format(element, strFunctions.cap(elem['name'])))
+      output.write('{\n')
+      output.write('  {0}* {1} = NULL;\n\n'.format(elem['element'], strFunctions.objAbbrev(elem['element'])))
+      output.write('  try\n')
+      output.write('  {\n')
+      output.write('    {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(pkgName.upper(), pkgName.lower()))
+      output.write(
+        '    {0} = new {1}({2}ns);\n'.format(strFunctions.objAbbrev(elem['element']), elem['element'], pkgName.lower()))
+      output.write('    delete {}ns;\n'.format(pkgName.lower()))
+      output.write('  }\n')
+      output.write('  catch (...)\n')
+      output.write('  {\n')
+      output.write('    /* here we do not create a default object as the level/version must\n')
+      output.write('     * match the parent object\n')
+      output.write('     *\n')
+      output.write('     * do nothing\n')
+      output.write('     */\n')
+      output.write('  }\n\n')
+      output.write('  if({0} != NULL)\n'.format(strFunctions.objAbbrev(elem['element'])))
+      output.write('  {\n')
+      output.write('    m{0}.appendAndOwn({1});\n'.format(strFunctions.objAbbrev(elem['element']), strFunctions.objAbbrev(elem['element'])))
+      output.write('  }\n\n')
+      output.write('  return {0};\n'.format(strFunctions.objAbbrev(elem['element'])))
+      output.write('}\n\n\n')
 
 
 def createCode(element):
@@ -451,21 +531,25 @@ def createCode(element):
   attributes = element['attribs']
   hasChildren = element['hasChildren']
   hasMath = element['hasMath']
+  baseClass = 'SBase'
+  if element != None and element.has_key('baseClass'):
+    baseClass = element['baseClass']
+
   codeName = nameOfElement + '.cpp'
   code = open(codeName, 'w')
   fileHeaders.addFilename(code, codeName, nameOfElement)
   fileHeaders.addLicence(code)
   writeIncludes(code, nameOfElement, nameOfPackage, hasMath)
-  writeConstructors(nameOfElement, nameOfPackage, code, attributes, hasChildren, hasMath)
+  writeConstructors(nameOfElement, nameOfPackage, code, attributes, hasChildren, hasMath, element)
   writeAttributeCode(attributes, code, nameOfElement, nameOfPackage)
   if hasMath == True or generalFunctions.hasSIdRef(attributes) == True:
     generalFunctions.writeRenameSIdCode(code, nameOfElement, attributes, hasMath)
   if hasChildren == True:
     generalFunctions.writeGetAllElementsCode(code, nameOfElement, attributes)
-  generalFunctions.writeCommonCPPCode(code, nameOfElement, sbmltypecode, attributes, False, hasChildren, hasMath)
-  generalFunctions.writeInternalCPPCode(code, nameOfElement, attributes, hasChildren, hasMath)
+  generalFunctions.writeCommonCPPCode(code, nameOfElement, sbmltypecode, attributes, False, hasChildren, hasMath, element,baseClass)
+  generalFunctions.writeInternalCPPCode(code, nameOfElement, attributes, hasChildren, hasMath,baseClass, isListOf)
   generalFunctions.writeProtectedCPPCode(code, nameOfElement, attributes, False, hasChildren, hasMath, nameOfPackage,
-                                         isListOf)
+                                         isListOf, baseClass)
   if isListOf == True:
     writeListOfCode.createCode(element, code)
   writeCCode.createCode(element, code)
