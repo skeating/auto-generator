@@ -41,6 +41,7 @@ def parseDeviserXML(filename):
   sbmlElements = []
   elements = []
   plugins = []
+  enums = []
 
   dom = parse(filename)
 
@@ -160,6 +161,15 @@ def parseDeviserXML(filename):
     plugin_dict = dict({'sbase': extPoint, 'extension': plugElements, 'attribs':attributes})
     plugins.append( plugin_dict)
 
+  for node in dom.getElementsByTagName('enum'):
+    values = []
+    enumName = getValue( node, 'name')
+
+    for val in node.getElementsByTagName('enumValue'):
+      values.append(dict({'name': getValue( val, 'name'), 'value': getValue( val, 'value')}))
+
+    enums.append(dict({'name': enumName, 'values': values}))
+
 
   return dict({
                'name' : packageName, 
@@ -167,10 +177,11 @@ def parseDeviserXML(filename):
                'plugins': plugins, 
                'number': number, 
                'sbmlElements': sbmlElements, 
+               'enums': enums, 
                'offset': offset
                })
 
 
-#parseDeviserXML("D:/Development/CsDeviser/Samples/distrib.xml")
+#parseDeviserXML("D:/Development/CsDeviser/Samples/spatial.xml")
 
   

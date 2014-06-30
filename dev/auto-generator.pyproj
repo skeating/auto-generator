@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{dec6e44b-f594-4d90-aab8-a0520527e5a7}</ProjectGuid>
     <ProjectHome>..\</ProjectHome>
-    <StartupFile>createPackageFromXml.py</StartupFile>
+    <StartupFile>run.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -14,7 +14,7 @@
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>spatial</CommandLineArguments>
+    <CommandLineArguments>spatial D:/Development/CsDeviser/Samples/spatial.xml</CommandLineArguments>
     <InterpreterPath />
     <InterpreterArguments />
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>

@@ -228,7 +228,7 @@ def writeRequiredMethods(fileOut):
   fileOut.write('  //\n')
   fileOut.write('  //---------------------------------------------------------------\n\n\n')
 
-def writeTypeDefns(fileOut, nameOfClass, nameOfPkg, elements, number):
+def writeTypeDefns(fileOut, nameOfClass, nameOfPkg, elements, number, enums):
   fileOut.write('// --------------------------------------------------------------------\n')
   fileOut.write('//\n')
   fileOut.write('// Required typedef definitions\n') 
@@ -258,7 +258,20 @@ def writeTypeDefns(fileOut, nameOfClass, nameOfPkg, elements, number):
     fileOut.write('}')
     fileOut.write(' SBML{0}TypeCode_t;\n\n\n'.format(nameOfPkg))
 
-
+  for i in range(0,len(enums)):
+    current = enums[i]
+    fileOut.write('typedef enum\n{\n')
+    fileOut.write('    {0}_UNKNOWN  /*!< Unknown {1} */\n'.format(current['name'].upper(), current['name']))
+    values = current['values']
+    for j in range(0, len(values)):
+      val = values[j]
+      fileOut.write('  , {0} /*!< {1} */\n'.format(val['name'], val['value']))
+    fileOut.write('}')
+    fileOut.write(' {0}_t;\n\n\n'.format(current['name']))
+    
+    fileOut.write('LIBSBML_EXTERN\n')
+    fileOut.write('const char *\n')
+    fileOut.write('{0}_toString({0}_t code);\n\n\n'.format(current['name']))
 
 
 def createHeader(package):
@@ -270,7 +283,7 @@ def createHeader(package):
   fileHeaders.addLicence(code)
   writeIncludes(code, nameOfClass, nameOfPackage)
   writeClassDefn(code, nameOfClass, nameOfPackage)
-  writeTypeDefns(code, nameOfClass, nameOfPackage, package['elements'], package['number']) 
+  writeTypeDefns(code, nameOfClass, nameOfPackage, package['elements'], package['number'], package['enums']) 
   writeIncludeEnds(code, nameOfClass)
 
   

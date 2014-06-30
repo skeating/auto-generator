@@ -347,7 +347,7 @@ def writeRequiredMethods(fileOut, nameOfClass, pkg, elements):
   fileOut.write('/*------------------ (END) ----------------------------------*/\n\n')
 
 
-def writeTypeDefns(fileOut, nameOfClass, pkg, elements, number):
+def writeTypeDefns(fileOut, nameOfClass, pkg, elements, number, enums):
   length = len(elements)
   if length > 1:
     el = elements[0];
@@ -372,6 +372,34 @@ def writeTypeDefns(fileOut, nameOfClass, pkg, elements, number):
     fileOut.write('  }\n')
     fileOut.write('\n  return SBML_{0}_TYPECODE_STRINGS[typeCode - min];\n'.format(pkg.upper()))
     fileOut.write('}\n\n\n')
+  for i in range(0, len(enums)):
+    current = enums[i]
+    values = current['values']
+    numValues = len(values)
+    fileOut.write('static\n')
+    fileOut.write('const char * SBML_{0}_STRINGS[] = \n'.format(current['name'].upper()))
+    fileOut.write('{\n')
+    fileOut.write('   "Unknown {0}"\n'.format(current['name']))
+    for j in range(0, numValues):
+      fileOut.write(' , "{0}"\n'.format(values[j]['value']))
+    fileOut.write('};\n')
+
+    fileOut.write('/*\n')
+    fileOut.write(' * This method takes a type code from the {0} enum and returns a string representing \n'.format(current['name']))
+    fileOut.write(' */\n')
+    fileOut.write('LIBSBML_EXTERN\n')
+    fileOut.write('const char *\n')
+    fileOut.write('{0}_toString({0}_t typeCode)\n'.format(current['name']))
+    fileOut.write('{\n')
+    fileOut.write('  int min = {0}_UNKNOWN;\n'.format(current['name'].upper()))
+    fileOut.write('  int max = {0};\n'.format(values[numValues-1]['name']))
+    fileOut.write('\n  if ( typeCode < min || typeCode > max)\n')
+    fileOut.write('  {\n')
+    fileOut.write('    return "(Unknown {0} value)";\n'.format(current['name']))
+    fileOut.write('  }\n')
+    fileOut.write('\n  return SBML_{0}_STRINGS[typeCode - min];\n'.format(current['name'].upper()))
+    fileOut.write('}\n\n\n')
+
 
 
 
@@ -387,7 +415,7 @@ def createCode(package):
   fileHeaders.addLicence(code)
   writeIncludes(code, nameOfClass, nameOfPackage, plugins)
   writeClass(code, nameOfClass, nameOfPackage, package['elements'])
-  writeTypeDefns(code, nameOfClass, nameOfPackage, package['elements'], package['number']) 
+  writeTypeDefns(code, nameOfClass, nameOfPackage, package['elements'], package['number'], package['enums']) 
   writeInitFunction(code, nameOfPackage, nameOfClass, plugins)
   writeErrorFunction(code, nameOfPackage, nameOfClass, offset)
   writeIncludeEnds(code, nameOfClass)
