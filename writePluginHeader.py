@@ -10,12 +10,14 @@ import fileHeaders
 import generalFunctions
 import strFunctions
 
-def writeClassDefn(fileOut, nameOfClass, pkg, members):
+import writeHeader
+
+def writeClassDefn(fileOut, nameOfClass, pkg, members, attribs):
   fileOut.write('class LIBSBML_EXTERN {0} : public SBasePlugin\n'.format(nameOfClass))
   fileOut.write('{\npublic:\n\n')
   writeConstructors(fileOut, nameOfClass, pkg)
-  writeRequiredMethods(fileOut)
-  writeGetFunctions(fileOut, pkg, members, nameOfClass)
+  writeRequiredMethods(fileOut, attribs)
+  writeGetFunctions(fileOut, pkg, members, nameOfClass, attribs)
   generalFunctions.writeSetDocHeader(fileOut)
   # TO DO - these properly
   generalFunctions.writeInternalStart(fileOut)
@@ -28,9 +30,9 @@ def writeClassDefn(fileOut, nameOfClass, pkg, members):
   generalFunctions.writeInternalStart(fileOut)
   fileOut.write('  virtual bool accept (SBMLVisitor& v) const;\n\n')
   generalFunctions.writeInternalEnd(fileOut)
-  writeClassEnd(fileOut, members)
+  writeClassEnd(fileOut, members, attribs)
 
-def writeClassEnd(fileOut, members):
+def writeClassEnd(fileOut, members, attribs):
   fileOut.write('protected:\n\n')
   generalFunctions.writeInternalStart(fileOut)
   for i in range (0, len(members)):
@@ -39,6 +41,9 @@ def writeClassEnd(fileOut, members):
       fileOut.write('  ListOf{0}s m{0}s;\n'.format(mem['name']))
     else:
       fileOut.write('  {0}* m{0};\n'.format(mem['name']))
+  for i in range (0, len(attribs)):
+    mem = attribs[i]
+    writeHeader.writeAtt(mem, fileOut);
   fileOut.write('\n')
   generalFunctions.writeInternalEnd(fileOut)
   fileOut.write('};\n\n\n')
@@ -70,7 +75,7 @@ def writeConstructors(fileOut, nameOfClass, pkg):
   fileOut.write('Destructor for {0}.\n   */\n'.format(nameOfClass))
   fileOut.write('  virtual ~{0}();\n\n\n '.format(nameOfClass))
 
-def writeGetFunctions(fileOut, pkg, members, plugin):
+def writeGetFunctions(fileOut, pkg, members, plugin, attribs):
   fileOut.write('  //---------------------------------------------------------------\n')
   fileOut.write('  //\n')
   fileOut.write('  // Functions for interacting with the members of the plugin\n')
@@ -83,6 +88,8 @@ def writeGetFunctions(fileOut, pkg, members, plugin):
       writeFunctions(fileOut, mem['name'])
     else:
       writeMemberFunctions(fileOut, mem['name'], plugin)
+
+  writeHeader.writeAttributeFunctions(attribs, fileOut, plugin, pkg)
   
 def writeMemberFunctions(fileOut, object, plugin):
   fileOut.write('  /**\n')
@@ -228,7 +235,7 @@ def writeFunctions(fileOut, object):
 
 
 # write the include files
-def writeIncludes(fileOut, pkg, element, members):
+def writeIncludes(fileOut, pkg, element, members, attribs):
   fileOut.write('\n\n');
   fileOut.write('#ifndef {0}_H__\n'.format(element))
   fileOut.write('#define {0}_H__\n'.format(element))
@@ -241,6 +248,10 @@ def writeIncludes(fileOut, pkg, element, members):
   for i in range (0, len(members)):
     mem = members[i]
     fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), mem['name']))
+  for i in range (0, len(attribs)):
+    if (attribs[i]['type'] == 'element' or attribs[i]['type'] == 'lo_element') and attribs[i]['name'] != 'math':
+      fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), strFunctions.cap(attribs[i]['name'])))
+
   fileOut.write('\n\n');
   fileOut.write('LIBSBML_CPP_NAMESPACE_BEGIN\n')
   fileOut.write('\n\n');
@@ -252,7 +263,7 @@ def writeIncludeEnds(fileOut, element):
   fileOut.write('#endif /* __cplusplus */\n')
   fileOut.write('#endif /* {0}_H__ */\n\n\n'.format(element))
 
-def writeRequiredMethods(fileOut):
+def writeRequiredMethods(fileOut, attribs):
   fileOut.write('  //---------------------------------------------------------------\n')
   fileOut.write('  //\n')
   fileOut.write('  // overridden virtual functions for read/write/check\n')
@@ -287,6 +298,9 @@ def writeRequiredMethods(fileOut):
   fileOut.write('   */\n')
   fileOut.write('  virtual bool hasRequiredElements () const;\n\n\n')
   fileOut.write('  //---------------------------------------------------------------\n\n\n')
+  generalFunctions.writeAddExpectedHeader(fileOut)
+  generalFunctions.writeReadAttributesHeader(fileOut)
+  generalFunctions.writeWriteAttributesHeader(fileOut)
 
 def createHeader(package, plugin):
   nameOfPackage = package['name']
@@ -296,8 +310,8 @@ def createHeader(package, plugin):
   code = open(codeName, 'w')
   fileHeaders.addFilename(code, codeName, nameOfClass)
   fileHeaders.addLicence(code)
-  writeIncludes(code, nameOfPackage, nameOfClass, plugin['extension'])
-  writeClassDefn(code, nameOfClass, nameOfPackage, plugin['extension'])
+  writeIncludes(code, nameOfPackage, nameOfClass, plugin['extension'], plugin['attribs'])
+  writeClassDefn(code, nameOfClass, nameOfPackage, plugin['extension'], plugin['attribs'])
   writeIncludeEnds(code, nameOfClass)
 
   

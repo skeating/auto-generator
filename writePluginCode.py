@@ -10,10 +10,12 @@ import fileHeaders
 import generalFunctions
 import strFunctions
 
-def writeClassDefn(fileOut, nameOfClass, pkg, members):
-  writeConstructors(fileOut, nameOfClass, pkg, members)
-  writeRequiredMethods(fileOut, nameOfClass, members, pkg)
-  writeGetFunctions(fileOut, pkg, members, nameOfClass)
+import writeCode
+
+def writeClassDefn(fileOut, nameOfClass, pkg, members, attribs):
+  writeConstructors(fileOut, nameOfClass, pkg, members, attribs)
+  writeRequiredMethods(fileOut, nameOfClass, members, pkg, attribs)
+  writeGetFunctions(fileOut, pkg, members, nameOfClass, attribs)
   writeOtherFunctions(fileOut, nameOfClass, members)
 
 def writeOtherFunctions(fileOut, nameOfClass, members):
@@ -102,7 +104,7 @@ def writeOtherFunctions(fileOut, nameOfClass, members):
 #  fileOut.write('virtual void enablePackageInternal(const std::string& pkgURI,\n')
 #  fileOut.write('                                   const std::string& pkgPrefix, bool flag);\n\n\n')
 
-def writeConstructors(fileOut, nameOfClass, pkg, members):
+def writeConstructors(fileOut, nameOfClass, pkg, members, attrs):
  # indent = strFunctions.getIndent(nameOfClass)
   fileOut.write('/*\n' )
   fileOut.write(' * Creates a new {0}\n'.format(nameOfClass))
@@ -117,6 +119,7 @@ def writeConstructors(fileOut, nameOfClass, pkg, members):
       fileOut.write('  , m{0}s ({1}ns)\n'.format(mem['name'], pkg.lower()))
     else:
       fileOut.write('  , m{0}  ( NULL )\n'.format(mem['name']))
+  writeCode.writeAttributes(attrs, fileOut, 1)
   fileOut.write('{\n')
   fileOut.write('}\n\n\n')
   fileOut.write('/*\n' )
@@ -131,6 +134,7 @@ def writeConstructors(fileOut, nameOfClass, pkg, members):
     else:
       fileOut.write('  , m{0} ( orig.m{0} )\n'.format(mem['name']))
   fileOut.write('{\n')
+  writeCode.writeCopyAttributes(attrs, fileOut, '    ', 'orig')
   fileOut.write('}\n\n\n')
   fileOut.write('/*\n' )
   fileOut.write(' * Assignment operator for {0}.\n'.format(nameOfClass))
@@ -147,6 +151,7 @@ def writeConstructors(fileOut, nameOfClass, pkg, members):
       fileOut.write('    m{0}s = rhs.m{0}s;\n'.format(mem['name']))
     else:
       fileOut.write('    m{0} = rhs.m{0};\n'.format(mem['name']))
+  writeCode.writeCopyAttributes(attrs, fileOut, '    ', 'rhs')
   fileOut.write('  }\n\n')
   fileOut.write('  return *this;\n')
   fileOut.write('}\n\n\n')
@@ -165,7 +170,7 @@ def writeConstructors(fileOut, nameOfClass, pkg, members):
   fileOut.write('{\n')
   fileOut.write('}\n\n\n')
 
-def writeGetFunctions(fileOut, pkg, members, nameOfClass):
+def writeGetFunctions(fileOut, pkg, members, nameOfClass, attribs):
   fileOut.write('//---------------------------------------------------------------\n')
   fileOut.write('//\n')
   fileOut.write('// Functions for interacting with the members of the plugin\n')
@@ -178,6 +183,9 @@ def writeGetFunctions(fileOut, pkg, members, nameOfClass):
       writeLOFunctions(fileOut, mem['name'], nameOfClass, pkg)
     else:
       writeFunctions(fileOut, mem['name'], nameOfClass, pkg)
+  for i in range (0, len(attribs)):
+    mem = attribs[i]
+    writeCode.writeAttributeCode(attribs, fileOut, nameOfClass, pkg);
   fileOut.write('//---------------------------------------------------------------\n\n\n')
   
 def writeFunctions(fileOut, object, nameOfClass, pkg):
@@ -394,7 +402,7 @@ def writeIncludeEnds(fileOut, element):
   fileOut.write('\n\n');
   fileOut.write('#endif /* __cplusplus */\n\n\n')
 
-def writeRequiredMethods(fileOut, nameOfClass, members, pkg):
+def writeRequiredMethods(fileOut, nameOfClass, members, pkg, attribs):
   fileOut.write('//---------------------------------------------------------------\n')
   fileOut.write('//\n')
   fileOut.write('// overridden virtual functions for read/write/check\n')
@@ -456,6 +464,10 @@ def writeRequiredMethods(fileOut, nameOfClass, members, pkg):
   fileOut.write('  return allPresent; \n')
   fileOut.write('}\n\n\n')
 
+  generalFunctions.writeAddExpectedCPPCode(fileOut, nameOfClass, attribs, 'SBasePlugin')
+  generalFunctions.writeReadAttributesCPPCode(fileOut, nameOfClass, attribs, pkg, False, 'SBasePlugin')
+  generalFunctions.writeWriteAttributesCPPCode(fileOut, nameOfClass, attribs, 'SBasePlugin')
+
 def writeCreateObject(fileOut, mem, ifCount, pkg):
   name = mem['name']
   if ifCount == 1:
@@ -491,7 +503,7 @@ def createCode(package, plugin):
   fileHeaders.addFilename(code, codeName, nameOfClass)
   fileHeaders.addLicence(code)
   writeIncludes(code, nameOfPackage, nameOfClass)
-  writeClassDefn(code, nameOfClass, nameOfPackage, plugin['extension'])
+  writeClassDefn(code, nameOfClass, nameOfPackage, plugin['extension'],plugin['attribs'])
   writeIncludeEnds(code, nameOfClass)
 
   

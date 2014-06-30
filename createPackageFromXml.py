@@ -127,11 +127,38 @@ def parseDeviserXML(filename):
     plugElements = []
     extPoint = getValue( node, 'extensionPoint')
 
+    # read references to elements
     for reference in node.getElementsByTagName('reference'):
       temp = findElement(elements, getValue( reference, 'name'))
       if temp != None:
         plugElements.append(temp)
-    plugins.append( dict({'sbase': extPoint, 'extension': plugElements}))
+
+    attributes = []
+    
+    # read additional attributes
+    for attr in node.getElementsByTagName('attribute'):
+ 
+        attrName = getValue( attr, 'name')
+        required = toBool(getValue( attr, 'required'))
+        type = getValue( attr, 'type')
+        attrAbstract = toBool(getValue( attr, 'abstract'))
+        attrElement = getValue( attr, 'element')
+     
+
+        attribute_dict = dict({
+                                 'type': type, 
+                                 'reqd' : required, 
+                                 'name' : attrName, 
+                                 'element':attrElement, 
+                                 'abstract':attrAbstract
+                                 })
+        if attrAbstract:
+          attribute_dict['concrete'] = concrete_dict[attrElement]
+
+        attributes.append(attribute_dict)
+
+    plugin_dict = dict({'sbase': extPoint, 'extension': plugElements, 'attribs':attributes})
+    plugins.append( plugin_dict)
 
 
   return dict({
