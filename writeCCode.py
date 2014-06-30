@@ -161,9 +161,10 @@ def writeGetFunction(attrib, output, element):
     output.write('(const {0}_t * {1})\n'.format(element, varname))
     output.write('{\n')
     if attType == 'string':
-      output.write('\tif ({0} == NULL)\n'.format(varname))
-      output.write('\t\treturn NULL;\n\n')
-      output.write('\treturn {0}->get{1}().empty() ? NULL : safe_strdup({0}->get{1}().c_str());\n'.format(varname, capAttName))
+      output.write('\treturn ({0} != NULL && {0}->isSet{1}()) ? {0}->get{1}().c_str() : NULL;\n'.format(varname, capAttName))
+#      output.write('\tif ({0} == NULL)\n'.format(varname))
+#      output.write('\t\treturn NULL;\n\n')
+#      output.write('\treturn {0}->get{1}().empty() ? NULL : safe_strdup({0}->get{1}().c_str());\n'.format(varname, capAttName))
     elif num == True:
       if attTypeCode == 'double':
         output.write('\treturn ({0} != NULL) ? {0}->get{1}() : numeric_limits<double>::quiet_NaN();\n'.format(varname, capAttName))
@@ -250,7 +251,11 @@ def writeSetFunction(attrib, output, element):
       output.write('({0}_t * {1},'.format(element, varname))
       output.write(' {0} {1})\n'.format(attTypeCode, attName))
       output.write('{\n')
-      output.write('  return ({0} != NULL) ? {0}->set{1}({2}) : LIBSBML_INVALID_OBJECT;\n'.format(varname, capAttName, attName))
+      output.write('  if ({} != NULL)\n'.format(varname))
+      output.write('    return ({0} == NULL) ? {1}->set{2}("") : {1}->set{2}({0});\n'.format(attName, varname, capAttName))
+      output.write('  else\n')
+      output.write('    return LIBSBML_INVALID_OBJECT;\n')
+#      output.write('  return ({0} != NULL) ? {0}->set{1}({2}) : LIBSBML_INVALID_OBJECT;\n'.format(varname, capAttName, attName))
       output.write('}\n\n\n')
   elif attrib['type'] == 'element':
     if attrib['name'] == 'Math' or attrib['name'] == 'math':
