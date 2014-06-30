@@ -13,9 +13,6 @@ import strFunctions
 
 def writeConstructors(element, package, output):
   indent = strFunctions.getIndent(element)
-  output.write('/*\n')
-  output.write(' * \n')
-  output.write(' */\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('{0}_t *\n'.format(element))
   output.write('{0}_create'.format(element))
@@ -34,9 +31,6 @@ def writeConstructors(element, package, output):
 #  output.write('{\n')
 #  output.write('  return new {0}(sbmlns);\n'.format(element))
 #  output.write('}\n\n\n')
-  output.write('/*\n')
-  output.write(' * \n')
-  output.write(' */\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('void\n')
   output.write('{0}_free'.format(element))
@@ -45,9 +39,6 @@ def writeConstructors(element, package, output):
   output.write('  if ({0} != NULL)\n'.format(strFunctions.objAbbrev(element)))
   output.write('    delete {0};\n'.format(strFunctions.objAbbrev(element)))
   output.write('}\n\n\n')
-  output.write('/*\n')
-  output.write(' *\n')
-  output.write(' */\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('{0}_t *\n'.format(element))
   output.write('{0}_clone'.format(element))
@@ -65,17 +56,17 @@ def writeConstructors(element, package, output):
 
 def writeAttributeFunctions(attrs, output, element):
   for i in range(0, len(attrs)):
-    if attrs[i]['type'] != 'lo_element':
-      writeGetFunction(attrs[i], output, element)
+	if attrs[i]['type'] != 'lo_element':
+		writeGetFunction(attrs[i], output, element)
   for i in range(0, len(attrs)):
-    if attrs[i]['type'] != 'lo_element':
-      writeIsSetFunction(attrs[i], output, element)
+	if attrs[i]['type'] != 'lo_element':
+		writeIsSetFunction(attrs[i], output, element)
   for i in range(0, len(attrs)):
-    if attrs[i]['type'] != 'lo_element':
-      writeSetFunction(attrs[i], output, element)
+	if attrs[i]['type'] != 'lo_element':
+		writeSetFunction(attrs[i], output, element)
   for i in range(0, len(attrs)):
-    if attrs[i]['type'] != 'lo_element':
-      writeUnsetFunction(attrs[i], output, element)
+	if attrs[i]['type'] != 'lo_element':
+		writeUnsetFunction(attrs[i], output, element)
   for i in range(0, len(attrs)):
     if attrs[i]['type'] == 'lo_element':
       writeListOfSubElements(attrs[i], output, element)
@@ -158,24 +149,22 @@ def writeGetFunction(attrib, output, element):
   else:
     attTypeCode = att[3]
   num = att[4]
-  if attrib['type'] == 'element' or attrib['type'] == 'lo_element':
+  if attrib['type'] == 'lo_element':
     return
   varname = strFunctions.objAbbrev(element)
-  output.write('/*\n')
-  output.write(' *\n')
-  output.write(' */\n')
   if attrib['type'] == 'std::vector<double>':
     return
   elif attrib['type'] != 'element' and attrib['type'] != 'lo_element' and attrib['type'] != 'XMLNode*':
     output.write('LIBSBML_EXTERN\n')
     output.write('{0}\n'.format(attTypeCode))
     output.write('{0}_get{1}'.format(element, capAttName))
-    output.write('({0}_t * {1})\n'.format(element, varname))
+    output.write('(const {0}_t * {1})\n'.format(element, varname))
     output.write('{\n')
     if attType == 'string':
-      output.write('\tif ({0} == NULL)\n'.format(varname))
-      output.write('\t\treturn NULL;\n\n')
-      output.write('\treturn {0}->get{1}().empty() ? NULL : safe_strdup({0}->get{1}().c_str());\n'.format(varname, capAttName))
+      output.write('\treturn ({0} != NULL && {0}->isSet{1}()) ? {0}->get{1}().c_str() : NULL;\n'.format(varname, capAttName))
+#      output.write('\tif ({0} == NULL)\n'.format(varname))
+#      output.write('\t\treturn NULL;\n\n')
+#      output.write('\treturn {0}->get{1}().empty() ? NULL : safe_strdup({0}->get{1}().c_str());\n'.format(varname, capAttName))
     elif num == True:
       if attTypeCode == 'double':
         output.write('\treturn ({0} != NULL) ? {0}->get{1}() : numeric_limits<double>::quiet_NaN();\n'.format(varname, capAttName))
@@ -197,13 +186,13 @@ def writeGetFunction(attrib, output, element):
   elif attrib['type'] == 'element':
     if attrib['name'] == 'Math' or attrib['name'] == 'math':
       output.write('LIBSBML_EXTERN\n')
-      output.write('ASTNode_t*\n')
+      output.write('const ASTNode_t*\n')
       output.write('{0}_get{1}'.format(element, capAttName))
-      output.write('({0}_t * {1})\n'.format(element, varname))
+      output.write('(const {0}_t * {1})\n'.format(element, varname))
       output.write('{\n')
       output.write('\tif ({0} == NULL)\n'.format(varname))
       output.write('\t\treturn NULL;\n\n')
-      output.write('\treturn (ASTNode_t*){0}->get{1}();\n'.format(varname, capAttName))
+      output.write('\treturn (ASTNode_t*)({0}->get{1}());\n'.format(varname, capAttName))
       output.write('}\n\n\n')
     else:
       output.write('LIBSBML_EXTERN\n')
@@ -236,13 +225,10 @@ def writeIsSetFunction(attrib, output, element):
   if attrib['type'] == 'lo_element':
     return
   varname = strFunctions.objAbbrev(element)
-  output.write('/*\n')
-  output.write(' *\n')
-  output.write(' */\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('int\n')
   output.write('{0}_isSet{1}'.format(element, capAttName))
-  output.write('({0}_t * {1})\n'.format(element, varname))
+  output.write('(const {0}_t * {1})\n'.format(element, varname))
   output.write('{\n')
   output.write('  return ({0} != NULL) ? static_cast<int>({0}->isSet{1}()) : 0;\n'.format(varname, capAttName))
   output.write('}\n\n\n')
@@ -258,9 +244,6 @@ def writeSetFunction(attrib, output, element):
   if attrib['type'] == 'lo_element':
     return
   varname = strFunctions.objAbbrev(element)
-  output.write('/*\n')
-  output.write(' *\n')
-  output.write(' */\n')
   if attrib['type'] != 'element' and attrib['type'] != 'lo_element':
       output.write('LIBSBML_EXTERN\n')
       output.write('int\n')
@@ -268,7 +251,11 @@ def writeSetFunction(attrib, output, element):
       output.write('({0}_t * {1},'.format(element, varname))
       output.write(' {0} {1})\n'.format(attTypeCode, attName))
       output.write('{\n')
-      output.write('  return ({0} != NULL) ? {0}->set{1}({2}) : LIBSBML_INVALID_OBJECT;\n'.format(varname, capAttName, attName))
+      output.write('  if ({} != NULL)\n'.format(varname))
+      output.write('    return ({0} == NULL) ? {1}->set{2}("") : {1}->set{2}({0});\n'.format(attName, varname, capAttName))
+      output.write('  else\n')
+      output.write('    return LIBSBML_INVALID_OBJECT;\n')
+#      output.write('  return ({0} != NULL) ? {0}->set{1}({2}) : LIBSBML_INVALID_OBJECT;\n'.format(varname, capAttName, attName))
       output.write('}\n\n\n')
   elif attrib['type'] == 'element':
     if attrib['name'] == 'Math' or attrib['name'] == 'math':
@@ -276,7 +263,7 @@ def writeSetFunction(attrib, output, element):
       output.write('int\n')
       output.write('{0}_set{1}'.format(element, capAttName))
       output.write('({0}_t * {1},'.format(element, varname))
-      output.write(' {0} {1})\n'.format('ASTNode_t*', attName))
+      output.write(' const {0} {1})\n'.format('ASTNode_t*', attName))
       output.write('{\n')
       output.write('\treturn ({0} != NULL) ? {0}->set{1}({2}) : LIBSBML_INVALID_OBJECT;\n'.format(varname, capAttName, attName))
       output.write('}\n\n\n')
@@ -297,12 +284,9 @@ def writeUnsetFunction(attrib, output, element):
   attType = att[2]
   attTypeCode = att[3]
   num = att[4]
-  if attrib['type'] == 'lo_element':
+  if attrib['type'] == 'lo_element' or attrib['type'] == 'element':
     return
   varname = strFunctions.objAbbrev(element)
-  output.write('/*\n')
-  output.write(' *\n')
-  output.write(' */\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('int\n')
   output.write('{0}_unset{1}'.format(element, capAttName))
@@ -314,26 +298,20 @@ def writeUnsetFunction(attrib, output, element):
  
 def writeHasReqdAttrFunction(output, element):
   varname = strFunctions.objAbbrev(element)
-  output.write('/*\n')
-  output.write(' *\n')
-  output.write(' */\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('int\n')
   output.write('{0}_hasRequiredAttributes'.format(element))
-  output.write('({0}_t * {1})\n'.format(element, varname))
+  output.write('(const {0}_t * {1})\n'.format(element, varname))
   output.write('{\n')
   output.write('  return ({0} != NULL) ? static_cast<int>({0}->hasRequiredAttributes()) : 0;\n'.format(varname))
   output.write('}\n\n\n')
 
 def writeHasReqdElementsFunction(output, element):
   varname = strFunctions.objAbbrev(element)
-  output.write('/**\n')
-  output.write(' *\n')
-  output.write(' */\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('int\n')
   output.write('{0}_hasRequiredElements'.format(element))
-  output.write('({0}_t * {1})\n'.format(element, varname))
+  output.write('(const {0}_t * {1})\n'.format(element, varname))
   output.write('{\n')
   output.write('\treturn ({0} != NULL) ? static_cast<int>({0}->hasRequiredElements()) : 0;\n'.format(varname))
   output.write('}\n\n\n')
