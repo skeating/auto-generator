@@ -273,6 +273,10 @@ def writeTypeDefns(fileOut, nameOfClass, nameOfPkg, elements, number, enums):
     fileOut.write('const char *\n')
     fileOut.write('{0}_toString({0}_t code);\n\n\n'.format(current['name']))
 
+    fileOut.write('LIBSBML_EXTERN\n')
+    fileOut.write('{0}_t\n'.format(current['name']))
+    fileOut.write('{0}_parse(const char* code);\n\n\n'.format(current['name']))
+
 
 def createHeader(package):
   nameOfPackage = package['name']

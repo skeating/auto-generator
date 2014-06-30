@@ -382,7 +382,7 @@ def writeTypeDefns(fileOut, nameOfClass, pkg, elements, number, enums):
     fileOut.write('   "Unknown {0}"\n'.format(current['name']))
     for j in range(0, numValues):
       fileOut.write(' , "{0}"\n'.format(values[j]['value']))
-    fileOut.write('};\n')
+    fileOut.write('};\n\n\n')
 
     fileOut.write('/*\n')
     fileOut.write(' * This method takes a type code from the {0} enum and returns a string representing \n'.format(current['name']))
@@ -398,6 +398,23 @@ def writeTypeDefns(fileOut, nameOfClass, pkg, elements, number, enums):
     fileOut.write('    return "(Unknown {0} value)";\n'.format(current['name']))
     fileOut.write('  }\n')
     fileOut.write('\n  return SBML_{0}_STRINGS[typeCode - min];\n'.format(current['name'].upper()))
+    fileOut.write('}\n\n\n')
+
+    fileOut.write('/*\n')
+    fileOut.write(' * This method takes a string and tries to find a {0} code to match it\n'.format(current['name']))
+    fileOut.write(' */\n')
+    fileOut.write('LIBSBML_EXTERN\n')
+    fileOut.write('{0}_t\n'.format(current['name']))
+    fileOut.write('{0}_parse(const char* code)\n'.format(current['name']))
+    fileOut.write('{\n')
+    fileOut.write('  static const int size = sizeof(SBML_{0}_STRINGS) / sizeof(SBML_{0}_STRINGS[0]);\n'.format(current['name'].upper()))
+    fileOut.write('  unsigned int i;\n')
+    fileOut.write('  for (i = 0; i < size; ++i)\n')
+    fileOut.write('  {\n')
+    fileOut.write('    if (type == SBML_{0}_STRINGS[i])\n'.format(current['name'].upper()))
+    fileOut.write('      return ({0}_t)i;\n'.format(current['name']))
+    fileOut.write('  }\n')
+    fileOut.write('  return {0}_UNKNOWN;\n'.format(current['name'].upper()))
     fileOut.write('}\n\n\n')
 
 
