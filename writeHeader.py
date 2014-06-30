@@ -374,8 +374,12 @@ def writeIncludes(fileOut, element, pkg, attribs):
   fileOut.write('#include <sbml/packages/{0}/extension/{1}Extension.h>\n'.format(pkg.lower(), pkg))
   fileOut.write('\n');
   for i in range (0, len(attribs)):
-    if (attribs[i]['type'] == 'element' or attribs[i]['type'] == 'lo_element') and attribs[i]['name'] != 'math':
-      fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), strFunctions.cap(attribs[i]['name'])))
+    current = attribs[i]
+    if (current['type'] == 'element' or current['type'] == 'lo_element') and current['name'] != 'math':
+      if current['type'] != 'element':
+        fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), strFunctions.cap(attribs[i]['name'])))
+      else: 
+        fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), strFunctions.cap(attribs[i]['element'])))
   fileOut.write('\nLIBSBML_CPP_NAMESPACE_BEGIN\n')
   fileOut.write('\n\n');
   
