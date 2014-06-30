@@ -88,6 +88,8 @@ def writeAtt(attrib, output):
   elif attType == 'boolean':
     output.write('  bool          m{0};\n'.format(capAttName))
     output.write('  bool          mIsSet{0};\n'.format(capAttName))
+  elif attrib['type'] == 'enum':
+    output.write('  {0}_t   m{1};\n'.format(attrib['element'], capAttName))
   else:
     output.write('  FIX ME   {0};\n'.format(attName))
  

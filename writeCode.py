@@ -33,11 +33,11 @@ def writeIncludes(fileOut, element, pkg, hasMath=False):
 # writes list of attributes
 def writeAttributes(attrs, output, constType=0, pkg=""):
   for i in range(0, len(attrs)):
-    writeAtt(attrs[i]['type'], attrs[i]['name'], output, constType, pkg)
+    writeAtt(attrs[i]['type'], attrs[i]['name'], output, constType, pkg, attrs[i])
   #  output.write('\n')
 
 
-def writeAtt(atttype, name, output, constType, pkg):
+def writeAtt(atttype, name, output, constType, pkg, attrib):
   if atttype == 'SId' or atttype == 'SIdRef' or atttype == 'UnitSId' or atttype == 'UnitSIdRef' or atttype == 'string':
     output.write('   ,m{0} ("")\n'.format(strFunctions.cap(name)))
   elif atttype == 'element':
@@ -62,6 +62,8 @@ def writeAtt(atttype, name, output, constType, pkg):
   elif atttype == 'bool':
     output.write('   ,m{0} (false)\n'.format(strFunctions.cap(name)))
     output.write('   ,mIsSet{0} (false)\n'.format(strFunctions.cap(name)))
+  elif atttype == 'enum':
+    output.write('   ,m{0} ({1}_UNKNOWN)\n'.format(strFunctions.cap(name), attrib['element'].upper()))
   else:
     output.write('  FIX ME   {0};\n'.format(name))
 
@@ -230,6 +232,8 @@ def writeIsSetCode(attrib, output, element):
     output.write('  return mIsSet{0};\n'.format(capAttName))
   elif attType == 'boolean':
     output.write('  return mIsSet{0};\n'.format(capAttName))
+  elif attrib['type'] == 'enum':
+    output.write('  return m{0} != {1}_UNKNOWN;\n'.format(capAttName, attrib['element'].upper()))
   output.write('}\n\n\n')
 
 
@@ -266,6 +270,9 @@ def writeSetCode(attrib, output, element):
   elif num == True:
     output.write('  m{0} = {1};\n'.format(capAttName, attName))
     output.write('  mIsSet{0} = true;\n'.format(capAttName))
+    output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
+  elif attrib['type'] == 'enum':
+    output.write('  m{0} = {1};\n'.format(capAttName, attName))
     output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
   elif attType == 'boolean':
     output.write('  m{0} = {1};\n'.format(capAttName, attName))
@@ -350,6 +357,9 @@ def writeUnsetCode(attrib, output, element):
   elif attType == 'element':
     output.write('  delete m{0};\n'.format(capAttName))
     output.write('  m{0} = NULL;\n'.format(capAttName))
+    output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
+  elif attrib['type'] == 'enum':
+    output.write('  m{0} = {1}_UNKNOWN;\n'.format(capAttName, attrib['element'].upper()))
     output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
   output.write('}\n\n\n')
 

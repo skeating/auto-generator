@@ -103,6 +103,10 @@ def parseAttribute(attrib):
     attType = 'XMLNode*'
     attTypeCode = 'XMLNode*'
     num = False
+  elif attrib['type'] == 'enum':
+    attType = '{0}_t'.format(attrib['element'])
+    attTypeCode = '{0}_t'.format(attrib['element'])
+    num = False
   else:
     attType = 'FIX ME'
     attTypeCode = 'FIX ME'
@@ -165,6 +169,10 @@ def parseAttributeForC(attrib):
   elif attrib['type'] == 'XMLNode*':
     attType = 'XMLNode*'
     attTypeCode = 'XMLNode*'
+    num = False
+  elif attrib['type'] == 'enum':
+    attType = '{0}_t'.format(attrib['element'])
+    attTypeCode = '{0}_t'.format(attrib['element'])
     num = False
   else:
     attType = 'FIX ME'
@@ -507,6 +515,26 @@ def writeReadAttribute(output, attrib, element, pkg):
       output.write('    getErrorLog()->logPackageError("{0}", {1}UnknownError,\n'.format(pkg.lower(), pkg))
       output.write('                   getPackageVersion(), sbmlLevel, sbmlVersion, message);\n')
     output.write('  }\n\n')
+  elif attrib['type'] == 'enum':
+    output.write('  //\n  // {0} enum'.format(attName))
+    output.write('  ( use = "{0}" )\n  //\n'.format(use))
+    output.write('  m{0} = {1}_UNKNOWN;\n'.format(capAttName, attrib['element'].upper()))
+    output.write('  {\n');
+    output.write('    const std::string stringValue;\n');
+    output.write('    assigned = attributes.readInto("{0}", stringValue);\n\n'.format(attName))
+    output.write('    if (assigned == true)\n')
+    output.write('    {\n')
+    output.write('      // parse enum\n\n')
+    output.write('      m{0} = {1}_parse(stringValue.c_str());\n'.format(capAttName, attrib['element']))
+    output.write('    }\n')
+    output.write('  }\n')
+    if use == 'required':
+      output.write('  if(m{0} == {1}_UNKNOWN)\n'.format(capAttName, attrib['element'].upper()))
+      output.write('  {\n')
+      output.write('    std::string message = "{0} attribute \'{1}\' is missing.";\n'.format(pkg, attName))
+      output.write('    getErrorLog()->logPackageError("{0}", {1}UnknownError,\n'.format(pkg.lower(), pkg))
+      output.write('                   getPackageVersion(), sbmlLevel, sbmlVersion, message);\n')
+    output.write('  }\n\n')
   elif attrib['type'] == 'string':
     output.write('  //\n  // {0} string '.format(attName))
     output.write('  ( use = "{0}" )\n  //\n'.format(use))
@@ -664,7 +692,7 @@ def writeReadAttribute(output, attrib, element, pkg):
     # output.write('                   getPackageVersion(), sbmlLevel, sbmlVersion);\n')
     # output.write('    }\n')
     # output.write('  }\n')
-  elif attrib['type'] == 'element':
+  elif attrib['type'] == 'element' or attrib['type'] == 'lo_element' or attrib['type'] == 'array':
     return
   else:
     attType = 'FIX ME'
@@ -830,7 +858,9 @@ def writeWriteAttributesCPPCode(outFile, element, attribs, baseClass='SBase'):
   for i in range (0, len(attribs)):
     if attribs[i]['type'] != 'element' and attribs[i]['type'] != 'XMLNode*' and attribs[i]['type'] != 'lo_element' and attribs[i]['type'] != 'std::vector<double>':
       outFile.write('\tif (isSet{0}() == true)\n'.format(strFunctions.cap(attribs[i]['name'])))
-      if attribs[i].has_key('attName'): 
+      if attribs[i]['type'] == 'enum': 
+        outFile.write('\t\tstream.writeAttribute("{0}", getPrefix(), {1}_toString(m{2}));\n\n'.format(attribs[i]['name'], attribs[i]['element'], strFunctions.cap(attribs[i]['name'])))	 
+      elif attribs[i].has_key('attName'): 
         outFile.write('\t\tstream.writeAttribute("{0}", getPrefix(), m{1});\n\n'.format(attribs[i]['attName'], strFunctions.cap(attribs[i]['name'])))	 
       else:
         outFile.write('\t\tstream.writeAttribute("{0}", getPrefix(), m{1});\n\n'.format(attribs[i]['name'], strFunctions.cap(attribs[i]['name'])))	 
