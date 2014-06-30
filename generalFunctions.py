@@ -84,8 +84,7 @@ def parseAttribute(attrib):
     if attrib['name'] == 'math' or attrib['name'] == 'Math':
       attTypeCode = 'ASTNode*'
     else:
-      if attrib.has_key('element'):
-	    attTypeCode = '{0}*'.format(attrib['element'])
+      if attrib.has_key('element'):attTypeCode = '{0}*'.format(attrib['element'])
       else:
         attTypeCode = '{0}*'.format(strFunctions.cap(attrib['name']))
     num = False
@@ -156,7 +155,7 @@ def parseAttributeForC(attrib):
       attTypeCode = 'ASTNode_t*'
     else:
       #attTypeCode = 'element-not-done'
-	  attTypeCode = '{0}*'.format(strFunctions.cap(attrib['name']))
+      attTypeCode = '{0}*'.format(strFunctions.cap(attrib['name']))
     num = False
   elif attrib['type'] == 'lo_element':
     attType = 'lo_element'

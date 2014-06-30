@@ -165,7 +165,9 @@ pip-log.txt
 
 # generated files
 
-spatial
+spatial*
+distrib*
+multi*
 create*bat
 
 .idea

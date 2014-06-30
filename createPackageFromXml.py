@@ -48,9 +48,24 @@ def parseDeviserXML(filename):
   number = toInt(getValue( dom.documentElement, 'number'))
   offset = toInt(getValue( dom.documentElement, 'offset'))
 
+  concrete_dict = dict({})
+
+  # read concrete versions of abstract classes and fill dictionary
+  for node in dom.getElementsByTagName('element'):
+    elementName = getValue( node, 'name')
+    concrete_list = []
+    for concrete in node.getElementsByTagName('concrete'):
+      concrete_list.append(
+                           dict({
+                                 'name': getValue(concrete, "name"), 
+                                 'element':getValue(concrete, "element")}))
+    concrete_dict[elementName] = concrete_list;
+
+  # read element
   for node in dom.getElementsByTagName('element'):
     
     elementName = getValue( node, 'name')
+    baseClass = getValue( node, 'baseClass')
     typeCode = getValue( node, 'typeCode')
     hasMath = toBool( getValue( node, 'hasMath'))
     hasChildren = toBool( getValue( node, 'hasChildren'))
@@ -59,6 +74,7 @@ def parseDeviserXML(filename):
 
     attributes = []
     
+    # add attributes
     for attr in node.getElementsByTagName('attribute'):
  
         attrName = getValue( attr, 'name')
@@ -68,14 +84,21 @@ def parseDeviserXML(filename):
         attrElement = getValue( attr, 'element')
      
 
-        attributes.append(dict({
+        attribute_dict = dict({
                                  'type': type, 
                                  'reqd' : required, 
                                  'name' : attrName, 
                                  'element':attrElement, 
                                  'abstract':attrAbstract
-                                 }))
+                                 })
+        if attrAbstract:
+          attribute_dict['concrete'] = concrete_dict[attrElement]
 
+        attributes.append(attribute_dict)
+
+          
+
+    # construct element
     element = dict({
                     'name': elementName, 
                     'package': packageName, 
@@ -84,9 +107,13 @@ def parseDeviserXML(filename):
                     'attribs':attributes, 
                     'hasChildren':hasChildren, 
                     'hasMath':hasMath, 
+                    'baseClass': baseClass,
                     'abstract' : abstract
                     })     
     
+    if abstract:
+      element['concrete'] = concrete_dict[elementName]
+
     elements.append(
                     dict({
                           'name': elementName, 

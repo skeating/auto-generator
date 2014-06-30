@@ -356,14 +356,14 @@ def writeUnsetCode(attrib, output, element):
 # for each attribute write a set/get/isset/unset
 def writeAttributeCode(attrs, output, element, pkgName):
   for i in range(0, len(attrs)):
-	if attrs[i]['type'] != 'lo_element':
-		writeGetCode(attrs[i], output, element)
+    if attrs[i]['type'] != 'lo_element':
+      writeGetCode(attrs[i], output, element)
   for i in range(0, len(attrs)):
-	if attrs[i]['type'] != 'lo_element':
-		writeIsSetCode(attrs[i], output, element)
+    if attrs[i]['type'] != 'lo_element':
+      writeIsSetCode(attrs[i], output, element)
   for i in range(0, len(attrs)):
-	if attrs[i]['type'] != 'lo_element':
-		writeSetCode(attrs[i], output, element)
+    if attrs[i]['type'] != 'lo_element':
+      writeSetCode(attrs[i], output, element)
   for i in range(0, len(attrs)):
     writeUnsetCode(attrs[i], output, element)
   for i in range(0, len(attrs)):
