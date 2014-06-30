@@ -409,6 +409,7 @@ def writeTypeDefns(fileOut, nameOfClass, pkg, elements, number, enums):
     fileOut.write('{\n')
     fileOut.write('  static const int size = sizeof(SBML_{0}_STRINGS) / sizeof(SBML_{0}_STRINGS[0]);\n'.format(current['name'].upper()))
     fileOut.write('  unsigned int i;\n')
+    fileOut.write('  std::string type(code);\n')
     fileOut.write('  for (i = 0; i < size; ++i)\n')
     fileOut.write('  {\n')
     fileOut.write('    if (type == SBML_{0}_STRINGS[i])\n'.format(current['name'].upper()))
