@@ -174,6 +174,8 @@ def writeGetFunction(attrib, output, element):
       output.write('\treturn ({0} != NULL) ? static_cast<int>({0}->get{1}()) : 0;\n'.format(varname, capAttName))
     elif attrib['type'] == 'array':
       output.write('\treturn ({0} != NULL) ? {0}->get{1}() : NULL;\n'.format(varname, capAttName))
+    elif attrib['type'] == 'enum':
+      output.write('\treturn ({0} != NULL) ? {0}->get{1}() : {2}KIND_UNKNOWN;\n'.format(varname, capAttName, capAttName.upper()))
     output.write('}\n\n\n')
   elif attrib['type'] == 'XMLNode*':
       output.write('LIBSBML_EXTERN\n')
@@ -254,7 +256,7 @@ def writeSetFunction(attrib, output, element):
       output.write(' {0} {1})\n'.format(attTypeCode, attName))
       output.write('{\n')
       output.write('  if ({} != NULL)\n'.format(varname))
-      if attrib['type'] == 'array' or num:
+      if attrib['type'] == 'array' or num or attrib['type'] == 'enum':
         output.write('    return ({0} == NULL) ? {1}->unset{2}() : {1}->set{2}({0});\n'.format(attName, varname, capAttName))
       else:
         output.write('    return ({0} == NULL) ? {1}->set{2}("") : {1}->set{2}({0});\n'.format(attName, varname, capAttName))

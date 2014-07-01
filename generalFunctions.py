@@ -526,7 +526,7 @@ def writeReadAttribute(output, attrib, element, pkg):
     output.write('  ( use = "{0}" )\n  //\n'.format(use))
     output.write('  m{0} = {1}_UNKNOWN;\n'.format(capAttName, attrib['element'].upper()))
     output.write('  {\n');
-    output.write('    const std::string stringValue;\n');
+    output.write('    std::string stringValue;\n');
     output.write('    assigned = attributes.readInto("{0}", stringValue);\n\n'.format(attName))
     output.write('    if (assigned == true)\n')
     output.write('    {\n')
