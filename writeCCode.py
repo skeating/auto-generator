@@ -119,7 +119,7 @@ def writeListOfSubElements(attrib, output, element):
   output.write('unsigned int\n')
   output.write('{0}_getNum{1}s({0}_t * {2})\n' .format(element, strFunctions.cap(attrib['name']), strFunctions.objAbbrev(element)))
   output.write('{\n')
-  output.write('\treturn  ({0} != NULL) ? {0}->getNum{1}s() : SEDML_INT_MAX;\n'.format(strFunctions.objAbbrev(element),strFunctions.cap(attrib['name'])))
+  output.write('\treturn  ({0} != NULL) ? {0}->getNum{1}s() : SBML_INT_MAX;\n'.format(strFunctions.objAbbrev(element),strFunctions.cap(attrib['name'])))
   output.write('}\n\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('{0}_t *\n'.format(attrib['element']))
@@ -145,7 +145,7 @@ def writeGetFunction(attrib, output, element):
   capAttName = att[1]
   attType = att[2]
   if att[3] == 'const char *':
-    attTypeCode = 'char *'
+    attTypeCode = 'const char *'
   else:
     attTypeCode = att[3]
   num = att[4]
@@ -169,7 +169,7 @@ def writeGetFunction(attrib, output, element):
       if attTypeCode == 'double':
         output.write('\treturn ({0} != NULL) ? {0}->get{1}() : numeric_limits<double>::quiet_NaN();\n'.format(varname, capAttName))
       else:
-        output.write('\treturn ({0} != NULL) ? {0}->get{1}() : SEDML_INT_MAX;\n'.format(varname, capAttName))
+        output.write('\treturn ({0} != NULL) ? {0}->get{1}() : SBML_INT_MAX;\n'.format(varname, capAttName))
     elif attType == 'boolean':
       output.write('\treturn ({0} != NULL) ? static_cast<int>({0}->get{1}()) : 0;\n'.format(varname, capAttName))
     output.write('}\n\n\n')

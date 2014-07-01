@@ -352,13 +352,16 @@ def writeClass(attributes, header, nameOfElement, nameOfPackage, hasChildren, ha
   if hasChildren == True:
     generalFunctions.writeGetAllElements(header)    
   generalFunctions.writeCommonHeaders(header, nameOfElement, attributes, False, hasChildren, hasMath)
-  generalFunctions.writeInternalHeaders(header, hasChildren)
+  generalFunctions.writeInternalHeaders(header, isListOf, hasChildren)
   header.write('protected:\n\n')
   generalFunctions.writeProtectedHeaders(header, attributes, hasChildren, hasMath)
   header.write('\n};\n\n')
  
 # write the include files
-def writeIncludes(fileOut, element, pkg, attribs):
+def writeIncludes(fileOut, element, pkg, attribs, elementDict):
+  baseClass = 'SBase'
+  if elementDict.has_key('baseClass'):
+    baseClass = elementDict['baseClass']
   fileOut.write('\n\n');
   fileOut.write('#ifndef {0}_H__\n'.format(element))
   fileOut.write('#define {0}_H__\n'.format(element))
@@ -374,6 +377,8 @@ def writeIncludes(fileOut, element, pkg, attribs):
   fileOut.write('#include <sbml/SBase.h>\n')
   fileOut.write('#include <sbml/ListOf.h>\n')
   fileOut.write('#include <sbml/packages/{0}/extension/{1}Extension.h>\n'.format(pkg.lower(), pkg))
+  if baseClass != 'SBase':
+    fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), baseClass))
   fileOut.write('\n');
   for i in range (0, len(attribs)):
     current = attribs[i]
@@ -416,7 +421,7 @@ def createHeader(element):
   header = open(headerName, 'w')
   fileHeaders.addFilename(header, headerName, nameOfElement)
   fileHeaders.addLicence(header)
-  writeIncludes(header, nameOfElement, nameOfPackage, attributes)
+  writeIncludes(header, nameOfElement, nameOfPackage, attributes, element)
   writeClass(attributes, header, nameOfElement, nameOfPackage, hasChildren, hasMath, False, element)
   if isListOf == True:
     writeListOfHeader.createHeader(element, header)

@@ -343,8 +343,6 @@ def writeSetDocCPPCode(outFile, element,attribs, baseClass='SBase'):
   writeInternalEnd(outFile)
 
 def writeConnectHeader(outFile, isListOf=False, hasChildren=False):
-  if isListOf or hasChildren==False:
-    return;
   writeInternalStart(outFile)
   outFile.write('  /**\n')
   outFile.write('   * Connects to child elements.\n')
@@ -1030,7 +1028,7 @@ def writeCommonHeaders(outFile, element, attribs, isListOf, hasChildren=False, h
     writeHasReqdElementsHeader(outFile, element, attribs)
 
 
-def writeInternalHeaders(outFile, isListOf, hasChildren=False):
+def writeInternalHeaders(outFile, isListOf, hasChildren):
   writeWriteElementsHeader(outFile)
   writeAcceptHeader(outFile)
   writeSetDocHeader(outFile)
