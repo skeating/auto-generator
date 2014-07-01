@@ -175,7 +175,7 @@ def writeGetFunction(attrib, output, element):
     elif attrib['type'] == 'array':
       output.write('\treturn ({0} != NULL) ? {0}->get{1}() : NULL;\n'.format(varname, capAttName))
     elif attrib['type'] == 'enum':
-      output.write('\treturn ({0} != NULL) ? {0}->get{1}() : {2}KIND_UNKNOWN;\n'.format(varname, capAttName, capAttName.upper()))
+      output.write('\treturn ({0} != NULL) ? {0}->get{1}() : {2}_UNKNOWN;\n'.format(varname, capAttName, attrib['element'].upper()))
     output.write('}\n\n\n')
   elif attrib['type'] == 'XMLNode*':
       output.write('LIBSBML_EXTERN\n')

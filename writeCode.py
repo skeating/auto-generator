@@ -305,19 +305,19 @@ def writeSetCode(attrib, output, element):
     output.write('    delete m{0};\n'.format(capAttName))
     output.write('    m{0} = NULL;\n'.format(capAttName))
     output.write('    return LIBSBML_OPERATION_SUCCESS;\n  }\n')
-    if attTypeCode == 'ASTNode*':
+    if attTypeCode == 'const ASTNode*':
       output.write('  else if (!({0}->isWellFormedASTNode()))\n'.format(attName))
       output.write('  {\n    return LIBSBML_INVALID_OBJECT;\n  }\n')
     output.write('  else\n  {\n')
     output.write('    delete m{0};\n'.format(capAttName))
     output.write('    m{0} = ({1} != NULL) ?\n'.format(capAttName, attName))
-    if attTypeCode == 'ASTNode*':
+    if attTypeCode == 'const ASTNode*':
       output.write('      {0}->deepCopy() : NULL;\n'.format(attName))
     else:
       output.write('      static_cast<{0}*>({1}->clone()) : NULL;\n'.format(capAttName, attName))
     output.write('    if (m{0} != NULL)\n'.format(capAttName))
     output.write('    {\n')
-    if attTypeCode == 'ASTNode*':
+    if attTypeCode == 'const ASTNode*':
       output.write('      m{0}->setParentSBMLObject(this);\n'.format(capAttName, attName))
     else:
       output.write('      m{0}->connectToParent(this);\n'.format(capAttName, attName))

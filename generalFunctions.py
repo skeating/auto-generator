@@ -82,7 +82,7 @@ def parseAttribute(attrib):
   elif attrib['type'] == 'element':
     attType = 'element'
     if attrib['name'] == 'math' or attrib['name'] == 'Math':
-      attTypeCode = 'ASTNode*'
+      attTypeCode = 'const ASTNode*'
     else:
       if attrib.has_key('element'):
         attTypeCode = '{0}*'.format(attrib['element'])
@@ -1007,7 +1007,6 @@ def writeReadOtherXMLCPPCode(outFile, element, hasMath = True, attribs = None, b
     outFile.write('\t\tm{0} = new XMLNode(stream);\n'.format(strFunctions.cap(node['name'])))	
     outFile.write('\t\tstream.skipPastEnd(token);\n')	
     outFile.write('\t\tread = true;\n\t}\n\n')
-  outFile.write('    read = true;\n  }\n\n')
   outFile.write('  if (SBase::readOtherXML(stream))\n  {\n    read = true;\n  }\n')
   outFile.write('  return read;\n')
   outFile.write('}\n\n\n')
@@ -1149,6 +1148,6 @@ def writeRenameSIdCode(output, element, attributes, hasMath):
   if hasMath == True:
     output.write('  if (isSetMath() == true)\n')
     output.write('  {\n')
-    output.write('    getMath()->renameSIdRefs(oldid, newid);\n')
+    output.write('    mMath->renameSIdRefs(oldid, newid);\n')
     output.write('  }\n\n')
   output.write('}\n\n\n')

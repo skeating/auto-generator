@@ -71,7 +71,7 @@ def writeAtt(attrib, output):
   if attType == 'string':
     output.write('  std::string   m{0};\n'.format(capAttName))
   elif attType == 'element':
-    if attTypeCode == 'ASTNode*' or attName== 'Math':
+    if attTypeCode == 'const ASTNode*' or attName== 'Math':
       output.write('  ASTNode*      m{0};\n'.format(capAttName))
     else:
       output.write('  {0}*      m{1};\n'.format(attrib['element'], capAttName))
