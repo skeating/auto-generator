@@ -388,6 +388,7 @@ def writeLOFunctions(fileOut, object, nameOfClass, pkg):
 def writeIncludes(fileOut, pkg, element):
   fileOut.write('\n\n');
   fileOut.write('#include <sbml/packages/{0}/extension/{1}.h>\n'.format(pkg.lower(), element))
+  fileOut.write('#include <sbml/packages/{0}/validator/{1}SBMLError.h>\n'.format(pkg.lower(), pkg))
   fileOut.write('\n\n');
   fileOut.write('using namespace std;\n')
   fileOut.write('\n\n');
