@@ -95,7 +95,7 @@ def parseAttribute(attrib):
     if attName.endswith('x'):
       attName = attName + 'es'
       capAttName = capAttName + 'es'
-    else:
+    elif attName.endswith('s') == False:
       attName = attName + 's'
       capAttName = capAttName + 's'
     num = False
