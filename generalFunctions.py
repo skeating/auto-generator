@@ -1097,7 +1097,10 @@ def writeGetAllElementsCodePlug(output, element, members):
   output.write('  List* ret = new List();\n')
   output.write('  List* sublist = NULL;\n\n')
   for i in range(0, len(members)):
-    output.write('  ADD_FILTERED_LIST(ret, sublist, m{0}s, filter);\n'.format(strFunctions.cap(members[i]['name'])))
+    if members[i]['isListOf'] == True:
+      output.write('  ADD_FILTERED_LIST(ret, sublist, m{0}, filter);\n'.format(strFunctions.capp(members[i]['name'])))
+    else:
+      output.write('  ADD_FILTERED_POINTER(ret, sublist, m{0}, filter);\n'.format(strFunctions.cap(members[i]['name'])))
   output.write('\n  return ret;\n}\n\n\n')
 
 def hasSIdRef(attributes):
