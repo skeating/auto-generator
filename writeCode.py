@@ -46,7 +46,7 @@ def writeAtt(atttype, name, output, constType, pkg, attrib):
     if name.endswith('x'):
       output.write('   ,m{0}es ('.format(strFunctions.cap((name))))
     else:
-      output.write('   ,m{0}s ('.format(strFunctions.cap(name)))
+      output.write('   ,m{0}{1} ('.format(strFunctions.cap(name), '' if name.endswith('s') else 's' ))
     if constType == 0:
       output.write(')\n')
     elif constType == 1:
