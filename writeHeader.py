@@ -379,7 +379,11 @@ def writeIncludes(fileOut, element, pkg, attribs, elementDict):
   fileOut.write('#include <sbml/packages/{0}/extension/{1}Extension.h>\n'.format(pkg.lower(), pkg))
   if baseClass != 'SBase':
     fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), baseClass))
-  fileOut.write('\n');
+  fileOut.write('\n')
+  if elementDict.has_key('concrete'):
+    for elem in elementDict['concrete']:
+      fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), elem['element']))
+    fileOut.write('\n')
   for i in range (0, len(attribs)):
     current = attribs[i]
     if (current['type'] == 'element' or current['type'] == 'lo_element') and current['name'] != 'math':
