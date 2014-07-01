@@ -244,7 +244,7 @@ def createErrorFiles(pkg, offset, classes):
   output = open(fileName, 'w')
   fileHeaders.addFilename(output, fileName, nameOfElement)
   fileHeaders.addLicence(output)
-#  writeError(output, nameOfElement, pkg, offset, classes)
+  writeError(output, nameOfElement, pkg, offset, classes)
   nameOfElement1 = pkg + 'SBMLErrorTable'
   fileName1 = nameOfElement1 + '.h'
   output1 = open(fileName1, 'w')
@@ -252,8 +252,8 @@ def createErrorFiles(pkg, offset, classes):
   fileHeaders.addLicence(output1)
   fileName2 = nameOfElement + '.txt'
   output2 = open(fileName2, 'w')
-#  writeErrorTable(output1, nameOfElement1, pkg, offset, classes)
-  writeErrors(output, output1, output2, nameOfElement, pkg,offset, classes)
+  writeErrorTable(output1, nameOfElement1, pkg, offset, classes)
+  #writeErrors(output, output1, output2, nameOfElement, pkg,offset, classes)
 
 def writeConsistencyHeader(fileOut, element, pkg, type):
   fileOut.write('\n\n');
