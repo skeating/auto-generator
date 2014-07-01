@@ -45,23 +45,23 @@ def parseAttribute(attrib):
   reqd = attrib['reqd']
   if attrib['type'] == 'SId':
     attType = 'string'
-    attTypeCode = 'std::string&'
+    attTypeCode = 'const std::string&'
     num = False
   elif attrib['type'] == 'SIdRef':
     attType = 'string'
-    attTypeCode = 'std::string&'
+    attTypeCode = 'const std::string&'
     num = False
   elif attrib['type'] == 'UnitSIdRef':
     attType = 'string'
-    attTypeCode = 'std::string&'
+    attTypeCode = 'const std::string&'
     num = False
   elif attrib['type'] == 'UnitSId':
     attType = 'string'
-    attTypeCode = 'std::string&'
+    attTypeCode = 'const std::string&'
     num = False
   elif attrib['type'] == 'string':
     attType = 'string'
-    attTypeCode = 'std::string&'
+    attTypeCode = 'const std::string&'
     num = False
   elif attrib['type'] == 'double':
     attType = 'double'
@@ -106,6 +106,10 @@ def parseAttribute(attrib):
   elif attrib['type'] == 'enum':
     attType = '{0}_t'.format(attrib['element'])
     attTypeCode = '{0}_t'.format(attrib['element'])
+    num = False
+  elif attrib['type'] == 'array':
+    attType = '{0}*'.format(attrib['element'])
+    attTypeCode = '{0}*'.format(attrib['element'])
     num = False
   else:
     attType = 'FIX ME'
@@ -173,6 +177,10 @@ def parseAttributeForC(attrib):
   elif attrib['type'] == 'enum':
     attType = '{0}_t'.format(attrib['element'])
     attTypeCode = '{0}_t'.format(attrib['element'])
+    num = False
+  elif attrib['type'] == 'array':
+    attType = '{0}*'.format(attrib['element'])
+    attTypeCode = '{0}*'.format(attrib['element'])
     num = False
   else:
     attType = 'FIX ME'

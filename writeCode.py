@@ -64,6 +64,8 @@ def writeAtt(atttype, name, output, constType, pkg, attrib):
     output.write('   ,mIsSet{0} (false)\n'.format(strFunctions.cap(name)))
   elif atttype == 'enum':
     output.write('   ,m{0} ({1}_UNKNOWN)\n'.format(strFunctions.cap(name), attrib['element'].upper()))
+  elif atttype == 'array':
+    output.write('   ,m{0} (NULL)\n'.format(strFunctions.cap(name)))
   else:
     output.write('  FIX ME   {0};\n'.format(name))
 
@@ -191,7 +193,7 @@ def writeGetCode(attrib, output, element):
   output.write(' * Returns the value of the \"{0}\"'.format(attName))
   output.write(' attribute of this {0}.\n'.format(element))
   output.write(' */\n')
-  output.write('const {0}\n'.format(attTypeCode))
+  output.write('{0}\n'.format(attTypeCode))
   output.write('{0}::get{1}() const\n'.format(element, capAttName))
   output.write('{\n')
   output.write('  return m{0};\n'.format(capAttName))
@@ -234,6 +236,8 @@ def writeIsSetCode(attrib, output, element):
     output.write('  return mIsSet{0};\n'.format(capAttName))
   elif attrib['type'] == 'enum':
     output.write('  return m{0} != {1}_UNKNOWN;\n'.format(capAttName, attrib['element'].upper()))
+  elif attrib['type'] == 'array':
+    output.write('  return (m{0} != NULL);\n'.format(capAttName))
   output.write('}\n\n\n')
 
 
@@ -272,6 +276,9 @@ def writeSetCode(attrib, output, element):
     output.write('  mIsSet{0} = true;\n'.format(capAttName))
     output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
   elif attrib['type'] == 'enum':
+    output.write('  m{0} = {1};\n'.format(capAttName, attName))
+    output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
+  elif attrib['type'] == 'array':
     output.write('  m{0} = {1};\n'.format(capAttName, attName))
     output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
   elif attType == 'boolean':
@@ -360,6 +367,9 @@ def writeUnsetCode(attrib, output, element):
     output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
   elif attrib['type'] == 'enum':
     output.write('  m{0} = {1}_UNKNOWN;\n'.format(capAttName, attrib['element'].upper()))
+    output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
+  elif attrib['type'] == 'array':
+    output.write('  m{0} = NULL;\n'.format(capAttName))
     output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
   output.write('}\n\n\n')
 

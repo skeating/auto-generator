@@ -172,6 +172,8 @@ def writeGetFunction(attrib, output, element):
         output.write('\treturn ({0} != NULL) ? {0}->get{1}() : SBML_INT_MAX;\n'.format(varname, capAttName))
     elif attType == 'boolean':
       output.write('\treturn ({0} != NULL) ? static_cast<int>({0}->get{1}()) : 0;\n'.format(varname, capAttName))
+    elif attrib['type'] == 'array':
+      output.write('\treturn ({0} != NULL) ? {0}->get{1}() : NULL;\n'.format(varname, capAttName))
     output.write('}\n\n\n')
   elif attrib['type'] == 'XMLNode*':
       output.write('LIBSBML_EXTERN\n')
@@ -252,7 +254,10 @@ def writeSetFunction(attrib, output, element):
       output.write(' {0} {1})\n'.format(attTypeCode, attName))
       output.write('{\n')
       output.write('  if ({} != NULL)\n'.format(varname))
-      output.write('    return ({0} == NULL) ? {1}->set{2}("") : {1}->set{2}({0});\n'.format(attName, varname, capAttName))
+      if attrib['type'] == 'array' or num:
+        output.write('    return ({0} == NULL) ? {1}->unset{2}() : {1}->set{2}({0});\n'.format(attName, varname, capAttName))
+      else:
+        output.write('    return ({0} == NULL) ? {1}->set{2}("") : {1}->set{2}({0});\n'.format(attName, varname, capAttName))
       output.write('  else\n')
       output.write('    return LIBSBML_INVALID_OBJECT;\n')
 #      output.write('  return ({0} != NULL) ? {0}->set{1}({2}) : LIBSBML_INVALID_OBJECT;\n'.format(varname, capAttName, attName))

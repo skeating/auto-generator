@@ -90,6 +90,8 @@ def writeAtt(attrib, output):
     output.write('  bool          mIsSet{0};\n'.format(capAttName))
   elif attrib['type'] == 'enum':
     output.write('  {0}_t   m{1};\n'.format(attrib['element'], capAttName))
+  elif attrib['type'] == 'array':
+    output.write('  {0}*         m{1};\n'.format(attrib['element'], capAttName))
   else:
     output.write('  FIX ME   {0};\n'.format(attName))
  
@@ -146,7 +148,7 @@ def writeGetFunction(attrib, output, element):
     output.write('   * @return the value of the \"{0}\"'.format(attName))
     output.write(' attribute of this {0} as a {1}.\n'.format(element, attType))
     output.write('   */\n')
-    output.write('  virtual const {0}'.format(attTypeCode))
+    output.write('  virtual {0}'.format(attTypeCode))
     output.write(' get{0}() const;\n\n\n'.format(capAttName))
      
 def writeIsSetFunction(attrib, output, element):

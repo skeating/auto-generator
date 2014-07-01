@@ -120,7 +120,7 @@ def writeGetFunction(attrib, output, element):
   capAttName = att[1]
   attType = att[2]
   if att[3] == 'const char *':
-    attTypeCode = 'char *'
+    attTypeCode = 'const char *'
   else:
     attTypeCode = att[3]
   num = att[4]
@@ -133,7 +133,7 @@ def writeGetFunction(attrib, output, element):
     output.write(' * @member of {}_t\n'.format(element))
     output.write(' */\n')
     output.write('LIBSBML_EXTERN\n')
-    output.write('const {0}\n'.format(attTypeCode))
+    output.write('{0}\n'.format(attTypeCode))
     output.write('{0}_get{1}'.format(element, capAttName))
     output.write('(const {0}_t * {1});\n\n\n'.format(element, strFunctions.objAbbrev(element)))
   elif attrib['type'] == 'XMLNode*':
