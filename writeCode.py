@@ -81,7 +81,10 @@ def writeCopyAttributes(attrs, output, tabs, name):
         output.write('{0}if ({2}.m{1} != NULL)\n'.format(tabs, strFunctions.cap(attrs[i]['name']), name))
         output.write('{0}'.format(tabs))
         output.write('{\n')
-        output.write('{0}  m{1} = {2}.m{1}->deepCopy();\n'.format(tabs, strFunctions.cap(attrs[i]['name']), name))
+        if attrs[i]['name'] != 'math':
+          output.write('{0}  m{1} = {2}.m{1}->clone();\n'.format(tabs, strFunctions.cap(attrs[i]['name']), name))
+        else:
+          output.write('{0}  m{1} = {2}.m{1}->deepCopy();\n'.format(tabs, strFunctions.cap(attrs[i]['name']), name))
         output.write('{0}'.format(tabs))
         output.write('}\n')
         output.write('{0}else\n'.format(tabs))
@@ -193,7 +196,10 @@ def writeGetCode(attrib, output, element):
   output.write(' * Returns the value of the \"{0}\"'.format(attName))
   output.write(' attribute of this {0}.\n'.format(element))
   output.write(' */\n')
-  output.write('{0}\n'.format(attTypeCode))
+  if attType == 'element' and attTypeCode != 'const ASTNode*':
+    output.write('const {0}\n'.format(attTypeCode))
+  else:
+    output.write('{0}\n'.format(attTypeCode))
   output.write('{0}::get{1}() const\n'.format(element, capAttName))
   output.write('{\n')
   output.write('  return m{0};\n'.format(capAttName))
@@ -314,7 +320,7 @@ def writeSetCode(attrib, output, element):
     if attTypeCode == 'const ASTNode*':
       output.write('      {0}->deepCopy() : NULL;\n'.format(attName))
     else:
-      output.write('      static_cast<{0}*>({1}->clone()) : NULL;\n'.format(capAttName, attName))
+      output.write('      static_cast<{0}>({1}->clone()) : NULL;\n'.format(attTypeCode, attName))
     output.write('    if (m{0} != NULL)\n'.format(capAttName))
     output.write('    {\n')
     if attTypeCode == 'const ASTNode*':

@@ -342,11 +342,17 @@ def writeSetDocCPPCode(outFile, element,attribs, baseClass='SBase'):
   outFile.write('\t{0}::setSBMLDocument(d);\n'.format(baseClass))
   for i in range (0, len(attribs)):
     if attribs[i]['type'] == 'lo_element' or ( attribs[i]['type'] == 'element' and attribs[i]['name'] != 'math'):
-      if attribs[i]['reqd'] == True or attribs[i]['type'] == 'lo_element':
-        outFile.write('\tm{0}.setSBMLDocument(d);\n'.format(strFunctions.capp(attribs[i]['name'], attribs[i]['type'] == 'lo_element')))
+      if attribs[i]['reqd'] == True:
+        if attribs[i]['type'] == 'lo_element':
+          outFile.write('\tm{0}.setSBMLDocument(d);\n'.format(strFunctions.capp(attribs[i]['name'])))
+        else:
+          outFile.write('\tm{0}->setSBMLDocument(d);\n'.format(strFunctions.capp(attribs[i]['name'])))
       else:
-        outFile.write('\tif (m{0} != NULL)\n'.format(strFunctions.cap(attribs[i]['name'])))
-        outFile.write('\t\tm{0}->setSBMLDocument(d);\n'.format(strFunctions.cap(attribs[i]['name'])))
+        if attribs[i]['type'] == 'element' and attribs[i]['name'] != 'math':
+          outFile.write('\tif (m{0} != NULL)\n'.format(strFunctions.cap(attribs[i]['name'])))
+          outFile.write('\t\tm{0}->setSBMLDocument(d);\n'.format(strFunctions.cap(attribs[i]['name'])))
+        else:
+          outFile.write('\tm{0}.setSBMLDocument(d);\n'.format(strFunctions.capp(attribs[i]['name'])))
   outFile.write('}\n\n\n')
   writeInternalEnd(outFile)
 
@@ -712,14 +718,20 @@ def writeCreateObjectCPPCode(outFile, element, attribs, pkg, isListOf, hasChildr
   outFile.write(' */\n')
   outFile.write('SBase*\n{0}::createObject(XMLInputStream& stream)\n'.format(element))
   outFile.write('{\n')
+  NSWritten = False
   if baseClass == 'SBase':
     outFile.write('\tSBase* object = NULL;\n\n')
   else:
     outFile.write('\tSBase* object = {0}::createObject(stream);\n\n'.format(baseClass))
   if hasChildren or hasMath:
-    outFile.write('  const string& name = stream.peek().getName();\n')
+    outFile.write('  const string& name = stream.peek().getName();\n\n')
 #    outFile.write('  {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n\n'.format(pkg.upper(), pkg.lower()))
   first = True
+  for i in range (0, len(attribs)):
+    current = attribs[i]
+    if current['type'] == 'element' and (current['name'] !='Math' and current['name'] != 'math') and NSWritten == False:
+      outFile.write('  {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n\n'.format(pkg.upper(), pkg.lower()))
+      NSWritten = True
   for i in range (0, len(attribs)):
     current = attribs[i]
     if current.has_key('lo_elementName'):        
@@ -748,9 +760,9 @@ def writeCreateObjectCPPCode(outFile, element, attribs, pkg, isListOf, hasChildr
       outFile.write('    m{0} = new {1}({2}ns);\n'.format(strFunctions.cap(current['name']), current['element'], pkg.lower()))
       outFile.write('    object = m{0};\n'.format(strFunctions.cap(current['name'])))
       outFile.write('  }\n')
-#  if hasChildren or hasMath:
-#    outFile.write('  delete {}ns;\n\n'.format(pkg.lower()))
-  outFile.write('\tconnectToChild();\n\n')
+  if NSWritten:
+    outFile.write('\n  delete {}ns;\n\n'.format(pkg.lower()))
+  outFile.write('  connectToChild();\n\n')
   outFile.write('\n  return object;\n')
   outFile.write('}\n\n\n')
   writeInternalEnd(outFile)
@@ -767,11 +779,17 @@ def writeConnectCPPCode(outFile, element, attribs, hasChildren=False, hasMath=Fa
   outFile.write('\t{0}::connectToChild();\n\n'.format(baseClass))
   for i in range (0, len(attribs)):
     if attribs[i]['type'] == 'lo_element' or ( attribs[i]['type'] == 'element' and attribs[i]['name'] != 'math'):
-      if attribs[i]['reqd'] == True or attribs[i]['type'] == 'lo_element':
-        outFile.write('\tm{0}.connectToParent(this);\n'.format(strFunctions.capp(attribs[i]['name'],attribs[i]['type'] == 'lo_element')))
+      if attribs[i]['reqd'] == True:
+        if attribs[i]['type'] == 'lo_element':
+          outFile.write('\tm{0}.connectToParent(this);\n'.format(strFunctions.capp(attribs[i]['name'])))
+        else:
+          outFile.write('\tm{0}->connectToParent(this);\n'.format(strFunctions.cap(attribs[i]['name'])))
       else:
-        outFile.write('\tif (m{0} != NULL)\n'.format(strFunctions.cap(attribs[i]['name'])))
-        outFile.write('\t\tm{0}->connectToParent(this);\n'.format(strFunctions.cap(attribs[i]['name'])))
+        if attribs[i]['type'] == 'lo_element':
+          outFile.write('\tm{0}.connectToParent(this);\n'.format(strFunctions.capp(attribs[i]['name'])))
+        else:
+          outFile.write('\tif (m{0} != NULL)\n'.format(strFunctions.cap(attribs[i]['name'])))
+          outFile.write('\t\tm{0}->connectToParent(this);\n'.format(strFunctions.cap(attribs[i]['name'])))
   outFile.write('}\n\n\n')
   writeInternalEnd(outFile)
 
@@ -1093,7 +1111,7 @@ def writeGetAllElementsCode(output, element, attrib):
   output.write('  List* sublist = NULL;\n\n')
   for i in range(0, len(attrib)):
     if attrib[i]['type'] == 'element':
-      output.write('  ADD_FILTERED_ELEMENT(ret, sublist, m{0}, filter);\n'.format(strFunctions.cap(attrib[i]['name'])))
+      output.write('  ADD_FILTERED_POINTER(ret, sublist, m{0}, filter);\n'.format(strFunctions.cap(attrib[i]['name'])))
   output.write('\n  ADD_FILTERED_FROM_PLUGIN(ret, sublist, filter);\n\n')
   output.write('  return ret;\n}\n\n\n')
 

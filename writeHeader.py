@@ -356,7 +356,7 @@ def writeClass(attributes, header, nameOfElement, nameOfPackage, hasChildren, ha
   generalFunctions.writeCommonHeaders(header, nameOfElement, attributes, False, hasChildren, hasMath)
   generalFunctions.writeInternalHeaders(header, isListOf, hasChildren)
   header.write('protected:\n\n')
-  generalFunctions.writeProtectedHeaders(header, attributes, hasChildren, hasMath)
+  generalFunctions.writeProtectedHeaders(header, attributes, hasChildren, hasMath, baseClass)
   header.write('\n};\n\n')
  
 # write the include files
