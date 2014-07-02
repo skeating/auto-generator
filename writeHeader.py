@@ -384,7 +384,8 @@ def writeIncludes(fileOut, element, pkg, attribs, elementDict):
   fileOut.write('\n')
   if elementDict.has_key('concrete'):
     for elem in elementDict['concrete']:
-      fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), elem['element']))
+      fileOut.write('class {};\n'.format(elem['element']))
+#      fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), elem['element']))
     fileOut.write('\n')
   for i in range (0, len(attribs)):
     current = attribs[i]

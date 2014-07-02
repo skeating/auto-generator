@@ -14,10 +14,16 @@ import writeListOfCode
 import writeCCode
 
 
-def writeIncludes(fileOut, element, pkg, hasMath=False):
+def writeIncludes(fileOut, element, pkg, hasMath, elementDict):
   fileOut.write('\n\n');
   fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), element))
   fileOut.write('#include <sbml/packages/{0}/validator/{1}SBMLError.h>\n'.format(pkg.lower(), pkg))
+  if elementDict.has_key('concrete'):
+    fileOut.write('\n')
+    for elem in elementDict['concrete']:
+#      fileOut.write('class {};\n'.format(elem['element']))
+      fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), elem['element']))
+    fileOut.write('\n')
   if hasMath == True:
     fileOut.write('#include <sbml/math/MathML.h>\n')
   fileOut.write('\n\n');
@@ -565,7 +571,7 @@ def createCode(element):
   code = open(codeName, 'w')
   fileHeaders.addFilename(code, codeName, nameOfElement)
   fileHeaders.addLicence(code)
-  writeIncludes(code, nameOfElement, nameOfPackage, hasMath)
+  writeIncludes(code, nameOfElement, nameOfPackage, hasMath, element)
   writeConstructors(nameOfElement, nameOfPackage, code, attributes, hasChildren, hasMath, element)
   writeAttributeCode(attributes, code, nameOfElement, nameOfPackage)
   if hasMath == True or generalFunctions.hasSIdRef(attributes) == True:
