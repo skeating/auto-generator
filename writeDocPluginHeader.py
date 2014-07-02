@@ -68,12 +68,12 @@ def writeOtherFunctions(fileOut, nameOfClass, pkg):
   fileOut.write('   */\n')
   fileOut.write('  virtual unsigned int checkConsistency();\n\n\n')
   generalFunctions.writeInternalEnd(fileOut)
-  generalFunctions.writeInternalStart(fileOut)
-  fileOut.write('  /**\n   * ' )
-  fileOut.write('Accepts the SBMLVisitor.\n'.format(nameOfClass))
-  fileOut.write('   */\n')
-  fileOut.write('  virtual bool accept(SBMLVisitor& v) const;\n\n\n '.format(nameOfClass, nameOfClass))
-  generalFunctions.writeInternalEnd(fileOut)
+#  generalFunctions.writeInternalStart(fileOut)
+#  fileOut.write('  /**\n   * ' )
+#  fileOut.write('Accepts the SBMLVisitor.\n'.format(nameOfClass))
+#  fileOut.write('   */\n')
+#  fileOut.write('  virtual bool accept(SBMLVisitor& v) const;\n\n\n '.format(nameOfClass, nameOfClass))
+#  generalFunctions.writeInternalEnd(fileOut)
 
  
 

@@ -248,6 +248,8 @@ def writeIncludes(fileOut, pkg, element, members, attribs):
   for i in range (0, len(members)):
     mem = members[i]
     fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), mem['name']))
+  if len(members) == 0:
+    fileOut.write('#include <sbml/packages/{0}/extension/{1}Extension.h>\n'.format(pkg.lower(), pkg))
   for i in range (0, len(attribs)):
     if (attribs[i]['type'] == 'element' or attribs[i]['type'] == 'lo_element') and attribs[i]['name'] != 'math':
       fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), strFunctions.cap(attribs[i]['name'])))
