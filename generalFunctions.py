@@ -39,6 +39,18 @@ def writeListOf(element):
   element = 'ListOf' + element
   return element
 
+def hasLeadingCaps(name):
+  leadingCaps = 1
+  for i in range (1, len(name)):
+    if name[i].upper() == name[i]:
+      leadingCaps = leadingCaps + 1;
+    else:
+      i = len(name)
+  if leadingCaps > 1:
+    return True
+  else:
+    return False
+
 def parseAttribute(attrib):
   attName = attrib['name']
   capAttName = strFunctions.cap(attName)
@@ -346,7 +358,7 @@ def writeSetDocCPPCode(outFile, element,attribs, baseClass='SBase'):
         if attribs[i]['type'] == 'lo_element':
           outFile.write('\tm{0}.setSBMLDocument(d);\n'.format(strFunctions.capp(attribs[i]['name'])))
         else:
-          outFile.write('\tm{0}->setSBMLDocument(d);\n'.format(strFunctions.capp(attribs[i]['name'])))
+          outFile.write('\tm{0}->setSBMLDocument(d);\n'.format(strFunctions.cap(attribs[i]['name'])))
       else:
         if attribs[i]['type'] == 'element' and attribs[i]['name'] != 'math':
           outFile.write('\tif (m{0} != NULL)\n'.format(strFunctions.cap(attribs[i]['name'])))
@@ -384,7 +396,10 @@ def writeEnablePkgCPPCode(outFile, element, attribs, baseClass):
   outFile.write('  {}::enablePackageInternal(pkgURI, pkgPrefix, flag);\n'.format(baseClass))
   for i in range (0, len(attribs)):
     if attribs[i]['type'] == 'lo_element':
-      outFile.write('  m{0}s.enablePackageInternal(pkgURI, pkgPrefix, flag);\n'.format(strFunctions.cap(attribs[i]['name'])))
+      if attribs[i]['name'].endswith('s'):
+        outFile.write('  m{0}.enablePackageInternal(pkgURI, pkgPrefix, flag);\n'.format(strFunctions.cap(attribs[i]['name'])))
+      else:
+        outFile.write('  m{0}s.enablePackageInternal(pkgURI, pkgPrefix, flag);\n'.format(strFunctions.cap(attribs[i]['name'])))
   outFile.write('}\n\n\n')
   writeInternalEnd(outFile)
 

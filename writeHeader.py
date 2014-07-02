@@ -391,7 +391,7 @@ def writeIncludes(fileOut, element, pkg, attribs, elementDict):
     current = attribs[i]
     if (current['type'] == 'element' or current['type'] == 'lo_element') and current['name'] != 'math':
       if current['type'] != 'element':
-        fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), strFunctions.cap(attribs[i]['name'])))
+        fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), strFunctions.cap(attribs[i]['element'])))
       else: 
         fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), strFunctions.cap(attribs[i]['element'])))
   fileOut.write('\nLIBSBML_CPP_NAMESPACE_BEGIN\n')

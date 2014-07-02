@@ -102,6 +102,8 @@ def writeCopyAttributes(attrs, output, tabs, name):
     else:
       if attName.endswith('x'):
         output.write('{0}m{1}es  = {2}.m{1}es;\n'.format(tabs, attName, name))
+      elif attName.endswith('s'):
+        output.write('{0}m{1}  = {2}.m{1};\n'.format(tabs, attName, name))
       else:
         output.write('{0}m{1}s  = {2}.m{1}s;\n'.format(tabs, attName, name))
     if atttype == 'double' or atttype == 'int' or atttype == 'uint' or atttype == 'bool':
@@ -522,11 +524,11 @@ def writeListOfSubFunctions(attrib, output, element, pkgName):
     for elem in attrib['concrete']:
       output.write('/**\n')
       output.write(' * Creates a new {0} object, adds it to this {1}s\n'.format(elem['element'], element))
-      output.write(' * {0} and returns the {1} object created. \n'.format(element, elem['element']))
+      output.write(' * {0} and returns the {1} object created. \n'.format(loname, elem['element']))
       output.write(' *\n')
       output.write(' * @return a new {0} object instance\n'.format(elem['element']))
       output.write(' *\n')
-      output.write(' * @see add{0}(const {1}* {2})\n'.format(strFunctions.cap(elem['name']), attrib['element'], strFunctions.objAbbrev(attrib['element'])))
+      output.write(' * @see add{0}(const {0}*)\n'.format(strFunctions.cap(attrib['element'])))
       output.write(' */\n')
       output.write('{0}* \n'.format(elem['element']))
       output.write('{0}::create{1}()\n'.format(element, strFunctions.cap(elem['name'])))
@@ -549,7 +551,7 @@ def writeListOfSubFunctions(attrib, output, element, pkgName):
       output.write('  }\n\n')
       output.write('  if({0} != NULL)\n'.format(strFunctions.objAbbrev(elem['element'])))
       output.write('  {\n')
-      output.write('    m{0}.appendAndOwn({1});\n'.format(strFunctions.objAbbrev(elem['element']), strFunctions.objAbbrev(elem['element'])))
+      output.write('    m{0}.appendAndOwn({1});\n'.format(strFunctions.capp(attrib['element']), strFunctions.objAbbrev(elem['element'])))
       output.write('  }\n\n')
       output.write('  return {0};\n'.format(strFunctions.objAbbrev(elem['element'])))
       output.write('}\n\n\n')
