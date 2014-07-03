@@ -358,7 +358,8 @@ def writeSetDocCPPCode(outFile, element,attribs, baseClass='SBase'):
         if attribs[i]['type'] == 'lo_element':
           outFile.write('\tm{0}.setSBMLDocument(d);\n'.format(strFunctions.capp(attribs[i]['name'])))
         else:
-          outFile.write('\tm{0}->setSBMLDocument(d);\n'.format(strFunctions.cap(attribs[i]['name'])))
+          outFile.write('\tif ( m{0} != NULL)\n'.format(strFunctions.cap(attribs[i]['name'])))
+          outFile.write('\t  m{0}->setSBMLDocument(d);\n'.format(strFunctions.cap(attribs[i]['name'])))
       else:
         if attribs[i]['type'] == 'element' and attribs[i]['name'] != 'math':
           outFile.write('\tif (m{0} != NULL)\n'.format(strFunctions.cap(attribs[i]['name'])))
@@ -798,7 +799,8 @@ def writeConnectCPPCode(outFile, element, attribs, hasChildren=False, hasMath=Fa
         if attribs[i]['type'] == 'lo_element':
           outFile.write('\tm{0}.connectToParent(this);\n'.format(strFunctions.capp(attribs[i]['name'])))
         else:
-          outFile.write('\tm{0}->connectToParent(this);\n'.format(strFunctions.cap(attribs[i]['name'])))
+          outFile.write('\tif (m{0} != NULL)\n'.format(strFunctions.cap(attribs[i]['name'])))
+          outFile.write('\t  m{0}->connectToParent(this);\n'.format(strFunctions.cap(attribs[i]['name'])))
       else:
         if attribs[i]['type'] == 'lo_element':
           outFile.write('\tm{0}.connectToParent(this);\n'.format(strFunctions.capp(attribs[i]['name'])))

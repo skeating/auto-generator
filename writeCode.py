@@ -195,6 +195,13 @@ def writeConstructors(element, package, output, attrs, hasChildren=False, hasMat
   output.write('{\n')
   if hasMath == True:
     output.write('  delete mMath;\n')
+    output.write('  mMath = NULL;\n')
+  for i in range (0, len(attrs)):
+    current = attrs[i];
+    if current['type'] == 'element' and current['name'] != 'math':
+      output.write('  delete m{0};\n'.format(strFunctions.cap(current['name'])))
+      output.write('  m{0} = NULL;\n'.format(strFunctions.cap(current['name'])))
+
   output.write('}\n\n\n')
 
 
