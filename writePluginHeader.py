@@ -98,6 +98,15 @@ def writeMemberFunctions(fileOut, object, plugin):
   fileOut.write('   * @return the {0} from object in this {1} object.\n'.format(object, plugin))
   fileOut.write('   */\n')
   fileOut.write('  const {0}* get{0} () const;\n\n\n'.format(object))
+
+  fileOut.write('  /**\n')
+  fileOut.write('   * Returns the {0} from this {1} object.\n'.format(object, plugin))
+  fileOut.write('   *\n')
+  fileOut.write('   * @return the {0} from object in this {1} object.\n'.format(object, plugin))
+  fileOut.write('   */\n')
+  fileOut.write('  {0}* get{0} ();\n\n\n'.format(object))
+
+
   fileOut.write('  /**\n')
   fileOut.write('   * Predicate returning @c true or @c false depending on ')
   fileOut.write('whether the\n    \"{0}\" '.format(object))

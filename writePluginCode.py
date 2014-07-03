@@ -198,6 +198,16 @@ def writeFunctions(fileOut, object, nameOfClass, pkg):
   fileOut.write('{\n')
   fileOut.write('  return m{0};\n'.format(object))
   fileOut.write('}\n\n\n')
+
+  fileOut.write('/*\n')
+  fileOut.write(' * Returns the {0} from this {1} object.\n'.format(object, nameOfClass))
+  fileOut.write(' */\n')
+  fileOut.write('{0}* \n'.format(object))
+  fileOut.write('{0}::get{1} ()\n'.format(nameOfClass, object))
+  fileOut.write('{\n')
+  fileOut.write('  return m{0};\n'.format(object))
+  fileOut.write('}\n\n\n')
+  
   fileOut.write('/*\n')
   fileOut.write(' * @return @c true if the \"{0}\"'.format(object))
   fileOut.write(' element has been set,\n')
