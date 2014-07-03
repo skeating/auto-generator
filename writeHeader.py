@@ -135,6 +135,18 @@ def writeGetFunction(attrib, output, element):
       output.write('\tvirtual const {0}*'.format(attrib['element']))
       output.write(' get{0}() const;\n\n\n'.format(capAttName))
       output.write('\t/**\n')
+
+      output.write('\t/**\n')
+      output.write('\t * Returns the \"{0}\"'.format(attName))
+      output.write(' element of this {0}.\n'.format(element))
+      output.write('\t *\n')
+      output.write('\t * @return the \"{0}\"'.format(attName))
+      output.write(' element of this {0}.\n'.format(element))
+      output.write('\t */\n')
+      output.write('\tvirtual {0}*'.format(attrib['element']))
+      output.write(' get{0}();\n\n\n'.format(capAttName))
+      output.write('\t/**\n')
+
       output.write('\t * Creates a new \"{0}\"'.format(attrib['element']))
       output.write(' and sets it for this {0}.\n'.format(element))
       output.write('\t *\n')
