@@ -240,6 +240,24 @@ def writeSetFunction(attrib, output, element):
     output.write('   */\n')
     output.write('  virtual int set{0}('.format(capAttName))
     output.write('{0} {1});\n\n\n'.format(attTypeCode, attName))
+
+    if attrib['type'] == 'enum':
+      output.write('  /**\n')
+      output.write('   * Sets the value of the \"{0}\"'.format(attName))
+      output.write(' attribute of this {0}.\n'.format(element))
+      output.write('   *\n')
+      output.write('   * @param {0}; string value of the "{0}" attribute to be set\n'.format(attName))
+      output.write('   *\n')
+      output.write('   * @return integer value indicating success/failure of the\n')
+      output.write('   * function.  @if clike The value is drawn from the\n')
+      output.write('   * enumeration #OperationReturnValues_t. @endif The possible values\n')
+      output.write('   * returned by this function are:\n')
+      output.write('   * @li LIBSBML_OPERATION_SUCCESS\n')
+      output.write('   * @li LIBSBML_INVALID_ATTRIBUTE_VALUE\n')
+      output.write('   */\n')
+      output.write('  virtual int set{0}('.format(capAttName))
+      output.write('const std::string& {0});\n\n\n'.format(attName))
+
      
   
 def writeUnsetFunction(attrib, output, element):

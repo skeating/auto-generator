@@ -357,6 +357,20 @@ def writeSetCode(attrib, output, element):
     output.write('    return LIBSBML_OPERATION_SUCCESS;\n  }\n')
   output.write('}\n\n\n')
 
+  if attrib['type'] == 'enum':
+    output.write('/*\n')
+    output.write(' * Sets {0} and returns value indicating success.\n'.format(attName))
+    output.write(' */\n')
+    output.write('int\n')
+    output.write('{0}::set{1}(const std::string& {2})\n'.format(element, capAttName, attName))
+    output.write('{\n')
+    output.write('  {0}_t parsed = {0}_parse({1}.c_str());\n'.format(attrib['element'], attName))
+    output.write('  if (parsed == {0}_UNKNOWN) return LIBSBML_INVALID_ATTRIBUTE_VALUE;\n'.format(attrib['element'].upper(), attName))
+    output.write('  m{0} = parsed;\n'.format(capAttName))
+    output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
+    output.write('}\n\n\n')
+
+
 
 def writeUnsetCode(attrib, output, element):
   att = generalFunctions.parseAttribute(attrib)
