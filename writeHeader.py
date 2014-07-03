@@ -77,7 +77,10 @@ def writeAtt(attrib, output):
       output.write('  {0}*      m{1};\n'.format(attrib['element'], capAttName))
       return
   elif attType == 'lo_element':
-    output.write('  {0}   m{1};\n'.format(generalFunctions.writeListOf(capAttName), strFunctions.capp(attName)))
+    if attrib.has_key('element'):
+      output.write('  {0}   m{1};\n'.format(generalFunctions.writeListOf(attrib['element']), strFunctions.capp(attrib['name'])))
+    else:
+      output.write('  {0}   m{1};\n'.format(generalFunctions.writeListOf(capAttName), strFunctions.capp(attName)))
   elif attTypeCode == 'XMLNode*':
     output.write('  {0}   m{1};\n'.format('XMLNode*', capAttName))
   elif num == True:
@@ -276,24 +279,25 @@ def writeAttributeFunctions(attrs, output, element, elementDict):
       
 
 def writeListOfSubFunctions(attrib, output, element, elementDict):
+  lotype = generalFunctions.writeListOf(strFunctions.cap(attrib['element']))
   loname = generalFunctions.writeListOf(strFunctions.cap(attrib['name']))
   output.write('  /**\n')
-  output.write('   * Returns the  \"{0}\"'.format(loname))
+  output.write('   * Returns the  \"{0}\"'.format(lotype))
   output.write(' in this {0} object.\n'.format(element))
   output.write('   *\n')
-  output.write('   * @return the \"{0}\"'.format(loname))
+  output.write('   * @return the \"{0}\"'.format(lotype))
   output.write(' attribute of this {0}.\n'.format(element))
   output.write('   */\n')
-  output.write('  const {0}*'.format(loname))
+  output.write('  const {0}*'.format(lotype))
   output.write(' get{0}() const;\n\n\n'.format(loname))
   output.write('  /**\n')
-  output.write('   * Returns the  \"{0}\"'.format(loname))
+  output.write('   * Returns the  \"{0}\"'.format(lotype))
   output.write(' in this {0} object.\n'.format(element))
   output.write('   *\n')
-  output.write('   * @return the \"{0}\"'.format(loname))
+  output.write('   * @return the \"{0}\"'.format(lotype))
   output.write(' attribute of this {0}.\n'.format(element))
   output.write('   */\n')
-  output.write('  {0}*'.format(loname))
+  output.write('  {0}*'.format(lotype))
   output.write(' get{0}();\n\n\n'.format(loname))
   writeListOfHeader.writeGetFunctions(output, strFunctions.cap(attrib['name']), attrib['element'], True, element)
   output.write('  /**\n')
@@ -314,11 +318,11 @@ def writeListOfSubFunctions(attrib, output, element, elementDict):
   output.write('   *\n')
   output.write('   * @return the number of {0} objects in this {1}\n'.format(attrib['element'], element))
   output.write('   */\n')
-  output.write('\tunsigned int getNum{0}s() const;\n\n\n'.format(strFunctions.cap(attrib['name'])))
+  output.write('\tunsigned int getNum{0}() const;\n\n\n'.format(strFunctions.capp(attrib['name'])))
   if attrib.has_key('abstract') == False or (attrib.has_key('abstract') and attrib['abstract'] == False):
     output.write('\t/**\n')
     output.write('\t * Creates a new {0} object, adds it to this {1}s\n'.format(attrib['element'], element))
-    output.write('\t * {0} and returns the {1} object created. \n'.format(loname, attrib['element']))
+    output.write('\t * {0} and returns the {1} object created. \n'.format(lotype, attrib['element']))
     output.write('\t *\n')
     output.write('\t * @return a new {0} object instance\n'.format(attrib['element']))
     output.write('\t *\n')
@@ -329,7 +333,7 @@ def writeListOfSubFunctions(attrib, output, element, elementDict):
     for elem in attrib['concrete']:
       output.write('\t/**\n')
       output.write('\t * Creates a new {0} object, adds it to this {1}s\n'.format(elem['element'], element))
-      output.write('\t * {0} and returns the {1} object created. \n'.format(loname, elem['element']))
+      output.write('\t * {0} and returns the {1} object created. \n'.format(lotype, elem['element']))
       output.write('\t *\n')
       output.write('\t * @return a new {0} object instance\n'.format(elem['element']))
       output.write('\t *\n')

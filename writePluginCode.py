@@ -444,7 +444,7 @@ def writeRequiredMethods(fileOut, nameOfClass, members, pkg, attribs):
   for i in range (0, len(members)):
     mem = members[i]
     if mem['isListOf'] == True:
-      fileOut.write('  if (getNum{0}s() > 0) \n'.format(mem['name']))
+      fileOut.write('  if (getNum{0}() > 0) \n'.format(strFunctions.capp(mem['name'])))
       fileOut.write('  { \n')
       fileOut.write('    m{0}s.write(stream);\n'.format(mem['name']))
       fileOut.write('  } \n')

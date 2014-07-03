@@ -210,7 +210,7 @@ def writeGetNumFunction(code, type, listOf, name):
   code.write(' * @return the number of {0} objects in this {1}\n'.format(type, listOf))
   code.write(' */\n')
   code.write('unsigned int \n')
-  code.write('{0}::getNum{1}s() const\n'.format(listOf, strFunctions.cap(name)))
+  code.write('{0}::getNum{1}() const\n'.format(listOf, strFunctions.capp(name)))
   code.write('{\n')
   code.write('\treturn size();\n')
   code.write('}\n\n')
@@ -343,7 +343,7 @@ def createCode(element, code):
     name = strFunctions.cap(element['elementName']) 
   if element.has_key('element'):
     type = element['element']
-  listOf = generalFunctions.writeListOf(name)
+  listOf = generalFunctions.writeListOf(type)
   writeConstructors(element['name'], element['package'], code) 
   writeGetFunctions(code, name, type)
   writeListAccessFunctions(code, type, listOf, name, element, element['package'])

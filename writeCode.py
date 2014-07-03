@@ -14,16 +14,22 @@ import writeListOfCode
 import writeCCode
 
 
+def writeIncludesForDict(fileOut, pkg, elementDict):
+  if elementDict.has_key('concrete'):
+    fileOut.write('\n')
+    for elem in elementDict['concrete']:
+      fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), elem['element']))
+    fileOut.write('\n')
+  if elementDict.has_key('attribs'):
+    attribs = elementDict['attribs']
+    for i in range(0, len(attribs)):
+      writeIncludesForDict(fileOut, pkg, attribs[i])
+
 def writeIncludes(fileOut, element, pkg, hasMath, elementDict):
   fileOut.write('\n\n');
   fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), element))
   fileOut.write('#include <sbml/packages/{0}/validator/{1}SBMLError.h>\n'.format(pkg.lower(), pkg))
-  if elementDict.has_key('concrete'):
-    fileOut.write('\n')
-    for elem in elementDict['concrete']:
-#      fileOut.write('class {};\n'.format(elem['element']))
-      fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), elem['element']))
-    fileOut.write('\n')
+  writeIncludesForDict(fileOut, pkg, elementDict)
   if hasMath == True:
     fileOut.write('#include <sbml/math/MathML.h>\n')
   fileOut.write('\n\n');
@@ -406,6 +412,7 @@ def writeAttributeCode(attrs, output, element, pkgName):
 
 
 def writeListOfSubFunctions(attrib, output, element, pkgName):
+  lotype = generalFunctions.writeListOf(strFunctions.cap(attrib['element']))
   loname = generalFunctions.writeListOf(strFunctions.cap(attrib['name']))
   att = generalFunctions.parseAttribute(attrib)
   attName = att[0]
@@ -414,19 +421,19 @@ def writeListOfSubFunctions(attrib, output, element, pkgName):
   attTypeCode = att[3]
   num = att[4]
   output.write('/*\n')
-  output.write(' * Returns the  \"{0}\"'.format(loname))
+  output.write(' * Returns the  \"{0}\"'.format(lotype))
   output.write(' in this {0} object.\n'.format(element))
   output.write(' */\n')
-  output.write('const {0}*\n'.format(loname))
+  output.write('const {0}*\n'.format(lotype))
   output.write('{0}::get{1}() const\n'.format(element, loname))
   output.write('{\n')
   output.write('\treturn &m{0};\n'.format(strFunctions.capp(attName)))
   output.write('}\n\n\n')
   output.write('/*\n')
-  output.write(' * Returns the  \"{0}\"'.format(loname))
+  output.write(' * Returns the  \"{0}\"'.format(lotype))
   output.write(' in this {0} object.\n'.format(element))
   output.write(' */\n')
-  output.write('{0}*\n'.format(loname))
+  output.write('{0}*\n'.format(lotype))
   output.write('{0}::get{1}()\n'.format(element, loname))
   output.write('{\n')
   output.write('  return &m{0};\n'.format(strFunctions.capp(attName)))
@@ -482,7 +489,7 @@ def writeListOfSubFunctions(attrib, output, element, pkgName):
   output.write(' * @return the number of {0} objects in this {1}\n'.format(attrib['element'], element))
   output.write(' */\n')
   output.write('unsigned int\n')
-  output.write('{0}::getNum{1}s() const\n'.format(element, strFunctions.cap(attrib['name'])))
+  output.write('{0}::getNum{1}() const\n'.format(element, strFunctions.capp(attrib['name'])))
   output.write('{\n')
   output.write('\treturn m{0}.size();\n'.format(strFunctions.capp(attrib['name'])))
   output.write('}\n\n\n')
@@ -524,7 +531,7 @@ def writeListOfSubFunctions(attrib, output, element, pkgName):
     for elem in attrib['concrete']:
       output.write('/**\n')
       output.write(' * Creates a new {0} object, adds it to this {1}s\n'.format(elem['element'], element))
-      output.write(' * {0} and returns the {1} object created. \n'.format(loname, elem['element']))
+      output.write(' * {0} and returns the {1} object created. \n'.format(lotype, elem['element']))
       output.write(' *\n')
       output.write(' * @return a new {0} object instance\n'.format(elem['element']))
       output.write(' *\n')
@@ -551,7 +558,7 @@ def writeListOfSubFunctions(attrib, output, element, pkgName):
       output.write('  }\n\n')
       output.write('  if({0} != NULL)\n'.format(strFunctions.objAbbrev(elem['element'])))
       output.write('  {\n')
-      output.write('    m{0}.appendAndOwn({1});\n'.format(strFunctions.capp(attrib['element']), strFunctions.objAbbrev(elem['element'])))
+      output.write('    m{0}.appendAndOwn({1});\n'.format(strFunctions.capp(attrib['name']), strFunctions.objAbbrev(elem['element'])))
       output.write('  }\n\n')
       output.write('  return {0};\n'.format(strFunctions.objAbbrev(elem['element'])))
       output.write('}\n\n\n')

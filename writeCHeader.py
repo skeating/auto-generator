@@ -69,7 +69,7 @@ def writeAttributeFunctions(attrs, output, element, dict):
       writeListOfSubElements(attrs[i], output, element)
 
 def writeListOfSubElements(attrib, output, element):
-  loname = generalFunctions.writeListOf(strFunctions.cap(attrib['name']))
+  loname = generalFunctions.writeListOf(strFunctions.cap(attrib['element']))
   output.write('LIBSBML_EXTERN\n')
   output.write('int\n')
   output.write('{0}_add{1}({0}_t * {2}, '.format(element, strFunctions.cap(attrib['name']), strFunctions.objAbbrev(element)))
@@ -99,7 +99,7 @@ def writeListOfSubElements(attrib, output, element):
   output.write('const char * sid);\n\n\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('unsigned int\n')
-  output.write('{0}_getNum{1}s({0}_t * {2}' .format(element, strFunctions.cap(attrib['name']), strFunctions.objAbbrev(element)))
+  output.write('{0}_getNum{1}({0}_t * {2}' .format(element, strFunctions.capp(attrib['name']), strFunctions.objAbbrev(element)))
   output.write(');\n\n\n')
   output.write('LIBSBML_EXTERN\n')
   output.write('{0}_t *\n'.format(attrib['element']))

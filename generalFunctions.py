@@ -1084,7 +1084,7 @@ def writeCommonCPPCode(outFile, element, sbmltypecode, attribs, isListOf, hasChi
   if elementDict.has_key('element'):
     type = elementDict['element']
   if isListOf == True:
-    element = writeListOf(name)
+    element = writeListOf(type)
   writeGetElementNameCPPCode(outFile, element, isListOf, elementDict)
   writeGetTypeCodeCPPCode(outFile, element, sbmltypecode, isListOf)
   if isListOf == False:
@@ -1113,7 +1113,7 @@ def writeProtectedCPPCode(outFile, element, attribs, False, hasChildren, hasMath
 #write get all elements function
 def writeGetAllElements(output):
   output.write('  /**\n   * Returns a List of all child SBase objects, ')
-  output.write('including those nested to an\n   * arbitary depth.\n   *\n')
+  output.write('including those nested to an\n   * arbitrary depth.\n   *\n')
   output.write('   * @return a List* of pointers to all child objects.\n   */\n')
   output.write('   virtual List* getAllElements(ElementFilter * filter = NULL);\n\n\n')  
  
