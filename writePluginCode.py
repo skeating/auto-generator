@@ -185,7 +185,7 @@ def writeGetFunctions(fileOut, pkg, members, nameOfClass, attribs):
       writeFunctions(fileOut, mem['name'], nameOfClass, pkg)
   for i in range (0, len(attribs)):
     mem = attribs[i]
-    writeCode.writeAttributeCode(attribs, fileOut, nameOfClass, pkg);
+    writeCode.writeAttributeCode(attribs, fileOut, nameOfClass, pkg, dict({}));
   fileOut.write('//---------------------------------------------------------------\n\n\n')
   
 def writeFunctions(fileOut, object, nameOfClass, pkg):

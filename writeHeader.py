@@ -306,7 +306,21 @@ def writeAttributeFunctions(attrs, output, element, elementDict):
   for i in range(0, len(attrs)):
     if attrs[i]['type'] == 'lo_element':
       writeListOfSubFunctions(attrs[i], output, element, elementDict)
-      
+  if elementDict.has_key('abstract'): 
+    if elementDict['abstract']:
+      concretes = elementDict['concrete']
+      for i in range(0, len(concretes)):
+        concrete = concretes[i]
+        # write     
+        output.write('  /**\n')
+        output.write('   * Returns @c true, if this abstract \"{0}\"'.format(element))
+        output.write(' is of type {0}.\n'.format(concrete['element']))
+        output.write('   *\n')
+        output.write('   * @return @c true, if this abstract \"{0}\"'.format(element))
+        output.write(' is of type {0}.\n'.format(concrete['element']))
+        output.write('   *\n')
+        output.write('   */\n')
+        output.write('  virtual bool is{0}() const;\n\n\n'.format(concrete['element']))
 
 def writeListOfSubFunctions(attrib, output, element, elementDict):
   lotype = generalFunctions.writeListOf(strFunctions.cap(attrib['element']))

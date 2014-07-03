@@ -420,7 +420,7 @@ def writeUnsetCode(attrib, output, element):
   output.write('}\n\n\n')
 
 # for each attribute write a set/get/isset/unset
-def writeAttributeCode(attrs, output, element, pkgName):
+def writeAttributeCode(attrs, output, element, pkgName, elementDict):
   for i in range(0, len(attrs)):
     if attrs[i]['type'] != 'lo_element':
       writeGetCode(attrs[i], output, element)
@@ -435,6 +435,19 @@ def writeAttributeCode(attrs, output, element, pkgName):
   for i in range(0, len(attrs)):
     if attrs[i]['type'] == 'lo_element':
       writeListOfSubFunctions(attrs[i], output, element, pkgName)
+  if elementDict.has_key('abstract'): 
+    if elementDict['abstract']:
+      concretes = elementDict['concrete']
+      for i in range(0, len(concretes)):
+        concrete = concretes[i]
+        output.write('/*\n')
+        output.write(' * Return @c true if of type {0}.\n'.format(concrete['element']))
+        output.write(' */\n')
+        output.write('bool\n')
+        output.write('{0}::is{1}() const\n'.format(element, concrete['element']))
+        output.write('{\n')
+        output.write('  return dynamic_cast<const {0}*>(this) != NULL;\n'.format(concrete['element']))
+        output.write('}\n\n\n')        
 
 
 def writeListOfSubFunctions(attrib, output, element, pkgName):
@@ -608,7 +621,7 @@ def createCode(element):
   fileHeaders.addLicence(code)
   writeIncludes(code, nameOfElement, nameOfPackage, hasMath, element)
   writeConstructors(nameOfElement, nameOfPackage, code, attributes, hasChildren, hasMath, element)
-  writeAttributeCode(attributes, code, nameOfElement, nameOfPackage)
+  writeAttributeCode(attributes, code, nameOfElement, nameOfPackage, element)
   if hasMath == True or generalFunctions.hasSIdRef(attributes) == True:
     generalFunctions.writeRenameSIdCode(code, nameOfElement, attributes, hasMath)
   if hasChildren == True:

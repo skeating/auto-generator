@@ -89,7 +89,7 @@ def writeGetFunctions(fileOut, pkg, members, plugin, attribs):
     else:
       writeMemberFunctions(fileOut, mem['name'], plugin)
 
-  writeHeader.writeAttributeFunctions(attribs, fileOut, plugin, pkg)
+  writeHeader.writeAttributeFunctions(attribs, fileOut, plugin, dict({}))
   
 def writeMemberFunctions(fileOut, object, plugin):
   fileOut.write('  /**\n')
