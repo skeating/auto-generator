@@ -157,7 +157,7 @@ def writeRemoveFunctions(output, element, type, subelement=False, topelement="",
     output.write('}\n\n\n')
      
   
-def writeProtectedFunctions(output, element, package):
+def writeProtectedFunctions(output, element, package, elementDict):
   listOf = generalFunctions.writeListOf(element)
   generalFunctions.writeInternalStart(output)
   output.write('/*\n')
@@ -167,6 +167,7 @@ def writeProtectedFunctions(output, element, package):
   output.write('{\n' )
   output.write('  const std::string& name   = stream.peek().getName();\n')
   output.write('  SBase* object = NULL;\n\n')
+  
   output.write('  if (name == "{0}")\n'.format(strFunctions.lowerFirst(element)))
   output.write('  {\n')
   output.write('    {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(package.upper(), package.lower()))
@@ -174,8 +175,21 @@ def writeProtectedFunctions(output, element, package):
   output.write('    appendAndOwn(object);\n')
   output.write('    delete {}ns;\n'.format(package.lower()))
   output.write('  }\n\n')
+
+  # need to create concrete objects
+  if elementDict.has_key('concrete'):
+    for elem in elementDict['concrete']:
+      output.write('  if (name == "{0}")\n'.format(strFunctions.lowerFirst(elem['name'])))
+      output.write('  {\n')
+      output.write('    {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(package.upper(), package.lower()))
+      output.write('    object = new {0}({1}ns);\n'.format(elem['element'], package.lower()))
+      output.write('    appendAndOwn(object);\n')
+      output.write('    delete {}ns;\n'.format(package.lower()))
+      output.write('  }\n\n')
+
   output.write('  return object;\n')
   output.write('}\n\n\n')
+
   generalFunctions.writeInternalEnd(output)
   generalFunctions.writeInternalStart(output)
   output.write('/*\n')
@@ -349,6 +363,6 @@ def createCode(element, code):
   writeListAccessFunctions(code, type, listOf, name, element, element['package'])
   writeRemoveFunctions(code, name, type)
   generalFunctions.writeCommonCPPCode(code, element['name'], element['typecode'],None,  True, False,False, element)
-  writeProtectedFunctions(code, element['name'], element['package'])
+  writeProtectedFunctions(code, element['name'], element['package'], element)
 
   

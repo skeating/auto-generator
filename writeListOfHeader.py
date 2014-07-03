@@ -236,10 +236,22 @@ def writeClass(header, nameOfElement, typeOfElement, nameOfPackage, elementDict)
       header.write('\t * @see add{0}(const {1}* {2})\n'.format(nameOfElement, typeOfElement, strFunctions.objAbbrev(nameOfElement)))
       header.write('\t */\n')
       header.write('\t{0}* create{1}();\n\n\n'.format(elem['element'], strFunctions.cap(elem['name'])))
+
   writeRemoveFunctions(header, nameOfElement, typeOfElement)
   generalFunctions.writeCommonHeaders(header, nameOfElement, None, True)
   header.write('protected:\n\n')
   writeProtectedFunctions(header, nameOfElement, nameOfPackage)
+
+  if elementDict.has_key('concrete'):
+    header.write('\tvirtual bool isValidTypeForList(SBase * item) {\n')
+    header.write('\t\tint code = item->getTypeCode();\n')
+    header.write('\t\treturn code == getItemTypeCode() ')
+    for elem in elementDict['concrete']:
+      header.write('|| code == SBML_{0}_{1} '.format(nameOfPackage.upper(),elem['element'].upper()))
+    header.write(';\n')
+    header.write('\t}\n\n\n');
+
+
   header.write('\n};\n\n')
  
 # write the header file      
