@@ -281,31 +281,31 @@ def writeWriteElementsCPPCode(outFile, element, attributes, hasChildren=False, h
   outFile.write(' */\n')
   outFile.write('void\n{0}::writeElements (XMLOutputStream& stream) const\n'.format(element))
   outFile.write('{\n')
-  outFile.write('\t{0}::writeElements(stream);\n'.format(baseClass))
+  outFile.write('  {0}::writeElements(stream);\n'.format(baseClass))
   if hasChildren == True:
     for i in range(0, len(attributes)):
       if attributes[i]['type'] == 'element' and (attributes[i]['name'] != 'Math' and attributes[i]['name'] != 'math'):
-        outFile.write('\tif (isSet{0}() == true)\n'.format(strFunctions.cap(attributes[i]['name'])))
-        outFile.write('\t{\n\t\t')
+        outFile.write('  if (isSet{0}() == true)\n'.format(strFunctions.cap(attributes[i]['name'])))
+        outFile.write('  {\n    ')
         outFile.write('m{0}->write(stream);'.format(strFunctions.cap(attributes[i]['name'])))
-        outFile.write('\n\t}\n')		
+        outFile.write('\n  }\n')		
       elif attributes[i]['type'] == 'lo_element':
-        outFile.write('\tif (getNum{0}() > 0)\n'.format(strFunctions.capp(attributes[i]['name'])))
+        outFile.write('  if (getNum{0}() > 0)\n'.format(strFunctions.capp(attributes[i]['name'])))
         outFile.write('  {\n')
         outFile.write('    m{0}.write(stream);\n'.format(strFunctions.capp(attributes[i]['name'])))
         outFile.write('  }\n\n')
   if containsType(attributes, 'XMLNode*'):
     node = getByType(attributes, 'XMLNode*')
-    outFile.write('\tif (isSet{0}() == true)\n'.format(strFunctions.cap(node['name'])))
-    outFile.write('\t{\n\t\t')
-    outFile.write('stream.startElement("{0}");\n'.format(node['name']))
-    outFile.write('\t\tstream << *m{0};\n'.format(strFunctions.cap(node['name'])))
-    outFile.write('\t\tstream.endElement("{0}");\n'.format(node['name']))
-    outFile.write('\n\t}\n')		
+    outFile.write('  if (isSet{0}() == true)\n'.format(strFunctions.cap(node['name'])))
+    outFile.write('  {\n')
+    outFile.write('    stream.startElement("{0}");\n'.format(node['name']))
+    outFile.write('    stream << *m{0};\n'.format(strFunctions.cap(node['name'])))
+    outFile.write('    stream.endElement("{0}");\n'.format(node['name']))
+    outFile.write('\n  }\n')		
   if hasMath == True:
     for i in range(0, len(attributes)):
       if attributes[i]['type'] == 'element' and attributes[i]['name'] == 'Math' or attributes[i]['name'] == 'math':
-        outFile.write('\tif (isSet{0}() == true)\n'.format('Math'))
+        outFile.write('  if (isSet{0}() == true)\n'.format('Math'))
         outFile.write('  {\n    writeMathML(getMath(), stream, getSBMLNamespaces());\n  }\n\n')
   outFile.write('  SBase::writeExtensionElements(stream);\n')
   outFile.write('}\n\n\n')
@@ -351,21 +351,21 @@ def writeSetDocCPPCode(outFile, element,attribs, baseClass='SBase'):
   outFile.write(' */\n')
   outFile.write('void\n{0}::setSBMLDocument (SBMLDocument* d)\n'.format(element))
   outFile.write('{\n')
-  outFile.write('\t{0}::setSBMLDocument(d);\n'.format(baseClass))
+  outFile.write('  {0}::setSBMLDocument(d);\n'.format(baseClass))
   for i in range (0, len(attribs)):
     if attribs[i]['type'] == 'lo_element' or ( attribs[i]['type'] == 'element' and attribs[i]['name'] != 'math'):
       if attribs[i]['reqd'] == True:
         if attribs[i]['type'] == 'lo_element':
-          outFile.write('\tm{0}.setSBMLDocument(d);\n'.format(strFunctions.capp(attribs[i]['name'])))
+          outFile.write('  m{0}.setSBMLDocument(d);\n'.format(strFunctions.capp(attribs[i]['name'])))
         else:
-          outFile.write('\tif ( m{0} != NULL)\n'.format(strFunctions.cap(attribs[i]['name'])))
-          outFile.write('\t  m{0}->setSBMLDocument(d);\n'.format(strFunctions.cap(attribs[i]['name'])))
+          outFile.write('  if ( m{0} != NULL)\n'.format(strFunctions.cap(attribs[i]['name'])))
+          outFile.write('    m{0}->setSBMLDocument(d);\n'.format(strFunctions.cap(attribs[i]['name'])))
       else:
         if attribs[i]['type'] == 'element' and attribs[i]['name'] != 'math':
-          outFile.write('\tif (m{0} != NULL)\n'.format(strFunctions.cap(attribs[i]['name'])))
-          outFile.write('\t\tm{0}->setSBMLDocument(d);\n'.format(strFunctions.cap(attribs[i]['name'])))
+          outFile.write('  if (m{0} != NULL)\n'.format(strFunctions.cap(attribs[i]['name'])))
+          outFile.write('    m{0}->setSBMLDocument(d);\n'.format(strFunctions.cap(attribs[i]['name'])))
         else:
-          outFile.write('\tm{0}.setSBMLDocument(d);\n'.format(strFunctions.capp(attribs[i]['name'])))
+          outFile.write('  m{0}.setSBMLDocument(d);\n'.format(strFunctions.capp(attribs[i]['name'])))
   outFile.write('}\n\n\n')
   writeInternalEnd(outFile)
 
@@ -427,13 +427,13 @@ def writeAddExpectedCPPCode(outFile, element, attribs, baseClass='SBase'):
   outFile.write(' */\n')
   outFile.write('void\n{0}::addExpectedAttributes(ExpectedAttributes& attributes)\n'.format(element))
   outFile.write('{\n')
-  outFile.write('\t{0}::addExpectedAttributes(attributes);\n\n'.format(baseClass))
+  outFile.write('  {0}::addExpectedAttributes(attributes);\n\n'.format(baseClass))
   for i in range (0, len(attribs)):
     if attribs[i]['type'] != 'element' and attribs[i]['type'] != 'lo_element':
       if attribs[i].has_key('attName'): 
-        outFile.write('\tattributes.add("{0}");\n'.format(attribs[i]['attName']))
+        outFile.write('  attributes.add("{0}");\n'.format(attribs[i]['attName']))
       else: 
-        outFile.write('\tattributes.add("{0}");\n'.format(attribs[i]['name']))
+        outFile.write('  attributes.add("{0}");\n'.format(attribs[i]['name']))
   outFile.write('}\n\n\n')
   writeInternalEnd(outFile)
   
@@ -736,9 +736,9 @@ def writeCreateObjectCPPCode(outFile, element, attribs, pkg, isListOf, hasChildr
   outFile.write('{\n')
   NSWritten = False
   if baseClass == 'SBase':
-    outFile.write('\tSBase* object = NULL;\n\n')
+    outFile.write('  SBase* object = NULL;\n\n')
   else:
-    outFile.write('\tSBase* object = {0}::createObject(stream);\n\n'.format(baseClass))
+    outFile.write('  SBase* object = {0}::createObject(stream);\n\n'.format(baseClass))
   if hasChildren or hasMath:
     outFile.write('  const string& name = stream.peek().getName();\n\n')
 #    outFile.write('  {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n\n'.format(pkg.upper(), pkg.lower()))
@@ -751,10 +751,10 @@ def writeCreateObjectCPPCode(outFile, element, attribs, pkg, isListOf, hasChildr
   for i in range (0, len(attribs)):
     current = attribs[i]
     if current.has_key('lo_elementName'):        
-      outFile.write('\tif (name == "{0}")\n'.format(current['lo_elementName']))	
-      outFile.write('\t{\n')	
-      outFile.write('\t\tobject = &m{0};\n'.format(strFunctions.capp(current['name'])))	
-      outFile.write('\t}\n\n')
+      outFile.write('  if (name == "{0}")\n'.format(current['lo_elementName']))	
+      outFile.write('  {\n')	
+      outFile.write('    object = &m{0};\n'.format(strFunctions.capp(current['name'])))	
+      outFile.write('  }\n\n')
     elif current['type'] == 'lo_element':
       if first == True:
       	outFile.write('  if')
@@ -792,21 +792,21 @@ def writeConnectCPPCode(outFile, element, attribs, hasChildren=False, hasMath=Fa
   outFile.write(' */\n')
   outFile.write('void\n{0}::connectToChild()\n'.format(element))
   outFile.write('{\n')
-  outFile.write('\t{0}::connectToChild();\n\n'.format(baseClass))
+  outFile.write('  {0}::connectToChild();\n\n'.format(baseClass))
   for i in range (0, len(attribs)):
     if attribs[i]['type'] == 'lo_element' or ( attribs[i]['type'] == 'element' and attribs[i]['name'] != 'math'):
       if attribs[i]['reqd'] == True:
         if attribs[i]['type'] == 'lo_element':
-          outFile.write('\tm{0}.connectToParent(this);\n'.format(strFunctions.capp(attribs[i]['name'])))
+          outFile.write('  m{0}.connectToParent(this);\n'.format(strFunctions.capp(attribs[i]['name'])))
         else:
-          outFile.write('\tif (m{0} != NULL)\n'.format(strFunctions.cap(attribs[i]['name'])))
-          outFile.write('\t  m{0}->connectToParent(this);\n'.format(strFunctions.cap(attribs[i]['name'])))
+          outFile.write('  if (m{0} != NULL)\n'.format(strFunctions.cap(attribs[i]['name'])))
+          outFile.write('    m{0}->connectToParent(this);\n'.format(strFunctions.cap(attribs[i]['name'])))
       else:
         if attribs[i]['type'] == 'lo_element':
-          outFile.write('\tm{0}.connectToParent(this);\n'.format(strFunctions.capp(attribs[i]['name'])))
+          outFile.write('  m{0}.connectToParent(this);\n'.format(strFunctions.capp(attribs[i]['name'])))
         else:
-          outFile.write('\tif (m{0} != NULL)\n'.format(strFunctions.cap(attribs[i]['name'])))
-          outFile.write('\t\tm{0}->connectToParent(this);\n'.format(strFunctions.cap(attribs[i]['name'])))
+          outFile.write('  if (m{0} != NULL)\n'.format(strFunctions.cap(attribs[i]['name'])))
+          outFile.write('    m{0}->connectToParent(this);\n'.format(strFunctions.cap(attribs[i]['name'])))
   outFile.write('}\n\n\n')
   writeInternalEnd(outFile)
 
@@ -849,7 +849,7 @@ def writeReadAttributesCPPCode(outFile, element, attribs, pkg, isListOf, baseCla
     outFile.write('      }\n')
     outFile.write('    }\n')
     outFile.write('  }\n\n')
-  outFile.write('\t{0}::readAttributes(attributes, expectedAttributes);\n\n'.format(baseClass))
+  outFile.write('  {0}::readAttributes(attributes, expectedAttributes);\n\n'.format(baseClass))
   outFile.write('  // look to see whether an unknown attribute error was logged\n')
   outFile.write('  if (getErrorLog() != NULL)\n')
   outFile.write('  {\n')
@@ -895,16 +895,16 @@ def writeWriteAttributesCPPCode(outFile, element, attribs, baseClass='SBase'):
   outFile.write(' */\n')
   outFile.write('  void\n{0}::writeAttributes (XMLOutputStream& stream) const\n'.format(element))
   outFile.write('{\n')
-  outFile.write('\t{0}::writeAttributes(stream);\n\n'.format(baseClass))
+  outFile.write('  {0}::writeAttributes(stream);\n\n'.format(baseClass))
   for i in range (0, len(attribs)):
     if attribs[i]['type'] != 'element' and attribs[i]['type'] != 'XMLNode*' and attribs[i]['type'] != 'lo_element' and attribs[i]['type'] != 'std::vector<double>':
-      outFile.write('\tif (isSet{0}() == true)\n'.format(strFunctions.cap(attribs[i]['name'])))
+      outFile.write('  if (isSet{0}() == true)\n'.format(strFunctions.cap(attribs[i]['name'])))
       if attribs[i]['type'] == 'enum': 
-        outFile.write('\t\tstream.writeAttribute("{0}", getPrefix(), {1}_toString(m{2}));\n\n'.format(attribs[i]['name'], attribs[i]['element'], strFunctions.cap(attribs[i]['name'])))	 
+        outFile.write('    stream.writeAttribute("{0}", getPrefix(), {1}_toString(m{2}));\n\n'.format(attribs[i]['name'], attribs[i]['element'], strFunctions.cap(attribs[i]['name'])))	 
       elif attribs[i].has_key('attName'): 
-        outFile.write('\t\tstream.writeAttribute("{0}", getPrefix(), m{1});\n\n'.format(attribs[i]['attName'], strFunctions.cap(attribs[i]['name'])))	 
+        outFile.write('    stream.writeAttribute("{0}", getPrefix(), m{1});\n\n'.format(attribs[i]['attName'], strFunctions.cap(attribs[i]['name'])))	 
       else:
-        outFile.write('\t\tstream.writeAttribute("{0}", getPrefix(), m{1});\n\n'.format(attribs[i]['name'], strFunctions.cap(attribs[i]['name'])))	 
+        outFile.write('    stream.writeAttribute("{0}", getPrefix(), m{1});\n\n'.format(attribs[i]['name'], strFunctions.cap(attribs[i]['name'])))	 
   outFile.write('}\n\n\n')
   writeInternalEnd(outFile)
   
@@ -928,17 +928,17 @@ def writeGetElementNameCPPCode(outFile, element, isListOf=False, dict=None):
   if dict != None and dict.has_key('elementName'):
     if isListOf:
       if dict.has_key('lo_elementName'):        
-        outFile.write('\tstatic const string name = "{0}";\n'.format(dict['lo_elementName']))
+        outFile.write('  static const string name = "{0}";\n'.format(dict['lo_elementName']))
       else:
-        outFile.write('\tstatic const string name = "listOf{0}";\n'.format(strFunctions.capp(dict['elementName'])))
+        outFile.write('  static const string name = "listOf{0}";\n'.format(strFunctions.capp(dict['elementName'])))
     else:
-      outFile.write('\tstatic const string name = "{0}";\n'.format(dict['elementName']))
+      outFile.write('  static const string name = "{0}";\n'.format(dict['elementName']))
   else:
     if dict != None and dict.has_key('lo_elementName'):
-      outFile.write('\tstatic const string name = "{0}";\n'.format(dict['lo_elementName']))
+      outFile.write('  static const string name = "{0}";\n'.format(dict['lo_elementName']))
     else: 
-      outFile.write('\tstatic const string name = "{0}";\n'.format(strFunctions.lowerFirst(element)))
-  outFile.write('\treturn name;\n')
+      outFile.write('  static const string name = "{0}";\n'.format(strFunctions.lowerFirst(element)))
+  outFile.write('  return name;\n')
   outFile.write('}\n\n\n')
   
 
@@ -965,9 +965,9 @@ def writeHasReqdAttribCPPCode(outFile, element, attribs, baseClass):
   outFile.write('bool\n{0}::hasRequiredAttributes () const\n'.format(element))
   outFile.write('{\n')
   if baseClass == 'SBase':
-    outFile.write('\tbool allPresent = true;\n\n')
+    outFile.write('  bool allPresent = true;\n\n')
   else:
-    outFile.write('\tbool allPresent = {0}::hasRequiredAttributes();\n\n'.format(baseClass))
+    outFile.write('  bool allPresent = {0}::hasRequiredAttributes();\n\n'.format(baseClass))
   for i in range(0, len(attribs)):
     if attribs[i]['reqd'] == True and attribs[i]['type'] != 'element':
       outFile.write('  if (isSet{0}() == false)\n'.format(strFunctions.cap(attribs[i]['name'])))
@@ -998,9 +998,9 @@ def writeHasReqdElementsCPPCode(outFile, element, attribs, baseClass):
   outFile.write('bool\n{0}::hasRequiredElements () const\n'.format(element))
   outFile.write('{\n')
   if baseClass == 'SBase':
-    outFile.write('\tbool allPresent = true;\n\n')
+    outFile.write('  bool allPresent = true;\n\n')
   else:
-    outFile.write('\tbool allPresent = {0}::hasRequiredElements();\n\n'.format(baseClass))
+    outFile.write('  bool allPresent = {0}::hasRequiredElements();\n\n'.format(baseClass))
   for i in range(0, len(attribs)):
     if attribs[i]['reqd'] == True and attribs[i]['type'] == 'element':
       outFile.write('  if (isSet{0}() == false)\n'.format(strFunctions.cap(attribs[i]['name'])))
@@ -1024,24 +1024,24 @@ def writeReadOtherXMLCPPCode(outFile, element, hasMath = True, attribs = None, b
   outFile.write('  bool          read = false;\n')
   outFile.write('  const string& name = stream.peek().getName();\n\n')
   if hasMath == True: 
-    outFile.write('\tif (name == "math")\n\t{\n')
-    outFile.write('\t\tconst XMLToken elem = stream.peek();\n')
-    outFile.write('\t\tconst std::string prefix = checkMathMLNamespace(elem);\n\n')
-    outFile.write('\t\tif (stream.getSBMLNamespaces() == NULL)\n\t\t{\n')
-    outFile.write('\t\t\tstream.setSBMLNamespaces(new SBMLNamespaces(getLevel(), getVersion()));\n\t\t}\n\n')
-    outFile.write('\t\tdelete mMath;\n')
-    outFile.write('\t\tmMath = readMathML(stream, prefix);\n')
-    #outFile.write('\t\tif (mMath != NULL)\n\t\t{\n\t\t\tmMath->setParentSBMLObject(this);\n\t\t}\n')
-    outFile.write('\t\tread = true;\n\t}\n\n')
+    outFile.write('  if (name == "math")\n  {\n')
+    outFile.write('    const XMLToken elem = stream.peek();\n')
+    outFile.write('    const std::string prefix = checkMathMLNamespace(elem);\n\n')
+    outFile.write('    if (stream.getSBMLNamespaces() == NULL)\n    {\n')
+    outFile.write('      stream.setSBMLNamespaces(new SBMLNamespaces(getLevel(), getVersion()));\n    }\n\n')
+    outFile.write('    delete mMath;\n')
+    outFile.write('    mMath = readMathML(stream, prefix);\n')
+    #outFile.write('    if (mMath != NULL)\n    {\n      mMath->setParentSBMLObject(this);\n    }\n')
+    outFile.write('    read = true;\n  }\n\n')
   elif containsType(attribs, 'XMLNode*'):
     node = getByType(attribs, 'XMLNode*')
-    outFile.write('\tif (name == "{0}")\n'.format(node['name']))
-    outFile.write('\t{\n')	
-    outFile.write('\t\tconst XMLToken& token = stream.next();\n')	
-    outFile.write('\t\tstream.skipText();\n')	
-    outFile.write('\t\tm{0} = new XMLNode(stream);\n'.format(strFunctions.cap(node['name'])))	
-    outFile.write('\t\tstream.skipPastEnd(token);\n')	
-    outFile.write('\t\tread = true;\n\t}\n\n')
+    outFile.write('  if (name == "{0}")\n'.format(node['name']))
+    outFile.write('  {\n')	
+    outFile.write('    const XMLToken& token = stream.next();\n')	
+    outFile.write('    stream.skipText();\n')	
+    outFile.write('    m{0} = new XMLNode(stream);\n'.format(strFunctions.cap(node['name'])))	
+    outFile.write('    stream.skipPastEnd(token);\n')	
+    outFile.write('    read = true;\n  }\n\n')
   outFile.write('  if (SBase::readOtherXML(stream))\n  {\n    read = true;\n  }\n')
   outFile.write('  return read;\n')
   outFile.write('}\n\n\n')
