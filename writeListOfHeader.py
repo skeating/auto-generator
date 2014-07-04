@@ -11,7 +11,7 @@ import generalFunctions
 import strFunctions
 
 def writeConstructors(element, type, package, output):
-  element = generalFunctions.writeListOf(element)
+  element = generalFunctions.writeListOf(type)
   indent = strFunctions.getIndent(element)
   output.write('  /**\n   * ' )
   output.write('Creates a new {0}'.format(element))
@@ -57,7 +57,7 @@ def writeConstructors(element, type, package, output):
   return
 
 def writeGetFunctions(output, element, type, subelement=False, topelement=""):
-  listOf = generalFunctions.writeListOf(element)
+  listOf = generalFunctions.writeListOf(type)
   output.write('  /**\n')
   output.write('   * Get a {0} from the {1}.\n'.format(element, listOf))
   output.write('   *\n')
@@ -127,10 +127,10 @@ def writeGetFunctions(output, element, type, subelement=False, topelement=""):
     output.write('   *\n   * @see get(unsigned int n)')
     output.write('   *\n   * @see size()\n')
     output.write('   */\n')
-    output.write('  virtual const {0}* get(const std::string& sid) const;\n\n\n'.format(element))
+    output.write('  virtual const {0}* get(const std::string& sid) const;\n\n\n'.format(type))
      
 def writeRemoveFunctions(output, element, type, subelement=False, topelement=""):
-  listOf = generalFunctions.writeListOf(element)
+  listOf = generalFunctions.writeListOf(type)
   output.write('  /**\n')
   if subelement == True:
     output.write('   * Removes the nth {0} from the {1} within this {2}.\n'.format(element, listOf, topelement))
@@ -191,7 +191,7 @@ def writeProtectedFunctions(output, element, package):
 
 #write class
 def writeClass(header, nameOfElement, typeOfElement, nameOfPackage, elementDict):
-  header.write('class LIBSBML_EXTERN {0} :'.format(generalFunctions.writeListOf(nameOfElement)))
+  header.write('class LIBSBML_EXTERN {0} :'.format(generalFunctions.writeListOf(typeOfElement)))
   header.write(' public ListOf\n{0}\n\n'.format('{'))
   header.write('public:\n\n')
   writeConstructors(nameOfElement, typeOfElement, nameOfPackage, header)
@@ -238,7 +238,7 @@ def writeClass(header, nameOfElement, typeOfElement, nameOfPackage, elementDict)
       header.write('\t{0}* create{1}();\n\n\n'.format(elem['element'], strFunctions.cap(elem['name'])))
 
   writeRemoveFunctions(header, nameOfElement, typeOfElement)
-  generalFunctions.writeCommonHeaders(header, nameOfElement, None, True)
+  generalFunctions.writeCommonHeaders(header, typeOfElement, None, True)
   header.write('protected:\n\n')
   writeProtectedFunctions(header, nameOfElement, nameOfPackage)
 

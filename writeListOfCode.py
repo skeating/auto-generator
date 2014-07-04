@@ -42,7 +42,7 @@ def writeConstructors(element, package, output):
   output.write('}\n\n\n')
   
 def writeGetFunctions(output, element, type, subelement=False, topelement="", name=""):
-  listOf = generalFunctions.writeListOf(element)
+  listOf = generalFunctions.writeListOf(type)
   output.write('/*\n')
   if subelement == True:
     output.write(' * Return the nth {0} in the {1} within this {2}.\n'.format(element, listOf, topelement))
@@ -116,7 +116,7 @@ def writeGetFunctions(output, element, type, subelement=False, topelement="", na
     output.write('}\n\n\n')
      
 def writeRemoveFunctions(output, element, type, subelement=False, topelement="", name=""):
-  listOf = generalFunctions.writeListOf(element)
+  listOf = generalFunctions.writeListOf(type)
   output.write('/*\n')
   if subelement == True:
     output.write(' * Removes the nth {0} from the {1}.\n'.format(element, listOf))
@@ -358,11 +358,11 @@ def createCode(element, code):
   if element.has_key('element'):
     type = element['element']
   listOf = generalFunctions.writeListOf(type)
-  writeConstructors(element['name'], element['package'], code) 
+  writeConstructors(type, element['package'], code) 
   writeGetFunctions(code, name, type)
   writeListAccessFunctions(code, type, listOf, name, element, element['package'])
   writeRemoveFunctions(code, name, type)
-  generalFunctions.writeCommonCPPCode(code, element['name'], element['typecode'],None,  True, False,False, element)
-  writeProtectedFunctions(code, element['name'], element['package'], element)
+  generalFunctions.writeCommonCPPCode(code, type, element['typecode'],None,  True, False,False, element)
+  writeProtectedFunctions(code,type, element['package'], element)
 
   
