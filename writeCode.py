@@ -262,7 +262,7 @@ def writeGetCode(attrib, output, element):
         output.write('{\n')
         output.write('  if (m{0} != NULL) delete m{0};\n'.format(capAttName))
         output.write('  m{0} = new {1}();\n'.format(capAttName, concrete['element']))
-        output.write('  return m{0};\n'.format(capAttName))
+        output.write('  return static_cast<{0}*>(m{1});\n'.format(concrete['element'], capAttName))
         output.write('}\n\n\n')
 
 
