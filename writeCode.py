@@ -87,7 +87,10 @@ def writeCopyAttributes(attrs, output, tabs, name):
   for i in range(0, len(attrs)):
     attName = strFunctions.cap(attrs[i]['name'])
     atttype = attrs[i]['type']
-    if atttype != 'lo_element':
+    if atttype == 'array':
+      output.write('{0}m{1}  = NULL;\n'.format(tabs, attName, name))
+      output.write('{0}set{1}({2}.m{1}, {2}.m{1}Length);\n'.format(tabs, attName, name))
+    elif atttype != 'lo_element':
       if atttype != 'element':
         output.write('{0}m{1}  = {2}.m{1};\n'.format(tabs, attName, name))
       else:
@@ -211,6 +214,10 @@ def writeConstructors(element, package, output, attrs, hasChildren=False, hasMat
     current = attrs[i];
     if current['type'] == 'element' and current['name'] != 'math':
       output.write('  delete m{0};\n'.format(strFunctions.cap(current['name'])))
+      output.write('  m{0} = NULL;\n'.format(strFunctions.cap(current['name'])))
+    elif current['type'] == 'array':      
+      output.write('  if (m{0} != NULL)\n'.format(strFunctions.cap(current['name'])))
+      output.write('    delete[] m{0};\n'.format(strFunctions.cap(current['name'])))
       output.write('  m{0} = NULL;\n'.format(strFunctions.cap(current['name'])))
 
   output.write('}\n\n\n')
@@ -514,6 +521,8 @@ def writeUnsetCode(attrib, output, element):
     output.write('  m{0} = {1}_UNKNOWN;\n'.format(capAttName, attrib['element'].upper()))
     output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
   elif attrib['type'] == 'array':
+    output.write('  if (m{0} != NULL)\n'.format(capAttName))
+    output.write('   delete[] m{0};\n'.format(capAttName))
     output.write('  m{0} = NULL;\n'.format(capAttName))
     output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
   output.write('}\n\n\n')

@@ -767,7 +767,7 @@ def writeCreateObjectCPPCode(outFile, element, attribs, pkg, isListOf, hasChildr
         outFile.write(' (name == "{0}")\n'.format(c['name']))
         outFile.write('  {\n')
         outFile.write('    m{0} = new {1}({2}ns);\n'.format(strFunctions.cap(current['name']), c['element'], pkg.lower()))
-        if current['parent']['childrenOverwriteElementName']:
+        if overridesElementName(current):
           outFile.write('    m{0}->setElementName(name);\n'.format(strFunctions.cap(current['name'])))
         outFile.write('    object = m{0};\n'.format(strFunctions.cap(current['name'])))
         outFile.write('  }\n')
@@ -797,7 +797,7 @@ def writeCreateObjectCPPCode(outFile, element, attribs, pkg, isListOf, hasChildr
         outFile.write(' (name == "{0}")\n'.format(current['name']))
         outFile.write('  {\n')
         outFile.write('    m{0} = new {1}({2}ns);\n'.format(strFunctions.cap(current['name']), current['element'], pkg.lower()))
-        if current['parent']['childrenOverwriteElementName']:
+        if overridesElementName(current):
           outFile.write('    m{0}->setElementName(name);\n'.format(strFunctions.cap(current['name']), current['element'], pkg.lower()))
         outFile.write('    object = m{0};\n'.format(strFunctions.cap(current['name'])))
         outFile.write('  }\n')
