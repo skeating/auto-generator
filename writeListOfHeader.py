@@ -226,7 +226,7 @@ def writeClass(header, nameOfElement, typeOfElement, nameOfPackage, elementDict)
     header.write('\t */\n')
     header.write('\t{0}* create{1}();\n\n\n'.format(typeOfElement, nameOfElement))
   elif elementDict.has_key('concrete'):
-    for elem in elementDict['concrete']:
+    for elem in generalFunctions.getConcretes(elementDict['root'], elementDict['concrete']):
       header.write('\t/**\n')
       header.write('\t * Creates a new {0} object, adds it to the\n'.format(nameOfElement))
       header.write('\t * {0} and returns the {1} object created. \n'.format(generalFunctions.writeListOf(typeOfElement), nameOfElement))
@@ -246,7 +246,7 @@ def writeClass(header, nameOfElement, typeOfElement, nameOfPackage, elementDict)
     header.write('\tvirtual bool isValidTypeForList(SBase * item) {\n')
     header.write('\t\tint code = item->getTypeCode();\n')
     header.write('\t\treturn code == getItemTypeCode() ')
-    for elem in elementDict['concrete']:
+    for elem in generalFunctions.getConcretes(elementDict['root'], elementDict['concrete']):
       header.write('|| code == SBML_{0}_{1} '.format(nameOfPackage.upper(),elem['element'].upper()))
     header.write(';\n')
     header.write('\t}\n\n\n');

@@ -79,8 +79,8 @@ def writeListOfSubElements(attrib, output, element):
     output.write('{0}_t *\n'.format(attrib['element']))
     output.write('{0}_create{1}({0}_t * {2}' .format(element, strFunctions.cap(attrib['name']), strFunctions.objAbbrev(element)))
     output.write(');\n\n\n')
-  elif attrib.has_key('concrete'):
-    for elem in attrib['concrete']:
+  elif attrib.has_key('concrete') and attrib.has_key('root'):    
+    for elem in generalFunctions.getConcretes(attrib['root'], attrib['concrete']):
       output.write('LIBSBML_EXTERN\n')
       output.write('{0}_t *\n'.format(elem['element']))
       output.write('{0}_create{1}({0}_t * {2}' .format(element, strFunctions.cap(elem['name']), strFunctions.objAbbrev(element)))
@@ -165,8 +165,8 @@ def writeGetFunction(attrib, output, element):
         output.write('{0}_t*\n'.format(strFunctions.cap(attrib['element'])))
         output.write('{0}_create{1}'.format(element, capAttName))
         output.write('({0}_t * {1});\n\n\n'.format(element, strFunctions.objAbbrev(element)))
-      else:
-        for elem in attrib['concrete']:
+      else:  
+        for elem in generalFunctions.getConcretes(attrib['root'], attrib['concrete']):
           output.write('LIBSBML_EXTERN\n')
           output.write('{0}_t *\n'.format(elem['element']))
           output.write('{0}_create{1}({0}_t * {2}' .format(element, strFunctions.cap(elem['name']), strFunctions.objAbbrev(element)))

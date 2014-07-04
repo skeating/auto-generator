@@ -156,7 +156,7 @@ def writeGetFunction(attrib, output, element):
         output.write('  virtual {0}*'.format(attrib['element']))
         output.write(' create{0}();\n\n\n'.format(capAttName))
       else:
-        for concrete in attrib['concrete']:
+        for concrete in generalFunctions.getConcretes(attrib['root'], attrib['concrete']):
           output.write('  /**\n')
           output.write('   * Creates a new \"{0}\"'.format(attName))
           output.write(' and sets it for this {0}.\n'.format(element))
@@ -316,7 +316,7 @@ def writeAttributeFunctions(attrs, output, element, elementDict):
       writeListOfSubFunctions(attrs[i], output, element, elementDict)
   if elementDict.has_key('abstract'): 
     if elementDict['abstract']:
-      concretes = elementDict['concrete']
+      concretes = generalFunctions.getConcretes(elementDict['root'], elementDict['concrete'])
       for i in range(0, len(concretes)):
         concrete = concretes[i]
         # write     
@@ -382,7 +382,7 @@ def writeListOfSubFunctions(attrib, output, element, elementDict):
     output.write('   */\n')
     output.write('  {0}* create{1}();\n\n\n'.format(attrib['element'], strFunctions.cap(attrib['name'])))
   elif attrib.has_key('concrete'):
-    for elem in attrib['concrete']:
+    for elem in generalFunctions.getConcretes(attrib['root'], attrib['concrete']):
       output.write('  /**\n')
       output.write('   * Creates a new {0} object, adds it to this {1}s\n'.format(elem['element'], element))
       output.write('   * {0} and returns the {1} object created. \n'.format(lotype, elem['element']))
@@ -439,8 +439,8 @@ def writeIncludes(fileOut, element, pkg, attribs, elementDict):
     fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), baseClass))
   fileOut.write('\n')
   if elementDict.has_key('concrete'):
-    for elem in elementDict['concrete']:
-      fileOut.write('class {};\n'.format(elem['element']))
+    for elem in generalFunctions.getConcretes(elementDict['root'], elementDict['concrete']):
+      fileOut.write('class {0};\n'.format(elem['element']))
 #      fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), elem['element']))
     fileOut.write('\n')
   for i in range (0, len(attribs)):

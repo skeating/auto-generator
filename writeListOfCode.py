@@ -178,7 +178,7 @@ def writeProtectedFunctions(output, element, package, elementDict):
 
   # need to create concrete objects
   if elementDict.has_key('concrete'):
-    for elem in elementDict['concrete']:
+    for elem in generalFunctions.getConcretes(elementDict['root'], elementDict['concrete']):
       output.write('  if (name == "{0}")\n'.format(strFunctions.lowerFirst(elem['name'])))
       output.write('  {\n')
       output.write('    {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(package.upper(), package.lower()))
@@ -312,7 +312,7 @@ def writeCreateObject(code, element, listOf, type, name, pkgName):
     code.write('  return {0};\n'.format(strFunctions.objAbbrev(type)))
     code.write('}\n\n')
   elif element.has_key('concrete'):
-    for elem in element['concrete']:
+    for elem in generalFunctions.getConcretes(element['root'], element['concrete']):
       code.write('/**\n')
       code.write(' * Creates a new {0} object, adds it to this {1}\n'.format(elem['element'], listOf))
       code.write(' * {0} and returns the {1} object created. \n'.format(elem['name'], elem['element']))

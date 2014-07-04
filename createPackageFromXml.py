@@ -2,6 +2,7 @@
 
 from xml.dom import *
 from xml.dom.minidom import *
+import weakref;
 
 def toBool(v):
   if (v == None): 
@@ -90,7 +91,7 @@ def parseDeviserXML(filename):
                                  'reqd' : required, 
                                  'name' : attrName, 
                                  'element':attrElement, 
-                                 'abstract':attrAbstract
+                                 'abstract':attrAbstract,                                 
                                  })
         if attrAbstract:
           attribute_dict['concrete'] = concrete_dict[attrElement]
@@ -170,8 +171,7 @@ def parseDeviserXML(filename):
 
     enums.append(dict({'name': enumName, 'values': values}))
 
-
-  return dict({
+  package = dict({
                'name' : packageName, 
                'elements': elements, 
                'plugins': plugins, 
@@ -180,6 +180,23 @@ def parseDeviserXML(filename):
                'enums': enums, 
                'offset': offset
                })
+
+  # link elements
+  for elem in package['elements']:
+      elem['root'] = package
+      if elem.has_key('attribs'):
+        for attr in elem['attribs']:
+            attr['parent'] = elem
+            attr['root'] = package
+  
+  for elem in package['sbmlElements']:
+      elem['root'] = package
+      if elem.has_key('attribs'):
+        for attr in elem['attribs']:
+            attr['parent'] = elem
+            attr['root'] = package
+
+  return package
 
 
 #parseDeviserXML("D:/Development/CsDeviser/Samples/spatial.xml")

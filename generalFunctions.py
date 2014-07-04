@@ -1186,3 +1186,25 @@ def writeRenameSIdCode(output, element, attributes, hasMath):
     output.write('    mMath->renameSIdRefs(oldid, newid);\n')
     output.write('  }\n\n')
   output.write('}\n\n\n')
+
+def getElement(root, name):
+  for elem in root['sbmlElements']:
+    if name == elem['name']:
+      return elem
+  return None
+
+def addConcreteToList(root, concrete, list):
+  current = getElement(root, concrete['element'])
+  if current != None:
+    if current['abstract'] == False:
+      list.append(concrete)
+    else:
+      for c in current['concrete']:
+        addConcreteToList(root, c, list)
+
+
+def getConcretes(root, concretes):
+  result = []
+  for c in concretes:
+    addConcreteToList(root, c, result)
+  return result;

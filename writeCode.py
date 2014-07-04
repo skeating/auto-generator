@@ -16,8 +16,8 @@ import writeCCode
 
 def writeIncludesForDict(fileOut, pkg, elementDict):
   if elementDict.has_key('concrete'):
-    fileOut.write('\n')
-    for elem in elementDict['concrete']:
+    fileOut.write('\n')      
+    for elem in generalFunctions.getConcretes(elementDict['root'], elementDict['concrete']):
       fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), elem['element']))
     fileOut.write('\n')
   if elementDict.has_key('attribs'):
@@ -252,7 +252,7 @@ def writeGetCode(attrib, output, element):
       output.write('  return m{0};\n'.format(capAttName))
       output.write('}\n\n\n')
     else:
-      for concrete in attrib['concrete']:
+      for concrete in generalFunctions.getConcretes(attrib['root'], attrib['concrete']):
         output.write('/*\n')
         output.write(' * Creates a new \"{0}\"'.format(attName))
         output.write(' element of this {0} and returns it.\n'.format(element))
@@ -460,7 +460,7 @@ def writeAttributeCode(attrs, output, element, pkgName, elementDict):
       writeListOfSubFunctions(attrs[i], output, element, pkgName)
   if elementDict.has_key('abstract'): 
     if elementDict['abstract']:
-      concretes = elementDict['concrete']
+      concretes = generalFunctions.getConcretes(elementDict['root'], elementDict['concrete'])
       for i in range(0, len(concretes)):
         concrete = concretes[i]
         output.write('/*\n')
@@ -590,7 +590,7 @@ def writeListOfSubFunctions(attrib, output, element, pkgName):
       output.write('  return {0};\n'.format(strFunctions.objAbbrev(attrib['element'])))
       output.write('}\n\n\n')
   elif attrib.has_key('concrete'):
-    for elem in attrib['concrete']:
+    for elem in generalFunctions.getConcretes(attrib['root'], attrib['concrete']):
       output.write('/**\n')
       output.write(' * Creates a new {0} object, adds it to this {1}s\n'.format(elem['element'], element))
       output.write(' * {0} and returns the {1} object created. \n'.format(lotype, elem['element']))
