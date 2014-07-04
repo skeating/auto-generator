@@ -51,14 +51,14 @@ def writeAttributes(attrs, output, constType=0, pkg=""):
 
 def writeAtt(atttype, name, output, constType, pkg, attrib):
   if atttype == 'SId' or atttype == 'SIdRef' or atttype == 'UnitSId' or atttype == 'UnitSIdRef' or atttype == 'string':
-    output.write('   ,m{0} ("")\n'.format(strFunctions.cap(name)))
+    output.write('  , m{0} ("")\n'.format(strFunctions.cap(name)))
   elif atttype == 'element':
-    output.write('   ,m{0} (NULL)\n'.format(strFunctions.cap(name)))
+    output.write('  , m{0} (NULL)\n'.format(strFunctions.cap(name)))
   elif atttype == 'lo_element':
     if name.endswith('x'):
-      output.write('   ,m{0}es ('.format(strFunctions.cap((name))))
+      output.write('  , m{0}es ('.format(strFunctions.cap((name))))
     else:
-      output.write('   ,m{0}{1} ('.format(strFunctions.cap(name), '' if name.endswith('s') else 's' ))
+      output.write('  , m{0}{1} ('.format(strFunctions.cap(name), '' if name.endswith('s') else 's' ))
     if constType == 0:
       output.write(')\n')
     elif constType == 1:
@@ -66,18 +66,18 @@ def writeAtt(atttype, name, output, constType, pkg, attrib):
     elif constType == 2:
       output.write('{0}ns)\n'.format(pkg))
   elif atttype == 'double':
-    output.write('   ,m{0} (numeric_limits<double>::quiet_NaN())\n'.format(strFunctions.cap(name)))
-    output.write('   ,mIsSet{0} (false)\n'.format(strFunctions.cap(name)))
+    output.write('  , m{0} (numeric_limits<double>::quiet_NaN())\n'.format(strFunctions.cap(name)))
+    output.write('  , mIsSet{0} (false)\n'.format(strFunctions.cap(name)))
   elif atttype == 'int' or atttype == 'uint':
-    output.write('   ,m{0} (SBML_INT_MAX)\n'.format(strFunctions.cap(name)))
-    output.write('   ,mIsSet{0} (false)\n'.format(strFunctions.cap(name)))
+    output.write('  , m{0} (SBML_INT_MAX)\n'.format(strFunctions.cap(name)))
+    output.write('  , mIsSet{0} (false)\n'.format(strFunctions.cap(name)))
   elif atttype == 'bool':
-    output.write('   ,m{0} (false)\n'.format(strFunctions.cap(name)))
-    output.write('   ,mIsSet{0} (false)\n'.format(strFunctions.cap(name)))
+    output.write('  , m{0} (false)\n'.format(strFunctions.cap(name)))
+    output.write('  , mIsSet{0} (false)\n'.format(strFunctions.cap(name)))
   elif atttype == 'enum':
-    output.write('   ,m{0} ({1}_UNKNOWN)\n'.format(strFunctions.cap(name), attrib['element'].upper()))
+    output.write('  , m{0} ({1}_UNKNOWN)\n'.format(strFunctions.cap(name), attrib['element'].upper()))
   elif atttype == 'array':
-    output.write('   ,m{0} (NULL)\n'.format(strFunctions.cap(name)))
+    output.write('  , m{0} (NULL)\n'.format(strFunctions.cap(name)))
   else:
     output.write('  FIX ME   {0};\n'.format(name))
 
@@ -124,7 +124,7 @@ def writeConstructors(element, package, output, attrs, hasChildren=False, hasMat
   output.write(' * Creates a new {0}'.format(element))
   output.write(' with the given level, version, and package version.\n */\n')
   output.write('{0}::{0} (unsigned int level, unsigned int version, unsigned int pkgVersion)\n'.format(element))
-  output.write('\t: {0}(level, version)\n'.format(baseClass))
+  output.write('  : {0}(level, version)\n'.format(baseClass))
   writeAttributes(attrs, output, 1)
   output.write('{\n')
   output.write('  // set an SBMLNamespaces derived object of this package\n')
@@ -137,7 +137,7 @@ def writeConstructors(element, package, output, attrs, hasChildren=False, hasMat
   output.write(' * Creates a new {0}'.format(element))
   output.write(' with the given {0}PkgNamespaces object.\n */\n'.format(package))
   output.write('{0}::{0} ({1}PkgNamespaces* {2}ns)\n'.format(element, package, package.lower()))
-  output.write('\t: {1}({0}ns)\n'.format(package.lower(), baseClass))
+  output.write('  : {1}({0}ns)\n'.format(package.lower(), baseClass))
   writeAttributes(attrs, output, 2, package.lower())
   output.write('{\n')
   output.write('  // set the element namespace of this object\n')
@@ -151,7 +151,7 @@ def writeConstructors(element, package, output, attrs, hasChildren=False, hasMat
   output.write('/*\n')
   output.write(' * Copy constructor for {0}.\n */\n'.format(element))
   output.write('{0}::{0} (const {0}& orig)\n'.format(element, package, package.lower()))
-  output.write('\t: {0}(orig)\n'.format(baseClass))
+  output.write('  : {0}(orig)\n'.format(baseClass))
   output.write('{\n')
   output.write('  if (&orig == NULL)\n')
   output.write('  {\n')
@@ -175,7 +175,7 @@ def writeConstructors(element, package, output, attrs, hasChildren=False, hasMat
   output.write('  }\n')
   output.write('  else if (&rhs != this)\n')
   output.write('  {\n')
-  output.write('\t\t{0}::operator=(rhs);\n'.format(baseClass))
+  output.write('    {0}::operator=(rhs);\n'.format(baseClass))
   writeCopyAttributes(attrs, output, '    ', 'rhs')
   if hasChildren == True:
     output.write('\n    // connect to child objects\n')
@@ -341,17 +341,17 @@ def writeSetCode(attrib, output, element):
     output.write('  mIsSet{0} = true;\n'.format(capAttName))
     output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
   elif attType == 'XMLNode*':
-      output.write('\tif (m{0} == {1})\n'.format(capAttName, attName))
-      output.write('\t{\n\t\treturn LIBSBML_OPERATION_SUCCESS;\n\t}\n')
-      output.write('\telse if ({0} == NULL)\n'.format(attName))
-      output.write('\t{\n')
-      output.write('\t\tdelete m{0};\n'.format(capAttName))
-      output.write('\t\tm{0} = NULL;\n'.format(capAttName))
-      output.write('\t\treturn LIBSBML_OPERATION_SUCCESS;\n\t}\n')
-      output.write('\tdelete m{0};\n'.format(capAttName))
-      output.write('\tm{0} = ({1} != NULL) ?\n'.format(capAttName, attName))
-      output.write('\t\t{0}->clone() : NULL;\n'.format(attName))
-      output.write('\treturn LIBSBML_OPERATION_SUCCESS;\n')
+      output.write('  if (m{0} == {1})\n'.format(capAttName, attName))
+      output.write('  {\n    return LIBSBML_OPERATION_SUCCESS;\n  }\n')
+      output.write('  else if ({0} == NULL)\n'.format(attName))
+      output.write('  {\n')
+      output.write('    delete m{0};\n'.format(capAttName))
+      output.write('    m{0} = NULL;\n'.format(capAttName))
+      output.write('    return LIBSBML_OPERATION_SUCCESS;\n  }\n')
+      output.write('  delete m{0};\n'.format(capAttName))
+      output.write('  m{0} = ({1} != NULL) ?\n'.format(capAttName, attName))
+      output.write('    {0}->clone() : NULL;\n'.format(attName))
+      output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
   elif attType == 'element':
     output.write('  if (m{0} == {1})\n'.format(capAttName, attName))
     output.write('  {\n    return LIBSBML_OPERATION_SUCCESS;\n  }\n')
@@ -489,7 +489,7 @@ def writeListOfSubFunctions(attrib, output, element, pkgName):
   output.write('const {0}*\n'.format(lotype))
   output.write('{0}::get{1}() const\n'.format(element, loname))
   output.write('{\n')
-  output.write('\treturn &m{0};\n'.format(strFunctions.capp(attName)))
+  output.write('  return &m{0};\n'.format(strFunctions.capp(attName)))
   output.write('}\n\n\n')
   output.write('/*\n')
   output.write(' * Returns the  \"{0}\"'.format(lotype))
@@ -541,7 +541,7 @@ def writeListOfSubFunctions(attrib, output, element, pkgName):
   output.write('  }\n')
   output.write('  else\n'.format(strFunctions.objAbbrev(attrib['element'])))
   output.write('  {\n')
-  output.write('\tm{0}.append({1});\n'.format(strFunctions.capp(attrib['name']),strFunctions.objAbbrev(attrib['element'])))
+  output.write('    m{0}.append({1});\n'.format(strFunctions.capp(attrib['name']),strFunctions.objAbbrev(attrib['element'])))
   output.write('    return LIBSBML_OPERATION_SUCCESS;\n')
   output.write('  }\n')
   output.write('}\n\n\n')
@@ -553,7 +553,7 @@ def writeListOfSubFunctions(attrib, output, element, pkgName):
   output.write('unsigned int\n')
   output.write('{0}::getNum{1}() const\n'.format(element, strFunctions.capp(attrib['name'])))
   output.write('{\n')
-  output.write('\treturn m{0}.size();\n'.format(strFunctions.capp(attrib['name'])))
+  output.write('  return m{0}.size();\n'.format(strFunctions.capp(attrib['name'])))
   output.write('}\n\n\n')
   if attrib.has_key('abstract') == False or (attrib.has_key('abstract') and attrib['abstract'] == False):
       output.write('/*\n')
