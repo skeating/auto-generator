@@ -159,10 +159,19 @@ def writeGetFunction(attrib, output, element):
       output.write('{0}_t*\n'.format(strFunctions.cap(attrib['element'])))
       output.write('{0}_get{1}'.format(element, capAttName))
       output.write('({0}_t * {1});\n\n\n'.format(element, strFunctions.objAbbrev(element)))
-      output.write('LIBSBML_EXTERN\n')
-      output.write('{0}_t*\n'.format(strFunctions.cap(attrib['element'])))
-      output.write('{0}_create{1}'.format(element, capAttName))
-      output.write('({0}_t * {1});\n\n\n'.format(element, strFunctions.objAbbrev(element)))
+
+      if attrib.has_key('abstract') == False or (attrib.has_key('abstract') and attrib['abstract'] == False):
+        output.write('LIBSBML_EXTERN\n')
+        output.write('{0}_t*\n'.format(strFunctions.cap(attrib['element'])))
+        output.write('{0}_create{1}'.format(element, capAttName))
+        output.write('({0}_t * {1});\n\n\n'.format(element, strFunctions.objAbbrev(element)))
+      else:
+        for elem in attrib['concrete']:
+          output.write('LIBSBML_EXTERN\n')
+          output.write('{0}_t *\n'.format(elem['element']))
+          output.write('{0}_create{1}({0}_t * {2}' .format(element, strFunctions.cap(elem['name']), strFunctions.objAbbrev(element)))
+          output.write(');\n\n\n')
+
  
 def writeIsSetFunction(attrib, output, element):
   att = generalFunctions.parseAttributeForC(attrib)

@@ -208,15 +208,26 @@ def writeGetFunction(attrib, output, element):
       output.write('\t\treturn NULL;\n\n')
       output.write('\treturn ({0}_t*){1}->get{2}();\n'.format(attrib['element'],varname, capAttName))
       output.write('}\n\n\n')
-      output.write('LIBSBML_EXTERN\n')
-      output.write('{0}_t*\n'.format(attrib['element']))
-      output.write('{0}_create{1}'.format(element, capAttName))
-      output.write('({0}_t * {1})\n'.format(element, varname))
-      output.write('{\n')
-      output.write('\tif ({0} == NULL)\n'.format(varname))
-      output.write('\t\treturn NULL;\n\n')
-      output.write('\treturn ({0}_t*){1}->create{2}();\n'.format(attrib['element'],varname, capAttName))
-      output.write('}\n\n\n')
+
+      if attrib.has_key('abstract') == False or (attrib.has_key('abstract') and attrib['abstract'] == False):
+        output.write('LIBSBML_EXTERN\n')
+        output.write('{0}_t*\n'.format(attrib['element']))
+        output.write('{0}_create{1}'.format(element, capAttName))
+        output.write('({0}_t * {1})\n'.format(element, varname))
+        output.write('{\n')
+        output.write('\tif ({0} == NULL)\n'.format(varname))
+        output.write('\t\treturn NULL;\n\n')
+        output.write('\treturn ({0}_t*){1}->create{2}();\n'.format(attrib['element'],varname, capAttName))
+        output.write('}\n\n\n')
+      elif attrib.has_key('concrete'):
+        for elem in attrib['concrete']:
+         output.write('LIBSBML_EXTERN\n')
+         output.write('{0}_t *\n'.format(elem['element']))
+         output.write('{0}_create{1}({0}_t * {2})\n' .format(element, strFunctions.cap(elem['name']), strFunctions.objAbbrev(element)))
+         output.write('{\n')
+         output.write('\treturn  ({0} != NULL) ? {0}->create{1}() : NULL;\n'.format(strFunctions.objAbbrev(element),strFunctions.cap(elem['name'])))
+         output.write('}\n\n')
+    
   
  
 def writeIsSetFunction(attrib, output, element):
