@@ -238,6 +238,7 @@ def writeGetCode(attrib, output, element):
     output.write('  return m{0};\n'.format(capAttName))
     output.write('}\n\n\n')
 
+    pkgName = attrib['root']['name']
 
     if attrib['abstract'] == False:
       output.write('/*\n')
@@ -247,9 +248,17 @@ def writeGetCode(attrib, output, element):
       output.write('{0}\n'.format(attTypeCode))
       output.write('{0}::create{1}()\n'.format(element, capAttName))
       output.write('{\n')
-      output.write('  if (m{0} != NULL) delete m{0};\n'.format(capAttName))
-      output.write('  m{0} = new {1}();\n'.format(capAttName, attrib['element']))
-      output.write('  return m{0};\n'.format(capAttName))
+      if attName == 'math' or attName == 'Math' or attType == 'XMLNode*':
+        output.write('  if (m{0} != NULL) delete m{0};\n'.format(capAttName))
+        output.write('  m{0} = new {1}();\n'.format(capAttName, attrib['element']))
+        output.write('  return m{0};\n'.format(capAttName))
+      else:
+        output.write('  if (m{0} != NULL) delete m{0};\n'.format(capAttName))
+        output.write('  {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(pkgName.upper(), pkgName.lower()))
+        output.write('  m{0} = new {1}({2}ns);\n'.format(capAttName, attrib['element'], pkgName.lower()))
+        output.write('  delete {}ns;\n'.format(pkgName.lower()))
+        output.write('  connectToChild();\n'.format(pkgName.lower()))          
+        output.write('  return m{0};\n'.format(capAttName))
       output.write('}\n\n\n')
     else:
       for concrete in generalFunctions.getConcretes(attrib['root'], attrib['concrete']):
@@ -261,7 +270,10 @@ def writeGetCode(attrib, output, element):
         output.write('{0}::create{1}()\n'.format(element, strFunctions.cap(concrete['name'])))
         output.write('{\n')
         output.write('  if (m{0} != NULL) delete m{0};\n'.format(capAttName))
-        output.write('  m{0} = new {1}();\n'.format(capAttName, concrete['element']))
+        output.write('  {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(pkgName.upper(), pkgName.lower()))
+        output.write('  m{0} = new {1}({2}ns);\n'.format(capAttName, concrete['element'], pkgName.lower()))
+        output.write('  delete {}ns;\n'.format(pkgName.lower()))
+        output.write('  connectToChild();\n'.format(pkgName.lower()))          
         output.write('  return static_cast<{0}*>(m{1});\n'.format(concrete['element'], capAttName))
         output.write('}\n\n\n')
 

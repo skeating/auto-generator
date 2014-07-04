@@ -73,6 +73,7 @@ def parseDeviserXML(filename):
     hasChildren = toBool( getValue( node, 'hasChildren'))
     hasListOf = toBool( getValue( node, 'hasListOf'))
     abstract = toBool(getValue(node, 'abstract'))
+    xmlElementName = getValue(node, 'elementName')
 
     attributes = []
     
@@ -112,6 +113,8 @@ def parseDeviserXML(filename):
                     'baseClass': baseClass,
                     'abstract' : abstract
                     })     
+    if xmlElementName != None:
+      element['elementName'] = xmlElementName
     
     if abstract:
       element['concrete'] = concrete_dict[elementName]
