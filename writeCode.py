@@ -223,6 +223,24 @@ def writeGetCode(attrib, output, element):
   attTypeCode = att[3]
   if attType == 'lo_element':
     return
+
+  if attrib['type'] == 'array':
+    output.write('/*\n');
+    output.write(' * The "{0}" attribute of this {1} is returned in an {2} array (pointer)\n'.format(attName, element, attTypeCode));
+    output.write(' * that is passed as argument to the method (this is needed while using SWIG to\n');
+    output.write(' * convert int[] from C++ to Java). The method itself has a return type void.\n');
+    output.write(' *\n');
+    output.write(' * NOTE: you have to pre-allocate the array with the correct length!'); 
+    output.write(' *\n');
+    output.write(' * @return void.\n');
+    output.write(' */\n');
+    output.write('void\n{0}::get{1}({2} outArray) const\n'.format(element,capAttName, attTypeCode));
+    output.write('{\n');
+    output.write('   if (outArray == NULL) return;\n\n')
+    output.write('   memcpy(outArray , m{0}, sizeof({1})*m{0}Length);\n'.format(capAttName, attrib['element']));
+    output.write('}\n\n\n');
+    return
+
   output.write('/*\n')
   output.write(' * Returns the value of the \"{0}\"'.format(attName))
   output.write(' attribute of this {0}.\n'.format(element))
@@ -333,6 +351,35 @@ def writeSetCode(attrib, output, element):
     attTypeCode = att[3]
   num = att[4]
   if attType == 'lo_element':
+    return
+  if attrib['type'] == 'array':
+    output.write('/*\n')
+    output.write(' * Sets the \"{0}\"'.format(attName))
+    output.write(' element of this {0}.\n'.format(element))
+    output.write(' *\n')
+    output.write(' * @param inArray; {1} array to be set (it will be copied).\n'.format(attName, attTypeCode))
+    output.write(' * @param arrayLength; the length of the array.\n')
+    output.write(' *\n')
+    output.write(' * @return integer value indicating success/failure of the\n')
+    output.write(' * function.  @if clike The value is drawn from the\n')
+    output.write(' * enumeration #OperationReturnValues_t. @endif The possible values\n')
+    output.write(' * returned by this function are:\n')
+    output.write(' * @li LIBSBML_OPERATION_SUCCESS\n')
+    output.write(' * @li LIBSBML_INVALID_ATTRIBUTE_VALUE\n')
+    output.write(' */\n')
+    output.write('int\n{0}::set{1}('.format(element, capAttName))
+    output.write('{0} inArray, int arrayLength)\n'.format(attTypeCode))
+    output.write('{\n')
+    output.write('  if (inArray == NULL) return LIBSBML_INVALID_ATTRIBUTE_VALUE;\n')
+    output.write('\n')
+    output.write('  if (m{0} != NULL) delete[] m{0};\n'.format(capAttName))
+    output.write('  m{0} = new {1}[arrayLength];\n'.format(capAttName, attrib['element']))
+    output.write('  memcpy(m{0}, inArray, sizeof({1})*arrayLength);\n'.format(capAttName, attrib['element']))
+    output.write('  mIsSet{0}Length = true;\n'.format(capAttName))
+    output.write('  m{0}Length = arrayLength;\n'.format(capAttName))
+    output.write('\n')
+    output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
+    output.write('}\n')
     return
   output.write('/*\n')
   output.write(' * Sets {0} and returns value indicating success.\n'.format(attName))
@@ -683,6 +730,54 @@ def createCode(element):
   generalFunctions.writeInternalCPPCode(code, nameOfElement, attributes, hasChildren, hasMath,baseClass, isListOf)
   generalFunctions.writeProtectedCPPCode(code, nameOfElement, attributes, False, hasChildren, hasMath, nameOfPackage,
                                          isListOf, baseClass)
+  
+  if generalFunctions.hasArray(element):
+    
+    # writes the array to model
+    code.write('void\n{0}::write(XMLOutputStream& stream) const\n'.format(element['name']))
+    code.write('{\n')
+    code.write('  stream.startElement(getElementName());\n')
+    code.write('  writeAttributes(stream);\n')
+
+    att = generalFunctions.getByType(element['attribs'], 'array')
+    if att != None:
+      capAttName = strFunctions.cap(att['name'])
+      code.write('  if(isSet{0}())\n'.format(capAttName))
+      code.write('  {\n')
+      code.write('    for (unsigned int i = 0; i < m{0}Length; ++i)\n'.format(capAttName))
+      code.write('    {\n')
+      code.write('      stream << m{0}[i] << " ";\n'.format(capAttName))
+      code.write('    }\n')
+      code.write('  }\n')
+    code.write('  stream.endElement(getElementName());\n')
+    code.write('}\n\n\n')
+
+    # set element text, parses the text
+    code.write('void\n{0}::setElementText(const std::string &text)\n'.format(element['name']))
+    code.write('{\n')
+    code.write('  stringstream strStream(text); // Insert the string into a stream\n')
+    code.write('  {0} val;\n'.format(att['element']))
+    code.write('  vector<{0}> valuesVector;\n'.format(att['element']))
+    code.write('  while (strStream >> val)\n')
+    code.write('  {\n')
+    code.write('    valuesVector.push_back(val);\n')
+    code.write('  }\n')
+    code.write('\n')
+    code.write('  // convert the vector to an array\n')
+    code.write('  unsigned int length = (unsigned int)valuesVector.size();\n')
+    code.write('  if (length > 0)\n')
+    code.write('  {\n')
+    code.write('\n')
+    code.write('    {0}* data = new {0}[length];\n'.format(att['element']))
+    code.write('    for (unsigned int i = 0; i < length; ++i)\n')
+    code.write('    {\n')
+    code.write('      data[i] = valuesVector.at(i);\n')
+    code.write('    }\n')
+    code.write('\n')
+    code.write('    set{0}(data, length);\n'.format(strFunctions.cap(att['name'])))
+    code.write('  }\n')     
+    code.write('}\n')
+
   if isListOf == True:
     writeListOfCode.createCode(element, code)
   writeCCode.createCode(element, code)

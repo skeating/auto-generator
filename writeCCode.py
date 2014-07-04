@@ -151,6 +151,8 @@ def writeGetFunction(attrib, output, element):
   num = att[4]
   if attrib['type'] == 'lo_element':
     return
+  if attrib['type'] == 'array':
+    return
   varname = strFunctions.objAbbrev(element)
   if attrib['type'] == 'std::vector<double>':
     return
@@ -257,6 +259,8 @@ def writeSetFunction(attrib, output, element):
   attTypeCode = att[3]
   num = att[4]
   if attrib['type'] == 'lo_element':
+    return
+  if attrib['type'] == 'array':
     return
   varname = strFunctions.objAbbrev(element)
   if attrib['type'] != 'element' and attrib['type'] != 'lo_element':
@@ -371,6 +375,7 @@ def createCode(element, code):
     writeHasReqdElementsFunction(code, element['name'])
   if element['hasListOf'] == True:
     writeListOfCode(code, element['name'])
+
   code.write('\n\n');
   code.write('LIBSBML_CPP_NAMESPACE_END\n')
   code.write('\n\n');

@@ -168,7 +168,11 @@ def writeProtectedFunctions(output, element, package, elementDict):
   output.write('  const std::string& name   = stream.peek().getName();\n')
   output.write('  SBase* object = NULL;\n\n')
   
-  output.write('  if (name == "{0}")\n'.format(strFunctions.lowerFirst(element)))
+  name = strFunctions.lowerFirst(element)
+  if elementDict.has_key('elementName'):
+    name = elementDict['elementName']
+
+  output.write('  if (name == "{0}")\n'.format(name))
   output.write('  {\n')
   output.write('    {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(package.upper(), package.lower()))
   output.write('    object = new {0}({1}ns);\n'.format(element, package.lower()))

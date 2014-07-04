@@ -429,7 +429,8 @@ def writeAddExpectedCPPCode(outFile, element, attribs, baseClass='SBase'):
   outFile.write('{\n')
   outFile.write('  {0}::addExpectedAttributes(attributes);\n\n'.format(baseClass))
   for i in range (0, len(attribs)):
-    if attribs[i]['type'] != 'element' and attribs[i]['type'] != 'lo_element':
+    attType = attribs[i]['type'];
+    if attType != 'element' and attType != 'lo_element' and attType != 'array':
       if attribs[i].has_key('attName'): 
         outFile.write('  attributes.add("{0}");\n'.format(attribs[i]['attName']))
       else: 
@@ -750,33 +751,56 @@ def writeCreateObjectCPPCode(outFile, element, attribs, pkg, isListOf, hasChildr
       NSWritten = True
   for i in range (0, len(attribs)):
     current = attribs[i]
-    if current.has_key('lo_elementName'):        
-      outFile.write('  if (name == "{0}")\n'.format(current['lo_elementName']))	
-      outFile.write('  {\n')	
-      outFile.write('    object = &m{0};\n'.format(strFunctions.capp(current['name'])))	
-      outFile.write('  }\n\n')
-    elif current['type'] == 'lo_element':
-      if first == True:
-      	outFile.write('  if')
-      	first = False
-      else:
-      	outFile.write('  else if')
-      outFile.write(' (name == "listOf{0}")\n'.format(strFunctions.capp(current['name'])))
-      outFile.write('  {\n')
-      outFile.write('    object = &m{0};\n'.format(strFunctions.capp(current['name'])))
-      outFile.write('  }\n')
-    elif current['type'] == 'element' and (current['name'] !='Math' and current['name'] != 'math'):
-      if first == True:
-      	outFile.write('  if')
-      	first = False
-      else:
-      	outFile.write('  else if')
-      outFile.write(' (name == "{0}")\n'.format(current['name']))
-      outFile.write('  {\n')
-      outFile.write('    m{0} = new {1}({2}ns);\n'.format(strFunctions.cap(current['name']), current['element'], pkg.lower()))
-      outFile.write('    m{0}->setElementName(name);\n'.format(strFunctions.cap(current['name']), current['element'], pkg.lower()))
-      outFile.write('    object = m{0};\n'.format(strFunctions.cap(current['name'])))
-      outFile.write('  }\n')
+    if current['abstract'] and current['type'] == 'element':
+      if NSWritten == False:
+        outFile.write('  {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n\n'.format(pkg.upper(), pkg.lower()))
+        NSWritten = True
+      concretes = getConcretes(current['root'], current['concrete'])
+      first = True
+      for c in concretes:
+        if first:
+          outFile.write('  if')
+          first = False
+        else:
+          outFile.write('  else if')
+
+        outFile.write(' (name == "{0}")\n'.format(c['name']))
+        outFile.write('  {\n')
+        outFile.write('    m{0} = new {1}({2}ns);\n'.format(strFunctions.cap(current['name']), c['element'], pkg.lower()))
+        if current['parent']['childrenOverwriteElementName']:
+          outFile.write('    m{0}->setElementName(name);\n'.format(strFunctions.cap(current['name'])))
+        outFile.write('    object = m{0};\n'.format(strFunctions.cap(current['name'])))
+        outFile.write('  }\n')
+
+    else:
+      if current.has_key('lo_elementName'):        
+        outFile.write('  if (name == "{0}")\n'.format(current['lo_elementName']))	
+        outFile.write('  {\n')	
+        outFile.write('    object = &m{0};\n'.format(strFunctions.capp(current['name'])))	
+        outFile.write('  }\n\n')
+      elif current['type'] == 'lo_element':
+        if first == True:
+        	outFile.write('  if')
+        	first = False
+        else:
+        	outFile.write('  else if')
+        outFile.write(' (name == "listOf{0}")\n'.format(strFunctions.capp(current['name'])))
+        outFile.write('  {\n')
+        outFile.write('    object = &m{0};\n'.format(strFunctions.capp(current['name'])))
+        outFile.write('  }\n')
+      elif current['type'] == 'element' and (current['name'] !='Math' and current['name'] != 'math'):
+        if first == True:
+        	outFile.write('  if')
+        	first = False
+        else:
+        	outFile.write('  else if')
+        outFile.write(' (name == "{0}")\n'.format(current['name']))
+        outFile.write('  {\n')
+        outFile.write('    m{0} = new {1}({2}ns);\n'.format(strFunctions.cap(current['name']), current['element'], pkg.lower()))
+        if current['parent']['childrenOverwriteElementName']:
+          outFile.write('    m{0}->setElementName(name);\n'.format(strFunctions.cap(current['name']), current['element'], pkg.lower()))
+        outFile.write('    object = m{0};\n'.format(strFunctions.cap(current['name'])))
+        outFile.write('  }\n')
   if NSWritten:
     outFile.write('\n  delete {}ns;\n\n'.format(pkg.lower()))
   outFile.write('  connectToChild();\n\n')
@@ -898,7 +922,7 @@ def writeWriteAttributesCPPCode(outFile, element, attribs, baseClass='SBase'):
   outFile.write('{\n')
   outFile.write('  {0}::writeAttributes(stream);\n\n'.format(baseClass))
   for i in range (0, len(attribs)):
-    if attribs[i]['type'] != 'element' and attribs[i]['type'] != 'XMLNode*' and attribs[i]['type'] != 'lo_element' and attribs[i]['type'] != 'std::vector<double>':
+    if attribs[i]['type'] != 'element' and attribs[i]['type'] != 'XMLNode*' and attribs[i]['type'] != 'lo_element' and attribs[i]['type'] != 'std::vector<double>' and attribs[i]['type'] != 'array':
       outFile.write('  if (isSet{0}() == true)\n'.format(strFunctions.cap(attribs[i]['name'])))
       if attribs[i]['type'] == 'enum': 
         outFile.write('    stream.writeAttribute("{0}", getPrefix(), {1}_toString(m{2}));\n\n'.format(attribs[i]['name'], attribs[i]['element'], strFunctions.cap(attribs[i]['name'])))	 
@@ -1230,3 +1254,6 @@ def overridesElementName(attrib):
   if current.has_key('childrenOverwriteElementName') and current['childrenOverwriteElementName']:
     return True
   return False
+
+def hasArray(elementDict):
+  return containsType(elementDict['attribs'], 'array')

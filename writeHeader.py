@@ -113,6 +113,17 @@ def writeGetFunction(attrib, output, element):
   num = att[4]
   if attrib['type'] == 'lo_element':
     return
+  elif attrib['type'] == 'array':
+    output.write('  /**\n');
+    output.write('   * The "{0}" attribute of this {1} is returned in an {2} array (pointer)\n'.format(attName, element, attTypeCode));
+    output.write('   * that is passed as argument to the method (this is needed while using SWIG to\n');
+    output.write('   * convert int[] from C++ to Java). The method itself has a return type void.\n');
+    output.write('   *\n');
+    output.write('   * NOTE: you have to pre-allocate the array with the correct length!');
+    output.write('   *\n');
+    output.write('   * @return void.\n');
+    output.write('   */\n');
+    output.write('  void get{0}({1} outArray) const;\n\n\n'.format(capAttName, attTypeCode));
   elif attrib['type'] == 'element':
     if attrib['name'] == 'Math' or attrib['name'] == 'math':
       output.write('  /**\n')
@@ -216,6 +227,23 @@ def writeSetFunction(attrib, output, element):
   num = att[4]
   if attrib['type'] == 'lo_element':
     return
+  elif attrib['type'] == 'array':
+    output.write('  /**\n')
+    output.write('   * Sets the \"{0}\"'.format(attName))
+    output.write(' element of this {0}.\n'.format(element))
+    output.write('   *\n')
+    output.write('   * @param inArray; {1} array to be set (it will be copied).\n'.format(attName, attTypeCode))
+    output.write('   * @param arrayLength; the length of the array.\n')
+    output.write('   *\n')
+    output.write('   * @return integer value indicating success/failure of the\n')
+    output.write('   * function.  @if clike The value is drawn from the\n')
+    output.write('   * enumeration #OperationReturnValues_t. @endif The possible values\n')
+    output.write('   * returned by this function are:\n')
+    output.write('   * @li LIBSBML_OPERATION_SUCCESS\n')
+    output.write('   * @li LIBSBML_INVALID_ATTRIBUTE_VALUE\n')
+    output.write('   */\n')
+    output.write('  virtual int set{0}('.format(capAttName))
+    output.write('{0} inArray, int arrayLength);\n\n\n'.format(attTypeCode))
   elif attrib['type'] == 'element':
     output.write('  /**\n')
     output.write('   * Sets the \"{0}\"'.format(attName))
@@ -410,16 +438,21 @@ def writeClass(attributes, header, nameOfElement, nameOfPackage, hasChildren, ha
   writeAttributeFunctions(attributes, header, nameOfElement, elementDict)
   if hasMath == True or generalFunctions.hasSIdRef(attributes) == True:
     generalFunctions.writeRenameSIdHeader(header)
+
   if hasChildren == True:
     generalFunctions.writeGetAllElements(header)    
   generalFunctions.writeCommonHeaders(header, nameOfElement, attributes, False, hasChildren, hasMath)
   generalFunctions.writeInternalHeaders(header, isListOf, hasChildren)
 
+  if generalFunctions.hasArray(elementDict):
+    header.write('  virtual void write(XMLOutputStream& stream) const;\n\n\n')
   if childrenOverwrite:
     header.write('  virtual void setElementName(const std::string& name);\n\n\n')
 
   header.write('protected:\n\n')
   generalFunctions.writeProtectedHeaders(header, attributes, hasChildren, hasMath, baseClass, elementDict)
+  if generalFunctions.hasArray(elementDict):
+    header.write('  virtual void setElementText(const std::string &text);\n\n\n')
   header.write('\n};\n\n')
  
 # write the include files
