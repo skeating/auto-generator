@@ -399,6 +399,8 @@ def writeIncludes(fileOut, pkg, element):
   fileOut.write('\n\n');
   fileOut.write('#include <sbml/packages/{0}/extension/{1}.h>\n'.format(pkg.lower(), element))
   fileOut.write('#include <sbml/packages/{0}/validator/{1}SBMLError.h>\n'.format(pkg.lower(), pkg))
+  fileOut.write('#include <sbml/util/ElementFilter.h>\n'.format(pkg.lower(), pkg))
+  fileOut.write('#include <sbml/Model.h>\n'.format(pkg.lower(), pkg))
   fileOut.write('\n\n');
   fileOut.write('using namespace std;\n')
   fileOut.write('\n\n');
@@ -516,5 +518,9 @@ def createCode(package, plugin):
   writeIncludes(code, nameOfPackage, nameOfClass)
   writeClassDefn(code, nameOfClass, nameOfPackage, plugin['extension'],plugin['attribs'])
   writeIncludeEnds(code, nameOfClass)
+
+  if plugin.has_key('addDefs'):
+    code.write(open(plugin['addDefs'], 'r').read())
+
 
   

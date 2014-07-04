@@ -453,6 +453,10 @@ def writeClass(attributes, header, nameOfElement, nameOfPackage, hasChildren, ha
   generalFunctions.writeProtectedHeaders(header, attributes, hasChildren, hasMath, baseClass, elementDict)
   if generalFunctions.hasArray(elementDict):
     header.write('  virtual void setElementText(const std::string &text);\n\n\n')
+
+  if elementDict.has_key('addDecls'):
+    header.write(open(elementDict['addDecls'], 'r').read())
+
   header.write('\n};\n\n')
  
 # write the include files

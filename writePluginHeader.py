@@ -12,7 +12,7 @@ import strFunctions
 
 import writeHeader
 
-def writeClassDefn(fileOut, nameOfClass, pkg, members, attribs):
+def writeClassDefn(fileOut, nameOfClass, pkg, members, attribs, plugin):
   fileOut.write('class LIBSBML_EXTERN {0} : public SBasePlugin\n'.format(nameOfClass))
   fileOut.write('{\npublic:\n\n')
   writeConstructors(fileOut, nameOfClass, pkg)
@@ -30,9 +30,10 @@ def writeClassDefn(fileOut, nameOfClass, pkg, members, attribs):
   generalFunctions.writeInternalStart(fileOut)
   fileOut.write('  virtual bool accept (SBMLVisitor& v) const;\n\n')
   generalFunctions.writeInternalEnd(fileOut)
-  writeClassEnd(fileOut, members, attribs)
 
-def writeClassEnd(fileOut, members, attribs):
+  writeClassEnd(fileOut, members, attribs, plugin)
+
+def writeClassEnd(fileOut, members, attribs, plugin):
   fileOut.write('protected:\n\n')
   generalFunctions.writeInternalStart(fileOut)
   for i in range (0, len(members)):
@@ -46,6 +47,10 @@ def writeClassEnd(fileOut, members, attribs):
     writeHeader.writeAtt(mem, fileOut);
   fileOut.write('\n')
   generalFunctions.writeInternalEnd(fileOut)
+
+  if plugin.has_key('addDecls'):
+    fileOut.write(open(plugin['addDecls'], 'r').read())
+
   fileOut.write('};\n\n\n')
  
 def writeConstructors(fileOut, nameOfClass, pkg):
@@ -322,7 +327,7 @@ def createHeader(package, plugin):
   fileHeaders.addFilename(code, codeName, nameOfClass)
   fileHeaders.addLicence(code)
   writeIncludes(code, nameOfPackage, nameOfClass, plugin['extension'], plugin['attribs'])
-  writeClassDefn(code, nameOfClass, nameOfPackage, plugin['extension'], plugin['attribs'])
+  writeClassDefn(code, nameOfClass, nameOfPackage, plugin['extension'], plugin['attribs'], plugin)
   writeIncludeEnds(code, nameOfClass)
 
   

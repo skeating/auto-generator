@@ -3,6 +3,7 @@
 from xml.dom import *
 from xml.dom.minidom import *
 import weakref;
+import os.path;
 
 def toBool(v):
   if (v == None): 
@@ -75,6 +76,10 @@ def parseDeviserXML(filename):
     abstract = toBool(getValue(node, 'abstract'))
     childrenOverwriteElementName = toBool(getValue(node, 'childrenOverwriteElementName'))
     xmlElementName = getValue(node, 'elementName')
+    xmlLoElementName = getValue(node, 'listOfName')
+
+    addDecls = getValue(node, 'additionalDecls')
+    addDefs = getValue(node, 'additionalDefs')
 
     attributes = []
     
@@ -118,6 +123,19 @@ def parseDeviserXML(filename):
     if xmlElementName != None:
       element['elementName'] = xmlElementName
     
+    if xmlLoElementName != None:
+      element['lo_elementName'] = xmlLoElementName
+
+    if addDecls != None:
+      if os.path.exists( os.path.dirname(filename) + '/' + addDecls):
+        addDecls = os.path.dirname(filename) + '/' + addDecls
+      element['addDecls'] = addDecls
+
+    if addDefs != None:
+      if os.path.exists( os.path.dirname(filename) + '/' + addDefs):
+        addDefs = os.path.dirname(filename) + '/' + addDefs
+      element['addDefs'] = addDefs
+
     if abstract:
       element['concrete'] = concrete_dict[elementName]
 
@@ -133,6 +151,8 @@ def parseDeviserXML(filename):
 
     plugElements = []
     extPoint = getValue( node, 'extensionPoint')
+    addDecls = getValue(node, 'additionalDecls')
+    addDefs = getValue(node, 'additionalDefs')
 
     # read references to elements
     for reference in node.getElementsByTagName('reference'):
@@ -165,6 +185,17 @@ def parseDeviserXML(filename):
         attributes.append(attribute_dict)
 
     plugin_dict = dict({'sbase': extPoint, 'extension': plugElements, 'attribs':attributes})
+
+    if addDecls != None:
+      if os.path.exists( os.path.dirname(filename) + '/' + addDecls):
+        addDecls = os.path.dirname(filename) + '/' + addDecls
+      plugin_dict['addDecls'] = addDecls
+
+    if addDefs != None:
+      if os.path.exists( os.path.dirname(filename) + '/' + addDefs):
+        addDefs = os.path.dirname(filename) + '/' + addDefs
+      plugin_dict['addDefs'] = addDefs
+
     plugins.append( plugin_dict)
 
   for node in dom.getElementsByTagName('enum'):

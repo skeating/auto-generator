@@ -743,11 +743,14 @@ def createCode(element):
     att = generalFunctions.getByType(element['attribs'], 'array')
     if att != None:
       capAttName = strFunctions.cap(att['name'])
+      attType = att['element'];
+      if attType == 'int':
+        attType = 'long'
       code.write('  if(isSet{0}())\n'.format(capAttName))
       code.write('  {\n')
-      code.write('    for (unsigned int i = 0; i < m{0}Length; ++i)\n'.format(capAttName))
+      code.write('    for (int i = 0; i < m{0}Length; ++i)\n'.format(capAttName))
       code.write('    {\n')
-      code.write('      stream << m{0}[i] << " ";\n'.format(capAttName))
+      code.write('      stream << ({0})m{1}[i] << " ";\n'.format(attType, capAttName))
       code.write('    }\n')
       code.write('  }\n')
     code.write('  stream.endElement(getElementName());\n')
@@ -778,6 +781,9 @@ def createCode(element):
     code.write('    set{0}(data, length);\n'.format(strFunctions.cap(att['name'])))
     code.write('  }\n')     
     code.write('}\n')
+
+  if element.has_key('addDefs'):
+    code.write(open(element['addDefs'], 'r').read())
 
   if isListOf == True:
     writeListOfCode.createCode(element, code)
