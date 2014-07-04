@@ -398,10 +398,13 @@ def writeListOfSubFunctions(attrib, output, element, elementDict):
 def writeClass(attributes, header, nameOfElement, nameOfPackage, hasChildren, hasMath, isListOf, elementDict):
   header.write('class LIBSBML_EXTERN {0} :'.format(nameOfElement))
   baseClass = 'SBase'
+  childrenOverwrite = elementDict.has_key('childrenOverwriteElementName') and elementDict['childrenOverwriteElementName']
   if elementDict.has_key('baseClass'):
     baseClass = elementDict['baseClass']
   header.write(' public {0}\n{1}\n\n'.format(baseClass, '{'))
   writeAttributes(attributes, header)
+  if childrenOverwrite:
+    header.write('  std::string   mElementName;\n\n')
   header.write('public:\n\n')
   writeConstructors(nameOfElement, nameOfPackage, header)
   writeAttributeFunctions(attributes, header, nameOfElement, elementDict)
@@ -411,8 +414,12 @@ def writeClass(attributes, header, nameOfElement, nameOfPackage, hasChildren, ha
     generalFunctions.writeGetAllElements(header)    
   generalFunctions.writeCommonHeaders(header, nameOfElement, attributes, False, hasChildren, hasMath)
   generalFunctions.writeInternalHeaders(header, isListOf, hasChildren)
+
+  if childrenOverwrite:
+    header.write('  virtual void setElementName(const std::string& name);\n\n\n')
+
   header.write('protected:\n\n')
-  generalFunctions.writeProtectedHeaders(header, attributes, hasChildren, hasMath, baseClass)
+  generalFunctions.writeProtectedHeaders(header, attributes, hasChildren, hasMath, baseClass, elementDict)
   header.write('\n};\n\n')
  
 # write the include files

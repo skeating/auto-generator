@@ -116,7 +116,7 @@ def writeCopyAttributes(attrs, output, tabs, name):
       output.write('{0}mIsSet{1}  = {2}.mIsSet{1};\n'.format(tabs, attName, name))
 
 
-def writeConstructors(element, package, output, attrs, hasChildren=False, hasMath=False, elementDict=None):
+def writeConstructors(element, package, output, attrs, hasChildren=False, hasMath=False, elementDict=None, childrenOverwrite=False):
   baseClass = 'SBase'
   if elementDict != None and elementDict.has_key('baseClass'):
     baseClass = elementDict['baseClass']
@@ -126,6 +126,8 @@ def writeConstructors(element, package, output, attrs, hasChildren=False, hasMat
   output.write('{0}::{0} (unsigned int level, unsigned int version, unsigned int pkgVersion)\n'.format(element))
   output.write('  : {0}(level, version)\n'.format(baseClass))
   writeAttributes(attrs, output, 1)
+  if childrenOverwrite:
+    output.write('  , mElementName("{0}")\n'.format(strFunctions.lowerFirst(elementDict['name'])))
   output.write('{\n')
   output.write('  // set an SBMLNamespaces derived object of this package\n')
   output.write('  setSBMLNamespacesAndOwn(new {0}PkgNamespaces(level, version, pkgVersion));\n'.format(package))
@@ -139,6 +141,8 @@ def writeConstructors(element, package, output, attrs, hasChildren=False, hasMat
   output.write('{0}::{0} ({1}PkgNamespaces* {2}ns)\n'.format(element, package, package.lower()))
   output.write('  : {1}({0}ns)\n'.format(package.lower(), baseClass))
   writeAttributes(attrs, output, 2, package.lower())
+  if childrenOverwrite:
+    output.write('  , mElementName("{0}")\n'.format(strFunctions.lowerFirst(elementDict['name'])))
   output.write('{\n')
   output.write('  // set the element namespace of this object\n')
   output.write('  setElementNamespace({0}ns->getURI());\n'.format(package.lower()))
@@ -160,6 +164,9 @@ def writeConstructors(element, package, output, attrs, hasChildren=False, hasMat
   output.write('  else\n')
   output.write('  {\n')
   writeCopyAttributes(attrs, output, '    ', 'orig')
+  if childrenOverwrite:
+    output.write('    mElementName = orig.mElementName;\n')
+
   if hasChildren == True:
     output.write('\n    // connect to child objects\n')
     output.write('    connectToChild();\n')
@@ -177,6 +184,9 @@ def writeConstructors(element, package, output, attrs, hasChildren=False, hasMat
   output.write('  {\n')
   output.write('    {0}::operator=(rhs);\n'.format(baseClass))
   writeCopyAttributes(attrs, output, '    ', 'rhs')
+  if childrenOverwrite:
+    output.write('    mElementName = rhs.mElementName;\n')
+
   if hasChildren == True:
     output.write('\n    // connect to child objects\n')
     output.write('    connectToChild();\n')
@@ -256,6 +266,8 @@ def writeGetCode(attrib, output, element):
         output.write('  if (m{0} != NULL) delete m{0};\n'.format(capAttName))
         output.write('  {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(pkgName.upper(), pkgName.lower()))
         output.write('  m{0} = new {1}({2}ns);\n'.format(capAttName, attrib['element'], pkgName.lower()))
+        if generalFunctions.overridesElementName(attrib):
+          output.write('  m{0}->setElementName("{1}");\n'.format(capAttName, attrib['name']));
         output.write('  delete {}ns;\n'.format(pkgName.lower()))
         output.write('  connectToChild();\n'.format(pkgName.lower()))          
         output.write('  return m{0};\n'.format(capAttName))
@@ -272,6 +284,8 @@ def writeGetCode(attrib, output, element):
         output.write('  if (m{0} != NULL) delete m{0};\n'.format(capAttName))
         output.write('  {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(pkgName.upper(), pkgName.lower()))
         output.write('  m{0} = new {1}({2}ns);\n'.format(capAttName, concrete['element'], pkgName.lower()))
+        if generalFunctions.overridesElementName(concrete):
+          output.write('  m{0}->setElementName("{1}");\n'.format(capAttName, attrib['name']));
         output.write('  delete {}ns;\n'.format(pkgName.lower()))
         output.write('  connectToChild();\n'.format(pkgName.lower()))          
         output.write('  return static_cast<{0}*>(m{1});\n'.format(concrete['element'], capAttName))
@@ -387,6 +401,8 @@ def writeSetCode(attrib, output, element):
     if attTypeCode == 'const ASTNode*':
       output.write('      m{0}->setParentSBMLObject(this);\n'.format(capAttName, attName))
     else:
+      if generalFunctions.overridesElementName(attrib):
+        output.write('      m{0}->setElementName("{1}");\n'.format(capAttName, attName))
       output.write('      m{0}->connectToParent(this);\n'.format(capAttName, attName))
     output.write('    }\n')
     output.write('    return LIBSBML_OPERATION_SUCCESS;\n  }\n')
@@ -647,6 +663,8 @@ def createCode(element):
   hasChildren = element['hasChildren']
   hasMath = element['hasMath']
   baseClass = 'SBase'
+  childrenOverwrite = element.has_key('childrenOverwriteElementName') and element['childrenOverwriteElementName']
+
   if element != None and element.has_key('baseClass'):
     baseClass = element['baseClass']
 
@@ -655,7 +673,7 @@ def createCode(element):
   fileHeaders.addFilename(code, codeName, nameOfElement)
   fileHeaders.addLicence(code)
   writeIncludes(code, nameOfElement, nameOfPackage, hasMath, element)
-  writeConstructors(nameOfElement, nameOfPackage, code, attributes, hasChildren, hasMath, element)
+  writeConstructors(nameOfElement, nameOfPackage, code, attributes, hasChildren, hasMath, element, childrenOverwrite)
   writeAttributeCode(attributes, code, nameOfElement, nameOfPackage, element)
   if hasMath == True or generalFunctions.hasSIdRef(attributes) == True:
     generalFunctions.writeRenameSIdCode(code, nameOfElement, attributes, hasMath)

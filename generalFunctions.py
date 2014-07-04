@@ -774,6 +774,7 @@ def writeCreateObjectCPPCode(outFile, element, attribs, pkg, isListOf, hasChildr
       outFile.write(' (name == "{0}")\n'.format(current['name']))
       outFile.write('  {\n')
       outFile.write('    m{0} = new {1}({2}ns);\n'.format(strFunctions.cap(current['name']), current['element'], pkg.lower()))
+      outFile.write('    m{0}->setElementName(name);\n'.format(strFunctions.cap(current['name']), current['element'], pkg.lower()))
       outFile.write('    object = m{0};\n'.format(strFunctions.cap(current['name'])))
       outFile.write('  }\n')
   if NSWritten:
@@ -925,14 +926,29 @@ def writeGetElementNameCPPCode(outFile, element, isListOf=False, dict=None):
   outFile.write(' */\n')
   outFile.write('const std::string&\n{0}::getElementName () const\n'.format(element))
   outFile.write('{\n')
-  if dict != None and dict.has_key('elementName'):
-    if isListOf:
-      if dict.has_key('lo_elementName'):        
-        outFile.write('  static const string name = "{0}";\n'.format(dict['lo_elementName']))
+  if dict != None:
+    if dict.has_key('childrenOverwriteElementName') and dict['childrenOverwriteElementName']:
+      outFile.write('  return mElementName;\n}\n\n\n')
+
+      outFile.write('/*\n')
+      outFile.write(' * Sets the element name for this object\n')
+      outFile.write(' */\n')
+      outFile.write('void\n{0}::setElementName(const std::string& name)\n'.format(element))
+      outFile.write('{\n')
+      outFile.write('  mElementName = name;\n')
+      outFile.write('}\n\n\n')
+
+      return;
+    elif dict.has_key('elementName'):
+      if isListOf:
+        if dict.has_key('lo_elementName'):        
+          outFile.write('  static const string name = "{0}";\n'.format(dict['lo_elementName']))
+        else:
+          outFile.write('  static const string name = "listOf{0}";\n'.format(strFunctions.capp(dict['elementName'])))
       else:
-        outFile.write('  static const string name = "listOf{0}";\n'.format(strFunctions.capp(dict['elementName'])))
-    else:
-      outFile.write('  static const string name = "{0}";\n'.format(dict['elementName']))
+        outFile.write('  static const string name = "{0}";\n'.format(dict['elementName']))
+    else: 
+      outFile.write('  static const string name = "{0}";\n'.format(strFunctions.lowerFirst(element)))
   else:
     if dict != None and dict.has_key('lo_elementName'):
       outFile.write('  static const string name = "{0}";\n'.format(dict['lo_elementName']))
@@ -1050,7 +1066,7 @@ def writeReadOtherXMLCPPCode(outFile, element, hasMath = True, attribs = None, b
 
 
 
-def writeProtectedHeaders(outFile, attribs = None, hasChildren=False, hasMath=False, baseClass='SBase'):
+def writeProtectedHeaders(outFile, attribs = None, hasChildren=False, hasMath=False, baseClass='SBase', elementDict=None):
   if hasChildren or baseClass != 'SBase':
     writeCreateObjectHeader(outFile)
   writeAddExpectedHeader(outFile)
@@ -1202,9 +1218,15 @@ def addConcreteToList(root, concrete, list):
       for c in current['concrete']:
         addConcreteToList(root, c, list)
 
-
 def getConcretes(root, concretes):
   result = []
   for c in concretes:
     addConcreteToList(root, c, result)
   return result;
+
+def overridesElementName(attrib):
+  root = attrib['root']
+  current = getElement(root, attrib['element'])
+  if current.has_key('childrenOverwriteElementName') and current['childrenOverwriteElementName']:
+    return True
+  return False

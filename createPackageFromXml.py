@@ -73,6 +73,7 @@ def parseDeviserXML(filename):
     hasChildren = toBool( getValue( node, 'hasChildren'))
     hasListOf = toBool( getValue( node, 'hasListOf'))
     abstract = toBool(getValue(node, 'abstract'))
+    childrenOverwriteElementName = toBool(getValue(node, 'childrenOverwriteElementName'))
     xmlElementName = getValue(node, 'elementName')
 
     attributes = []
@@ -110,6 +111,7 @@ def parseDeviserXML(filename):
                     'attribs':attributes, 
                     'hasChildren':hasChildren, 
                     'hasMath':hasMath, 
+                    'childrenOverwriteElementName':childrenOverwriteElementName, 
                     'baseClass': baseClass,
                     'abstract' : abstract
                     })     
@@ -198,6 +200,11 @@ def parseDeviserXML(filename):
         for attr in elem['attribs']:
             attr['parent'] = elem
             attr['root'] = package
+      if elem.has_key('concrete'):
+        for attr in elem['concrete']:
+            attr['parent'] = elem
+            attr['root'] = package
+
 
   return package
 
