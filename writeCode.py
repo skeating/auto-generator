@@ -244,7 +244,7 @@ def writeGetCode(attrib, output, element):
     output.write(' */\n');
     output.write('void\n{0}::get{1}({2} outArray) const\n'.format(element,capAttName, attTypeCode));
     output.write('{\n');
-    output.write('   if (outArray == NULL) return;\n\n')
+    output.write('   if (outArray == NULL || m{0} == NULL) return;\n\n'.format(capAttName))
     output.write('   memcpy(outArray , m{0}, sizeof({1})*m{0}Length);\n'.format(capAttName, attrib['element']));
     output.write('}\n\n\n');
     return
@@ -524,7 +524,7 @@ def writeUnsetCode(attrib, output, element):
     output.write('  if (m{0} != NULL)\n'.format(capAttName))
     output.write('   delete[] m{0};\n'.format(capAttName))
     output.write('  m{0} = NULL;\n'.format(capAttName))
-    output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
+    output.write('  return unset{0}Length();\n'.format(capAttName))
   output.write('}\n\n\n')
 
 # for each attribute write a set/get/isset/unset
@@ -746,7 +746,7 @@ def createCode(element):
     # writes the array to model
     code.write('void\n{0}::write(XMLOutputStream& stream) const\n'.format(element['name']))
     code.write('{\n')
-    code.write('  stream.startElement(getElementName());\n')
+    code.write('  stream.startElement(getElementName(), getPrefix());\n')
     code.write('  writeAttributes(stream);\n')
 
     att = generalFunctions.getByType(element['attribs'], 'array')
@@ -762,7 +762,7 @@ def createCode(element):
       code.write('      stream << ({0})m{1}[i] << " ";\n'.format(attType, capAttName))
       code.write('    }\n')
       code.write('  }\n')
-    code.write('  stream.endElement(getElementName());\n')
+    code.write('  stream.endElement(getElementName(), getPrefix());\n')
     code.write('}\n\n\n')
 
     # set element text, parses the text
