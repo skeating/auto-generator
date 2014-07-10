@@ -490,7 +490,7 @@ def writeIncludes(fileOut, element, pkg, attribs, elementDict):
         fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), strFunctions.cap(attribs[i]['element'])))
       else: 
         fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), strFunctions.cap(attribs[i]['element'])))
-  fileOut.write('\nLIBSBML_CPP_NAMESPACE_BEGIN\n')
+  fileOut.write('\nLIBSBML_CPP_NAMESPACE_BEGIN\n\n')
 
   if elementDict.has_key('concrete'):
     for elem in generalFunctions.getConcretes(elementDict['root'], elementDict['concrete']):
