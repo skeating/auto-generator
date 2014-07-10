@@ -271,7 +271,9 @@ def writeSetFunction(attrib, output, element):
       output.write(' {0} {1})\n'.format(attTypeCode, attName))
       output.write('{\n')
       output.write('  if ({} != NULL)\n'.format(varname))
-      if attrib['type'] == 'array' or num or attrib['type'] == 'enum':
+      if num:
+        output.write('    return {1}->set{2}({0});\n'.format(attName, varname, capAttName))
+      elif attrib['type'] == 'array' or num or attrib['type'] == 'enum':
         output.write('    return ({0} == NULL) ? {1}->unset{2}() : {1}->set{2}({0});\n'.format(attName, varname, capAttName))
       else:
         output.write('    return ({0} == NULL) ? {1}->set{2}("") : {1}->set{2}({0});\n'.format(attName, varname, capAttName))

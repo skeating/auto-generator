@@ -517,10 +517,12 @@ def createCode(package, plugin):
   fileHeaders.addLicence(code)
   writeIncludes(code, nameOfPackage, nameOfClass)
   writeClassDefn(code, nameOfClass, nameOfPackage, plugin['extension'],plugin['attribs'])
-  writeIncludeEnds(code, nameOfClass)
-
+  
   if plugin.has_key('addDefs'):
     code.write(open(plugin['addDefs'], 'r').read())
+
+  writeIncludeEnds(code, nameOfClass)
+
 
 
   
