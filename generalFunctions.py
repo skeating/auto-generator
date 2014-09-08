@@ -563,7 +563,7 @@ def writeReadAttribute(output, attrib, element, pkg):
       output.write('    std::string message = "{0} attribute \'{1}\' is missing.";\n'.format(pkg, attName))
       output.write('    getErrorLog()->logPackageError("{0}", {1}UnknownError,\n'.format(pkg.lower(), pkg))
       output.write('                   getPackageVersion(), sbmlLevel, sbmlVersion, message, getLine(), getColumn());\n')
-    output.write('  }\n\n')
+      output.write('  }\n\n')
   elif attrib['type'] == 'string':
     output.write('  //\n  // {0} string '.format(attName))
     output.write('  ( use = "{0}" )\n  //\n'.format(use))
@@ -604,7 +604,7 @@ def writeReadAttribute(output, attrib, element, pkg):
     output.write('      {\n')
     output.write('        getErrorLog()->remove(XMLAttributeTypeMismatch);\n')
     output.write('        getErrorLog()->logPackageError("{0}", {1}UnknownError,\n'.format(pkg.lower(), pkg))
-    output.write('                     getPackageVersion(), sbmlLevel, sbmlVersion, getLine(), getColumn());\n')
+    output.write('                     getPackageVersion(), sbmlLevel, sbmlVersion, "", getLine(), getColumn());\n')
     output.write('      }\n')
     if use == 'required':
       output.write('      else\n')
@@ -636,7 +636,7 @@ def writeReadAttribute(output, attrib, element, pkg):
     output.write('      {\n')
     output.write('        getErrorLog()->remove(XMLAttributeTypeMismatch);\n')
     output.write('        getErrorLog()->logPackageError("{0}", {1}UnknownError,\n'.format(pkg.lower(), pkg))
-    output.write('                     getPackageVersion(), sbmlLevel, sbmlVersion, getLine(), getColumn());\n')
+    output.write('                     getPackageVersion(), sbmlLevel, sbmlVersion, "", getLine(), getColumn());\n')
     output.write('      }\n')
     if use == 'required':
       output.write('      else\n')
@@ -668,7 +668,7 @@ def writeReadAttribute(output, attrib, element, pkg):
     output.write('      {\n')
     output.write('        getErrorLog()->remove(XMLAttributeTypeMismatch);\n')
     output.write('        getErrorLog()->logPackageError("{0}", {1}UnknownError,\n'.format(pkg.lower(), pkg))
-    output.write('                     getPackageVersion(), sbmlLevel, sbmlVersion, getLine(), getColumn());\n')
+    output.write('                     getPackageVersion(), sbmlLevel, sbmlVersion, "", getLine(), getColumn());\n')
     output.write('      }\n')
     if use == 'required':
       output.write('      else\n')
@@ -693,7 +693,7 @@ def writeReadAttribute(output, attrib, element, pkg):
     output.write('      {\n')
     output.write('        getErrorLog()->remove(XMLAttributeTypeMismatch);\n')
     output.write('        getErrorLog()->logPackageError("{0}", {1}UnknownError,\n'.format(pkg.lower(), pkg))
-    output.write('                     getPackageVersion(), sbmlLevel, sbmlVersion, getLine(), getColumn());\n')
+    output.write('                     getPackageVersion(), sbmlLevel, sbmlVersion, "", getLine(), getColumn());\n')
     output.write('      }\n')
     if use == 'required':
       output.write('      else\n')
@@ -718,7 +718,7 @@ def writeReadAttribute(output, attrib, element, pkg):
     # output.write('    {\n')
     # output.write('      getErrorLog()->remove(XMLAttributeTypeMismatch);\n')
     # output.write('      getErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
-    # output.write('                   getPackageVersion(), sbmlLevel, sbmlVersion, getLine(), getColumn());\n')
+    # output.write('                   getPackageVersion(), sbmlLevel, sbmlVersion, "", getLine(), getColumn());\n')
     # output.write('    }\n')
     # output.write('  }\n')
   elif attrib['type'] == 'element' or attrib['type'] == 'lo_element' or attrib['type'] == 'array':
