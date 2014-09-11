@@ -167,13 +167,13 @@ def writeGetFunction(attrib, output, element):
 #      output.write('\tif ({0} == NULL)\n'.format(varname))
 #      output.write('\t\treturn NULL;\n\n')
 #      output.write('\treturn {0}->get{1}().empty() ? NULL : safe_strdup({0}->get{1}().c_str());\n'.format(varname, capAttName))
+    elif attType == 'boolean':
+      output.write('\treturn ({0} != NULL) ? static_cast<int>({0}->get{1}()) : 0;\n'.format(varname, capAttName))
     elif num == True:
       if attTypeCode == 'double':
         output.write('\treturn ({0} != NULL) ? {0}->get{1}() : numeric_limits<double>::quiet_NaN();\n'.format(varname, capAttName))
       else:
         output.write('\treturn ({0} != NULL) ? {0}->get{1}() : SBML_INT_MAX;\n'.format(varname, capAttName))
-    elif attType == 'boolean':
-      output.write('\treturn ({0} != NULL) ? static_cast<int>({0}->get{1}()) : 0;\n'.format(varname, capAttName))
     elif attrib['type'] == 'array':
       output.write('\treturn ({0} != NULL) ? {0}->get{1}() : NULL;\n'.format(varname, capAttName))
     elif attrib['type'] == 'enum':

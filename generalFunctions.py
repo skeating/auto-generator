@@ -169,7 +169,7 @@ def parseAttributeForC(attrib):
   elif attrib['type'] == 'bool':
     attType = 'boolean'
     attTypeCode = 'int'
-    num = False
+    num = True
   elif attrib['type'] == 'element':
     attType = 'element'
     if attrib['name'] == 'math' or attrib['name'] == 'Math':
