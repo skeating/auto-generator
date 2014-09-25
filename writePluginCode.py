@@ -119,7 +119,7 @@ def writeConstructors(fileOut, nameOfClass, pkg, members, attrs):
       fileOut.write('  , m{0}s ({1}ns)\n'.format(mem['name'], pkg.lower()))
     else:
       fileOut.write('  , m{0}  ( NULL )\n'.format(mem['name']))
-  writeCode.writeAttributes(attrs, fileOut, 1)
+  writeCode.writeAttributes(attrs, fileOut, 2, pkg.lower())
   fileOut.write('{\n')
   fileOut.write('}\n\n\n')
   fileOut.write('/*\n' )
@@ -183,8 +183,7 @@ def writeGetFunctions(fileOut, pkg, members, nameOfClass, attribs):
       writeLOFunctions(fileOut, mem['name'], nameOfClass, pkg)
     else:
       writeFunctions(fileOut, mem['name'], nameOfClass, pkg)
-  for i in range (0, len(attribs)):
-    mem = attribs[i]
+  if len(attribs) > 0:
     writeCode.writeAttributeCode(attribs, fileOut, nameOfClass, pkg, dict({}));
   fileOut.write('//---------------------------------------------------------------\n\n\n')
   

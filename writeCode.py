@@ -618,12 +618,13 @@ def writeListOfSubFunctions(attrib, output, element, pkgName):
   output.write('  {\n')
   output.write('    return LIBSBML_VERSION_MISMATCH;\n')
   output.write('  }\n')
-  output.write(
-    '  else if (matchesRequiredSBMLNamespacesForAddition(static_cast<const SBase *>({0})) == false)\n'.format(
-      strFunctions.objAbbrev(attrib['element'])))
-  output.write('  {\n')
-  output.write('    return LIBSBML_NAMESPACES_MISMATCH;\n')
-  output.write('  }\n')
+  if not element.endswith('Plugin'):
+    output.write(
+      '  else if (matchesRequiredSBMLNamespacesForAddition(static_cast<const SBase *>({0})) == false)\n'.format(
+        strFunctions.objAbbrev(attrib['element'])))
+    output.write('  {\n')
+    output.write('    return LIBSBML_NAMESPACES_MISMATCH;\n')
+    output.write('  }\n')
   output.write('  else\n'.format(strFunctions.objAbbrev(attrib['element'])))
   output.write('  {\n')
   output.write('    m{0}.append({1});\n'.format(strFunctions.capp(attrib['name']),strFunctions.objAbbrev(attrib['element'])))

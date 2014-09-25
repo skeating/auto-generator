@@ -447,7 +447,7 @@ def writeReadAttributesHeader(outFile):
   outFile.write('                               const ExpectedAttributes& expectedAttributes);\n\n\n')
   writeInternalEnd(outFile)
 
-def writeReadAttribute(output, attrib, element, pkg):
+def writeReadAttribute(output, attrib, element, pkg, baseClass = ''):
   attName = attrib['name']
   capAttName = strFunctions.cap(attName)
   if attrib['reqd'] == True:
@@ -463,7 +463,10 @@ def writeReadAttribute(output, attrib, element, pkg):
     output.write('    // check string is not empty and correct syntax\n\n')
     output.write('    if (m{0}.empty() == true)\n'.format(capAttName))
     output.write('    {\n')
-    output.write('      logEmptyString(m{0}, getLevel(), getVersion(), "<{1}>");\n'.format(capAttName, element))
+    if baseClass.endswith('Plugin'):
+      output.write('      logEmptyString(m{0}, getLevel(), getVersion(), getPackageVersion(), "<{1}>");\n'.format(capAttName, element))
+    else: 
+      output.write('      logEmptyString(m{0}, getLevel(), getVersion(), "<{1}>");\n'.format(capAttName, element))
     output.write('    }\n')
     output.write('    else if (SyntaxChecker::isValidSBMLSId(m{0}) == false && getErrorLog() != NULL)\n'.format(capAttName))
     output.write('    {\n')
@@ -487,7 +490,10 @@ def writeReadAttribute(output, attrib, element, pkg):
     output.write('    // check string is not empty and correct syntax\n\n')
     output.write('    if (m{0}.empty() == true)\n'.format(capAttName))
     output.write('    {\n')
-    output.write('      logEmptyString(m{0}, getLevel(), getVersion(), "<{1}>");\n'.format(capAttName, element))
+    if baseClass.endswith('Plugin'):
+      output.write('      logEmptyString(m{0}, getLevel(), getVersion(), getPackageVersion(), "<{1}>");\n'.format(capAttName, element))
+    else: 
+      output.write('      logEmptyString(m{0}, getLevel(), getVersion(), "<{1}>");\n'.format(capAttName, element))
     output.write('    }\n')
     output.write('    else if (SyntaxChecker::isValidSBMLSId(m{0}) == false && getErrorLog() != NULL)\n'.format(capAttName))
     output.write('    {\n')
@@ -511,7 +517,10 @@ def writeReadAttribute(output, attrib, element, pkg):
     output.write('    // check string is not empty and correct syntax\n\n')
     output.write('    if (m{0}.empty() == true)\n'.format(capAttName))
     output.write('    {\n')
-    output.write('      logEmptyString(m{0}, getLevel(), getVersion(), "<{1}>");\n'.format(capAttName, element))
+    if baseClass.endswith('Plugin'):
+      output.write('      logEmptyString(m{0}, getLevel(), getVersion(), getPackageVersion(), "<{1}>");\n'.format(capAttName, element))
+    else: 
+      output.write('      logEmptyString(m{0}, getLevel(), getVersion(), "<{1}>");\n'.format(capAttName, element))
     output.write('    }\n')
     output.write('    else if (SyntaxChecker::isValidInternalUnitSId(m{0}) == false)\n'.format(capAttName))
     output.write('    {\n      logError(InvalidUnitIdSyntax);\n    }\n')
@@ -532,7 +541,10 @@ def writeReadAttribute(output, attrib, element, pkg):
     output.write('    // check string is not empty and correct syntax\n\n')
     output.write('    if (m{0}.empty() == true)\n'.format(capAttName))
     output.write('    {\n')
-    output.write('      logEmptyString(m{0}, getLevel(), getVersion(), "<{1}>");\n'.format(capAttName, element))
+    if baseClass.endswith('Plugin'):
+      output.write('      logEmptyString(m{0}, getLevel(), getVersion(), getPackageVersion(), "<{1}>");\n'.format(capAttName, element))
+    else: 
+      output.write('      logEmptyString(m{0}, getLevel(), getVersion(), "<{1}>");\n'.format(capAttName, element))
     output.write('    }\n')
     output.write('    else if (SyntaxChecker::isValidInternalUnitSId(m{0}) == false)\n'.format(capAttName))
     output.write('    {\n      logError(InvalidUnitIdSyntax);\n    }\n')
@@ -573,7 +585,10 @@ def writeReadAttribute(output, attrib, element, pkg):
     output.write('    // check string is not empty\n\n')
     output.write('    if (m{0}.empty() == true)\n'.format(capAttName))
     output.write('    {\n')
-    output.write('      logEmptyString(m{0}, getLevel(), getVersion(), "<{1}>");\n'.format(capAttName, element))
+    if baseClass.endswith('Plugin'):
+      output.write('      logEmptyString(m{0}, getLevel(), getVersion(), getPackageVersion(), "<{1}>");\n'.format(capAttName, element))
+    else: 
+      output.write('      logEmptyString(m{0}, getLevel(), getVersion(), "<{1}>");\n'.format(capAttName, element))
     output.write('    }\n')
     if use == 'required':
       output.write('  }\n')
@@ -901,7 +916,7 @@ def writeReadAttributesCPPCode(outFile, element, attribs, pkg, isListOf, baseCla
   outFile.write('  }\n\n')
   outFile.write('  bool assigned = false;\n\n')
   for i in range (0, len(attribs)):
-    writeReadAttribute(outFile, attribs[i], element, pkg)
+    writeReadAttribute(outFile, attribs[i], element, pkg, baseClass)
   outFile.write('}\n\n\n')
   writeInternalEnd(outFile)
 
