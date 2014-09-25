@@ -41,12 +41,12 @@ def writeOtherFunctions(fileOut, nameOfClass, members, attribs):
   for i in range (0, len(attribs)):
     mem = attribs[i]
     if mem['type'] == 'lo_element':
-        fileOut.write('  if (getNum{0}s() > 0)\n'.format(strFunctions.cap(mem['name'])))
+        #fileOut.write('  if (getNum{0}s() > 0)\n'.format(strFunctions.cap(mem['name'])))
         fileOut.write('  {\n')
         fileOut.write('    m{0}s.setSBMLDocument(d);\n'.format(strFunctions.cap(mem['name'])))
         fileOut.write('  }\n')
     elif mem['type'] == 'element':
-      fileOut.write('  if (isSet{0}() == true)\n'.format(strFunctions.cap(mem['name'])))
+      #fileOut.write('  if (isSet{0}() == true)\n'.format(strFunctions.cap(mem['name'])))
       fileOut.write('  {\n')
       fileOut.write('    m{0}->setSBMLDocument(d);\n'.format(strFunctions.cap(mem['name'])))
       fileOut.write('  }\n')
