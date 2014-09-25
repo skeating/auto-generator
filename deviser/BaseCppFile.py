@@ -80,12 +80,12 @@ class BaseCppFile(BaseFile.BaseFile):
   # functions cpp ns
   def writeCppNsBegin(self):
     self.skipLine(2)
-    self.writeLine('{}_CPP_NAMESPACE_BEGIN'.format(self.libraryName.upper()))
+    self.writeLine('{0}_CPP_NAMESPACE_BEGIN'.format(self.libraryName.upper()))
     self.skipLine(2)
 
   def writeCppNsEnd(self):
     self.skipLine(2)
-    self.writeLine('{}_CPP_NAMESPACE_END'.format(self.libraryName.upper()))
+    self.writeLine('{0}_CPP_NAMESPACE_END'.format(self.libraryName.upper()))
     self.skipLine(2)
 
   # functions c declaration

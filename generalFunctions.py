@@ -394,7 +394,7 @@ def writeEnablePkgCPPCode(outFile, element, attribs, baseClass):
   outFile.write('void\n{0}::enablePackageInternal(const std::string& pkgURI,\n'.format(element))
   outFile.write('             const std::string& pkgPrefix, bool flag)\n')
   outFile.write('{\n')
-  outFile.write('  {}::enablePackageInternal(pkgURI, pkgPrefix, flag);\n'.format(baseClass))
+  outFile.write('  {0}::enablePackageInternal(pkgURI, pkgPrefix, flag);\n'.format(baseClass))
   for i in range (0, len(attribs)):
     if attribs[i]['type'] == 'lo_element':
       if attribs[i]['name'].endswith('s'):
@@ -802,7 +802,7 @@ def writeCreateObjectCPPCode(outFile, element, attribs, pkg, isListOf, hasChildr
         outFile.write('    object = m{0};\n'.format(strFunctions.cap(current['name'])))
         outFile.write('  }\n')
   if NSWritten:
-    outFile.write('\n  delete {}ns;\n\n'.format(pkg.lower()))
+    outFile.write('\n  delete {0}ns;\n\n'.format(pkg.lower()))
   outFile.write('  connectToChild();\n\n')
   outFile.write('\n  return object;\n')
   outFile.write('}\n\n\n')

@@ -177,7 +177,7 @@ def writeProtectedFunctions(output, element, package, elementDict):
   output.write('    {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(package.upper(), package.lower()))
   output.write('    object = new {0}({1}ns);\n'.format(element, package.lower()))
   output.write('    appendAndOwn(object);\n')
-  output.write('    delete {}ns;\n'.format(package.lower()))
+  output.write('    delete {0}ns;\n'.format(package.lower()))
   output.write('  }\n\n')
 
   # need to create concrete objects
@@ -188,7 +188,7 @@ def writeProtectedFunctions(output, element, package, elementDict):
       output.write('    {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(package.upper(), package.lower()))
       output.write('    object = new {0}({1}ns);\n'.format(elem['element'], package.lower()))
       output.write('    appendAndOwn(object);\n')
-      output.write('    delete {}ns;\n'.format(package.lower()))
+      output.write('    delete {0}ns;\n'.format(package.lower()))
       output.write('  }\n\n')
 
   output.write('  return object;\n')
@@ -299,7 +299,7 @@ def writeCreateObject(code, element, listOf, type, name, pkgName):
     code.write('    {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(pkgName.upper(), pkgName.lower()))
     code.write(
         '    {0} = new {1}({2}ns);\n'.format(strFunctions.objAbbrev(type), type, pkgName.lower()))
-    code.write('    delete {}ns;\n'.format(pkgName.lower()))
+    code.write('    delete {0}ns;\n'.format(pkgName.lower()))
     code.write('  }\n')
     code.write('  catch (...)\n')
     code.write('  {\n')
@@ -335,7 +335,7 @@ def writeCreateObject(code, element, listOf, type, name, pkgName):
       code.write('    {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(pkgName.upper(), pkgName.lower()))
       code.write(
             '    {0} = new {1}({2}ns);\n'.format(strFunctions.objAbbrev(elem['element']), elem['element'], pkgName.lower()))
-      code.write('    delete {}ns;\n'.format(pkgName.lower()))
+      code.write('    delete {0}ns;\n'.format(pkgName.lower()))
       code.write('  }\n')
       code.write('  catch (...)\n')
       code.write('  {\n')

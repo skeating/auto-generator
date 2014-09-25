@@ -48,10 +48,10 @@ class BaseFile:
         while i < len(words) and len(newline) < self.lineLength:
           newline = newline + ' ' + words[i]
           i = i + 1
-        self.fileOut.write('{}{}\n'.format(tabs, newline))
+        self.fileOut.write('{0}{1}\n'.format(tabs, newline))
         newline = '  '
     else:
-      self.fileOut.write('{}{}\n'.format(tabs, line))
+      self.fileOut.write('{0}{1}\n'.format(tabs, line))
 
   # function for blankLines
   def skipLine(self, num = 1):
@@ -72,50 +72,50 @@ class BaseFile:
         while i < len(words) and len(newline) < self.lineLength:
           newline = newline + ' ' + words[i]
           i = i + 1
-        self.fileOut.write('{}{} {}\n'.format(tabs, self.comment, newline))
+        self.fileOut.write('{0}{1} {2}\n'.format(tabs, self.comment, newline))
         newline = '  '
       if len(words) == 1:
         # anomaly where the whole line is one word
-        self.fileOut.write('{}{} {}\n'.format(tabs, self.comment, line))
+        self.fileOut.write('{0}{1} {2}\n'.format(tabs, self.comment, line))
     else:
-      self.fileOut.write('{}{} {}\n'.format(tabs, self.comment, line))
+      self.fileOut.write('{0}{1} {2}\n'.format(tabs, self.comment, line))
 
   def writeBlankCommentLine(self):
     tabs = ''
     for i in range(0, self.numTabs):
       tabs = tabs + '  '
-    self.fileOut.write('{}{}\n'.format(tabs, self.comment))
+    self.fileOut.write('{0}{1}\n'.format(tabs, self.comment))
 
   def openComment(self):
     tabs = ''
     for i in range(0, self.numTabs):
       tabs = tabs + '  '
-    self.fileOut.write('{}{}\n'.format(tabs, self.commentStart))
+    self.fileOut.write('{0}{1}\n'.format(tabs, self.commentStart))
 
   def closeComment(self):
     tabs = ''
     for i in range(0, self.numTabs):
       tabs = tabs + '  '
-    self.fileOut.write('{} {}\n'.format(tabs, self.commentEnd))
+    self.fileOut.write('{0} {1}\n'.format(tabs, self.commentEnd))
 
   def writeDoxygenStart(self):
     tabs = ''
     for i in range(0, self.numTabs):
       tabs = tabs + '  '
-    self.fileOut.write('\n{}{} @cond doxygenLibsbmlInternal {}\n\n'.format(tabs, self.commentStart, self.commentEnd))
+    self.fileOut.write('\n{0}{1} @cond doxygenLibsbmlInternal {2}\n\n'.format(tabs, self.commentStart, self.commentEnd))
 
   def writeDoxygenEnd(self):
     tabs = ''
     for i in range(0, self.numTabs):
       tabs = tabs + '  '
-    self.fileOut.write('\n{}{} @endcond {}\n\n'.format(tabs, self.commentStart, self.commentEnd))
+    self.fileOut.write('\n{0}{1} @endcond {2}\n\n'.format(tabs, self.commentStart, self.commentEnd))
 
   # function for the library extern declaration
   def writeExternDecl(self):
     tabs = ''
     for i in range(0, self.numTabs):
       tabs = tabs + '  '
-    self.fileOut.write('{}{}_EXTERN\n'.format(tabs,self.libraryName.upper()))
+    self.fileOut.write('{0}{1}_EXTERN\n'.format(tabs,self.libraryName.upper()))
 
 
 ####################################################################################

@@ -294,7 +294,7 @@ def writeGetCode(attrib, output, element):
         output.write('  m{0} = new {1}({2}ns);\n'.format(capAttName, attrib['element'], pkgName.lower()))
         if generalFunctions.overridesElementName(attrib):
           output.write('  m{0}->setElementName("{1}");\n'.format(capAttName, attrib['name']));
-        output.write('  delete {}ns;\n'.format(pkgName.lower()))
+        output.write('  delete {0}ns;\n'.format(pkgName.lower()))
         output.write('  connectToChild();\n'.format(pkgName.lower()))          
         output.write('  return m{0};\n'.format(capAttName))
       output.write('}\n\n\n')
@@ -312,7 +312,7 @@ def writeGetCode(attrib, output, element):
         output.write('  m{0} = new {1}({2}ns);\n'.format(capAttName, concrete['element'], pkgName.lower()))
         if generalFunctions.overridesElementName(concrete):
           output.write('  m{0}->setElementName("{1}");\n'.format(capAttName, attrib['name']));
-        output.write('  delete {}ns;\n'.format(pkgName.lower()))
+        output.write('  delete {0}ns;\n'.format(pkgName.lower()))
         output.write('  connectToChild();\n'.format(pkgName.lower()))          
         output.write('  return static_cast<{0}*>(m{1});\n'.format(concrete['element'], capAttName))
         output.write('}\n\n\n')
@@ -658,7 +658,7 @@ def writeListOfSubFunctions(attrib, output, element, pkgName):
       output.write('    {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(pkgName.upper(), pkgName.lower()))
       output.write(
         '    {0} = new {1}({2}ns);\n'.format(strFunctions.objAbbrev(attrib['element']), attrib['element'], pkgName.lower()))
-      output.write('    delete {}ns;\n'.format(pkgName.lower()))
+      output.write('    delete {0}ns;\n'.format(pkgName.lower()))
       output.write('  }\n')
       output.write('  catch (...)\n')
       output.write('  {\n')
@@ -693,7 +693,7 @@ def writeListOfSubFunctions(attrib, output, element, pkgName):
       output.write('    {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(pkgName.upper(), pkgName.lower()))
       output.write(
         '    {0} = new {1}({2}ns);\n'.format(strFunctions.objAbbrev(elem['element']), elem['element'], pkgName.lower()))
-      output.write('    delete {}ns;\n'.format(pkgName.lower()))
+      output.write('    delete {0}ns;\n'.format(pkgName.lower()))
       output.write('  }\n')
       output.write('  catch (...)\n')
       output.write('  {\n')
