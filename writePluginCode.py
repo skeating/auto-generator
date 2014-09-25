@@ -16,9 +16,9 @@ def writeClassDefn(fileOut, nameOfClass, pkg, members, attribs):
   writeConstructors(fileOut, nameOfClass, pkg, members, attribs)
   writeRequiredMethods(fileOut, nameOfClass, members, pkg, attribs)
   writeGetFunctions(fileOut, pkg, members, nameOfClass, attribs)
-  writeOtherFunctions(fileOut, nameOfClass, members)
+  writeOtherFunctions(fileOut, nameOfClass, members, attribs)
 
-def writeOtherFunctions(fileOut, nameOfClass, members):
+def writeOtherFunctions(fileOut, nameOfClass, members, attribs):
   fileOut.write('/*\n' )
   fileOut.write(' * Set the SBMLDocument.\n')
   fileOut.write(' */\n')
@@ -37,6 +37,18 @@ def writeOtherFunctions(fileOut, nameOfClass, members):
       fileOut.write('  if (isSet{0}() == true)\n'.format(mem['name']))
       fileOut.write('  {\n')
       fileOut.write('    m{0}->setSBMLDocument(d);\n'.format(mem['name']))
+      fileOut.write('  }\n')
+  for i in range (0, len(attribs)):
+    mem = attribs[i]
+    if mem['type'] == 'lo_element':
+        fileOut.write('  if (getNum{0}s() > 0)\n'.format(strFunctions.cap(mem['name'])))
+        fileOut.write('  {\n')
+        fileOut.write('    m{0}s.setSBMLDocument(d);\n'.format(strFunctions.cap(mem['name'])))
+        fileOut.write('  }\n')
+    elif mem['type'] == 'element':
+      fileOut.write('  if (isSet{0}() == true)\n'.format(strFunctions.cap(mem['name'])))
+      fileOut.write('  {\n')
+      fileOut.write('    m{0}->setSBMLDocument(d);\n'.format(strFunctions.cap(mem['name'])))
       fileOut.write('  }\n')
   fileOut.write('}\n\n\n')
   fileOut.write('/*\n' )
@@ -58,6 +70,18 @@ def writeOtherFunctions(fileOut, nameOfClass, members):
       fileOut.write('  {\n')
       fileOut.write('    m{0}->connectToParent(sbase);\n'.format(mem['name']))
       fileOut.write('  }\n')
+  for i in range (0, len(attribs)):
+    mem = attribs[i]
+    if mem['type'] == 'lo_element':
+        fileOut.write('  if (getNum{0}s() > 0)\n'.format(strFunctions.cap(mem['name'])))
+        fileOut.write('  {\n')
+        fileOut.write('    m{0}s.connectToParent(sbase);\n'.format(strFunctions.cap(mem['name'])))
+        fileOut.write('  }\n')
+    elif mem['type'] == 'element':
+      fileOut.write('  if (isSet{0}() == true)\n'.format(strFunctions.cap(mem['name'])))
+      fileOut.write('  {\n')
+      fileOut.write('    m{0}->connectToParent(sbase);\n'.format(strFunctions.cap(mem['name'])))
+      fileOut.write('  }\n')
   fileOut.write('}\n\n\n')
   fileOut.write('/*\n' )
   fileOut.write(' * Enables the given package.\n')
@@ -78,6 +102,18 @@ def writeOtherFunctions(fileOut, nameOfClass, members):
       fileOut.write('  {\n')
       fileOut.write('    m{0}->enablePackageInternal(pkgURI, pkgPrefix, flag);\n'.format(mem['name']))
       fileOut.write('  }\n')
+  for i in range (0, len(attribs)):
+    mem = attribs[i]
+    if mem['type'] == 'lo_element':
+        fileOut.write('  if (getNum{0}s() > 0)\n'.format(strFunctions.cap(mem['name'])))
+        fileOut.write('  {\n')
+        fileOut.write('    m{0}s.enablePackageInternal(pkgURI, pkgPrefix, flag);\n'.format(strFunctions.cap(mem['name'])))
+        fileOut.write('  }\n')
+    elif mem['type'] == 'lo_element':
+      fileOut.write('  if (isSet{0}() == true)\n'.format(strFunctions.cap(mem['name'])))
+      fileOut.write('  {\n')
+      fileOut.write('    m{0}->enablePackageInternal(pkgURI, pkgPrefix, flag);\n'.format(strFunctions.cap(mem['name'])))
+      fileOut.write('  }\n')
   fileOut.write('}\n\n\n')
   fileOut.write('/*\n' )
   fileOut.write(' * Accept the SBMLVisitor.\n')
@@ -94,6 +130,13 @@ def writeOtherFunctions(fileOut, nameOfClass, members):
       fileOut.write('  for(unsigned int i = 0; i < getNum{0}s(); i++)\n'.format(mem['name']))
       fileOut.write('  {\n')
       fileOut.write('    get{0}(i)->accept(v);\n'.format(mem['name']))
+      fileOut.write('  }\n\n')
+  for i in range (0, len(attribs)):
+    mem = attribs[i]
+    if mem['type'] == 'lo_element':
+      fileOut.write('  for(unsigned int i = 0; i < getNum{0}s(); i++)\n'.format(strFunctions.cap(mem['name'])))
+      fileOut.write('  {\n')
+      fileOut.write('    get{0}(i)->accept(v);\n'.format(strFunctions.cap(mem['name'])))
       fileOut.write('  }\n\n')
   fileOut.write('  return true;\n')
   fileOut.write('}\n\n\n')
@@ -176,7 +219,7 @@ def writeGetFunctions(fileOut, pkg, members, nameOfClass, attribs):
   fileOut.write('// Functions for interacting with the members of the plugin\n')
   fileOut.write('//\n')
   fileOut.write('//---------------------------------------------------------------\n\n')
-  generalFunctions.writeGetAllElementsCodePlug(fileOut, nameOfClass, members)
+  generalFunctions.writeGetAllElementsCodePlug(fileOut, nameOfClass, members, attribs)
   for i in range (0, len(members)):
     mem = members[i]
     if mem['isListOf'] == True:
@@ -441,7 +484,15 @@ def writeRequiredMethods(fileOut, nameOfClass, members, pkg, attribs):
       writeCreateLOObject(fileOut, mem, ifCount)
     else:
       writeCreateObject(fileOut, mem, ifCount, pkg)
-    ifCount = ifCount + 1
+    ifCount = ifCount + 1  
+  for i in range (0, len(attribs)):
+    mem = attribs[i]
+    if mem['type'] == 'lo_element':
+      writeCreateLOObject(fileOut, mem, ifCount)
+      ifCount = ifCount + 1
+    elif mem['type'] == 'element':
+      writeCreateObject(fileOut, mem, ifCount, pkg)
+      ifCount = ifCount + 1
   fileOut.write('\n    delete {0}ns;\n'.format(pkg.lower()))
   fileOut.write('  } \n\n')
   fileOut.write('  return object; \n')
@@ -464,6 +515,20 @@ def writeRequiredMethods(fileOut, nameOfClass, members, pkg, attribs):
       fileOut.write('  { \n')
       fileOut.write('    m{0}->write(stream);\n'.format(mem['name']))
       fileOut.write('  } \n')
+
+  for i in range (0, len(attribs)):
+    mem = attribs[i]
+    if mem['type'] == 'lo_element':
+      fileOut.write('  if (getNum{0}() > 0) \n'.format(strFunctions.capp(mem['name'])))
+      fileOut.write('  { \n')
+      fileOut.write('    m{0}s.write(stream);\n'.format(strFunctions.cap(mem['name'])))
+      fileOut.write('  } \n')
+    elif mem['type'] == 'element':
+      fileOut.write('  if (isSet{0}() == true) \n'.format(strFunctions.cap(mem['name'])))
+      fileOut.write('  { \n')
+      fileOut.write('    m{0}->write(stream);\n'.format(strFunctions.cap(mem['name'])))
+      fileOut.write('  } \n')
+
   fileOut.write('}\n\n\n')
   fileOut.write('/*\n')
   fileOut.write(' * Checks if this plugin object has all the required elements.\n')
@@ -481,7 +546,7 @@ def writeRequiredMethods(fileOut, nameOfClass, members, pkg, attribs):
   generalFunctions.writeWriteAttributesCPPCode(fileOut, nameOfClass, attribs, 'SBasePlugin')
 
 def writeCreateObject(fileOut, mem, ifCount, pkg):
-  name = mem['name']
+  name = strFunctions.cap(mem['name'])
   if ifCount == 1:
     fileOut.write('    if (name == "{0}" ) \n'.format(strFunctions.lowerFirst(name)))
   else:
@@ -493,7 +558,7 @@ def writeCreateObject(fileOut, mem, ifCount, pkg):
 
   
 def writeCreateLOObject(fileOut, mem, ifCount):
-  name = mem['name']
+  name = strFunctions.cap(mem['name'])
   if ifCount == 1:
     fileOut.write('    if (name == "listOf{0}s" ) \n'.format(name))
   else:

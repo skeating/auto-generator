@@ -1184,10 +1184,12 @@ def writeGetAllElementsCode(output, element, attrib):
   for i in range(0, len(attrib)):
     if attrib[i]['type'] == 'element':
       output.write('  ADD_FILTERED_POINTER(ret, sublist, m{0}, filter);\n'.format(strFunctions.cap(attrib[i]['name'])))
+    elif attrib[i]['type'] == 'lo_element':
+      output.write('  ADD_FILTERED_LIST(ret, sublist, m{0}, filter);\n'.format(strFunctions.capp(attrib[i]['name'])))
   output.write('\n  ADD_FILTERED_FROM_PLUGIN(ret, sublist, filter);\n\n')
   output.write('  return ret;\n}\n\n\n')
 
-def writeGetAllElementsCodePlug(output, element, members):
+def writeGetAllElementsCodePlug(output, element, members, attribs):
   output.write('List*\n')
   output.write('{0}::getAllElements(ElementFilter* filter)\n'.format(element))
   output.write('{\n')
@@ -1198,6 +1200,11 @@ def writeGetAllElementsCodePlug(output, element, members):
       output.write('  ADD_FILTERED_LIST(ret, sublist, m{0}, filter);\n'.format(strFunctions.capp(members[i]['name'])))
     else:
       output.write('  ADD_FILTERED_POINTER(ret, sublist, m{0}, filter);\n'.format(strFunctions.cap(members[i]['name'])))
+  for i in range(0, len(attribs)):
+    if attribs[i]['type'] == 'lo_element':
+      output.write('  ADD_FILTERED_LIST(ret, sublist, m{0}, filter);\n'.format(strFunctions.capp(attribs[i]['name'])))
+    elif attribs[i]['type'] == 'element':
+      output.write('  ADD_FILTERED_POINTER(ret, sublist, m{0}, filter);\n'.format(strFunctions.cap(attribs[i]['name'])))
   output.write('\n  return ret;\n}\n\n\n')
 
 def hasSIdRef(attributes):
