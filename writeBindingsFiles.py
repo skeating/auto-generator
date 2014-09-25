@@ -17,6 +17,8 @@ def createSBase(sbaseName):
     return 'SPECIES_REFERENCE'
   elif sbaseName == 'FUNCTIONDEFINITION':
     return 'FUNCTION_DEFINITION'
+  elif sbaseName == 'SBASE':
+    return 'GENERIC_SBASE'
   else:
     return sbaseName
 
@@ -127,12 +129,14 @@ def writeCSharp(fileOut, name, plugins, classes):
   for i in range (0, len(classes)):
     if (classes[i]['hasListOf'] == True):
       loName = strFunctions.listOfName(classes[i]['name'])
+      if classes[i].has_key('lo_elementName'):
+        loName = classes[i]['lo_elementName']
       if (i==0):
         fileOut.write('        if (name == "{0}")\n'.format(loName))
       else :
         fileOut.write('        else if (name == "{0}")\n'.format(loName))
       fileOut.write('        {\n')
-      fileOut.write('          return new {0}(cPtr, owner);\n'.format(strFunctions.cap(loName)))
+      fileOut.write('          return new {0}(cPtr, owner);\n'.format(strFunctions.cap(strFunctions.listOfName(classes[i]['name']))))
       fileOut.write('        }\n')
   fileOut.write('\n        return new ListOf(cPtr, owner);\n\n')
   for i in range (0, len(classes)):
@@ -201,12 +205,14 @@ def writeJava(fileOut, name, plugins, classes):
   for i in range (0, len(classes)):
     if (classes[i]['hasListOf'] == True):
       loName = strFunctions.listOfName(classes[i]['name'])
+      if classes[i].has_key('lo_elementName'):
+        loName = classes[i]['lo_elementName']
       if (i==0):
         fileOut.write('        if (name == "{0}")\n'.format(loName))
       else :
         fileOut.write('        else if (name == "{0}")\n'.format(loName))
       fileOut.write('        {\n')
-      fileOut.write('          return new {0}(cPtr, owner);\n'.format(strFunctions.cap(loName)))
+      fileOut.write('          return new {0}(cPtr, owner);\n'.format(strFunctions.cap(strFunctions.listOfName(classes[i]['name']))))
       fileOut.write('        }\n')
   fileOut.write('\n        return new ListOf(cPtr, owner);\n\n')
   for i in range (0, len(classes)):
@@ -254,12 +260,14 @@ def writePkg(fileOut, name, classes):
   for i in range (0, len(classes)):
     if (classes[i]['hasListOf'] == True):
       loName = strFunctions.listOfName(classes[i]['name'])
+      if classes[i].has_key('lo_elementName'):
+        loName = classes[i]['lo_elementName']
       if (i==0):
         fileOut.write('      if (name == "{0}")\n'.format(loName))
       else :
         fileOut.write('      else if (name == "{0}")\n'.format(loName))
       fileOut.write('      {\n')
-      fileOut.write('        return SWIGTYPE_p_{0};\n'.format(strFunctions.cap(loName)))
+      fileOut.write('        return SWIGTYPE_p_{0};\n'.format(strFunctions.cap(strFunctions.listOfName(classes[i]['name']))))
       fileOut.write('      }\n')
   fileOut.write('\n      return SWIGTYPE_p_ListOf;\n\n')
   for i in range (0, len(classes)):
