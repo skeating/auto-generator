@@ -170,6 +170,17 @@ def writeCSharp(fileOut, name, plugins, classes):
       loName = strFunctions.listOfName(classes[i]['name'])
       fileOut.write('SBMLCONSTRUCTOR_EXCEPTION({0})\n'.format(strFunctions.cap(loName)))
   fileOut.write('\n')
+  for i in range (0, len(classes)):
+    if (classes[i]['abstract'] == True):
+      fileOut.write('//\n')
+      fileOut.write('// Convert {0} objects into the most specific object possible.\n'.format(classes[i]['name']))
+      fileOut.write('//\n')
+      fileOut.write('%typemap("csout") {0}*\n'.format(classes[i]['name']))
+      fileOut.write('{\n')
+      fileOut.write('	return ({0}) libsbml.DowncastSBase($imcall, $owner);\n'.format(classes[i]['name']))
+      fileOut.write('}\n')
+      fileOut.write('\n')
+  fileOut.write('\n')
   fileOut.write('#endif /* USE_{0} */\n\n'.format(capName))
 
 def writeJava(fileOut, name, plugins, classes):
@@ -246,6 +257,18 @@ def writeJava(fileOut, name, plugins, classes):
       loName = strFunctions.listOfName(classes[i]['name'])
       fileOut.write('SBMLCONSTRUCTOR_EXCEPTION({0})\n'.format(strFunctions.cap(loName)))
   fileOut.write('\n')
+  for i in range (0, len(classes)):
+    if (classes[i]['abstract'] == True):
+      fileOut.write('//\n')
+      fileOut.write('// Convert {0} objects into the most specific object possible.\n'.format(classes[i]['name']))
+      fileOut.write('//\n')
+      fileOut.write('%typemap("javaout") {0}*\n'.format(classes[i]['name']))
+      fileOut.write('{\n')
+      fileOut.write('	return ({0}) libsbml.DowncastSBase($jnicall, $owner);\n'.format(classes[i]['name']))
+      fileOut.write('}\n')
+      fileOut.write('\n')
+
+  fileOut.write('\n')
   fileOut.write('#endif /* USE_{0} */\n\n'.format(capName))
 
 def writePkg(fileOut, name, classes):
@@ -309,6 +332,18 @@ def writeLocal(fileOut, name, classes):
     if (classes[i]['hasListOf'] == True):
       loName = strFunctions.listOfName(classes[i]['name'])
       fileOut.write('SBMLCONSTRUCTOR_EXCEPTION({0})\n'.format(strFunctions.cap(loName)))
+  fileOut.write('\n')
+  
+  for i in range (0, len(classes)):
+    if (classes[i]['abstract'] == True):
+      fileOut.write('/**\n')
+      fileOut.write(' * Convert {0} objects into the most specific object possible.\n'.format(classes[i]['name']))
+      fileOut.write(' */\n')
+      fileOut.write('%typemap(out) {0}*\n'.format(classes[i]['name']))
+      fileOut.write('{\n')
+      fileOut.write('	$result = SWIG_NewPointerObj($1, GetDowncastSwigTypeForPackage($1, "{0}"), $owner | %newpointer_flags);\n'.format(name))
+      fileOut.write('}\n')
+      fileOut.write('\n')
   fileOut.write('\n')
   fileOut.write('#endif // USE_{0} \n\n'.format(capName))
 
