@@ -10,6 +10,14 @@ import os
 import fileHeaders
 import strFunctions
 
+def isBaseClassForOthers(element, classes):
+  for item in classes:
+    if element['name'] == item['name']: 
+      pass
+    if item['baseClass'] == element['name']:
+      return True
+  return False
+
 def createSBase(sbaseName):
   if sbaseName == 'SIMPLESPECIESREFERENCE':
     return 'MODIFIER_SPECIES_REFERENCE'
@@ -171,7 +179,7 @@ def writeCSharp(fileOut, name, plugins, classes):
       fileOut.write('SBMLCONSTRUCTOR_EXCEPTION({0})\n'.format(strFunctions.cap(loName)))
   fileOut.write('\n')
   for i in range (0, len(classes)):
-    if (classes[i]['abstract'] == True):
+    if (classes[i]['abstract'] == True or isBaseClassForOthers(classes[i], classes)):
       fileOut.write('//\n')
       fileOut.write('// Convert {0} objects into the most specific object possible.\n'.format(classes[i]['name']))
       fileOut.write('//\n')
@@ -258,7 +266,7 @@ def writeJava(fileOut, name, plugins, classes):
       fileOut.write('SBMLCONSTRUCTOR_EXCEPTION({0})\n'.format(strFunctions.cap(loName)))
   fileOut.write('\n')
   for i in range (0, len(classes)):
-    if (classes[i]['abstract'] == True):
+    if (classes[i]['abstract'] == True or isBaseClassForOthers(classes[i], classes)):
       fileOut.write('//\n')
       fileOut.write('// Convert {0} objects into the most specific object possible.\n'.format(classes[i]['name']))
       fileOut.write('//\n')
@@ -335,7 +343,7 @@ def writeLocal(fileOut, name, classes):
   fileOut.write('\n')
   
   for i in range (0, len(classes)):
-    if (classes[i]['abstract'] == True):
+    if (classes[i]['abstract'] == True or isBaseClassForOthers(classes[i], classes)):
       fileOut.write('/**\n')
       fileOut.write(' * Convert {0} objects into the most specific object possible.\n'.format(classes[i]['name']))
       fileOut.write(' */\n')
