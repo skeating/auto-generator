@@ -447,7 +447,7 @@ def writeReadAttributesHeader(outFile):
   outFile.write('                               const ExpectedAttributes& expectedAttributes);\n\n\n')
   writeInternalEnd(outFile)
 
-def writeReadAttribute(output, attrib, element, pkg, baseClass = ''):
+def writeReadAttribute(output, attrib, element, pkg, baseClass = '', extendedElement = ''):
   attName = attrib['name']
   capAttName = strFunctions.cap(attName)
   if attrib['reqd'] == True:
@@ -719,7 +719,10 @@ def writeReadAttribute(output, attrib, element, pkg, baseClass = ''):
     if use == 'required':
       output.write('      else\n')
       output.write('      {\n')
-      output.write('        std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, strFunctions.lowerFirst(element)))
+      if baseClass.endswith('Plugin'):
+        output.write('        std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, strFunctions.lowerFirst(extendedElement)))
+      else:
+        output.write('        std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, strFunctions.lowerFirst(element)))
       output.write('        getErrorLog()->logPackageError("{0}", {1}UnknownError,\n'.format(pkg.lower(), pkg))
       output.write('                       getPackageVersion(), sbmlLevel, sbmlVersion, message, getLine(), getColumn());\n')
       output.write('      }\n')
@@ -856,7 +859,7 @@ def writeConnectCPPCode(outFile, element, attribs, hasChildren=False, hasMath=Fa
   outFile.write('}\n\n\n')
   writeInternalEnd(outFile)
 
-def writeReadAttributesCPPCode(outFile, element, attribs, pkg, isListOf, baseClass):
+def writeReadAttributesCPPCode(outFile, element, attribs, pkg, isListOf, baseClass, plugin = None):
   writeInternalStart(outFile)
   outFile.write('/*\n')
   outFile.write(' * Read values from the given XMLAttributes set into their specific fields.\n')
@@ -923,14 +926,17 @@ def writeReadAttributesCPPCode(outFile, element, attribs, pkg, isListOf, baseCla
   if hasReadAttributes(attribs) > 0:
     outFile.write('  bool assigned = false;\n\n')
   for i in range (0, len(attribs)):
-    writeReadAttribute(outFile, attribs[i], element, pkg, baseClass)
+    if plugin != None and plugin['sbase'] != None:
+      writeReadAttribute(outFile, attribs[i], element, pkg, baseClass, plugin['sbase'])
+    else: 
+      writeReadAttribute(outFile, attribs[i], element, pkg, baseClass)
   outFile.write('}\n\n\n')
   writeInternalEnd(outFile)
 
 def hasReadAttributes(attribs):
   for attr in attribs:
     type = attr['type']
-    if type == 'SId' or type == 'SIdRef' or type == 'UnitSIdRef' or type == 'UnitSId' or type == 'enum' or type == 'string' or type == 'uint' or type == 'bool':
+    if type == 'SId' or type == 'SIdRef' or type == 'UnitSIdRef' or type == 'UnitSId' or type == 'enum' or type == 'string' or type == 'uint':
       return True
   return False
 
@@ -1188,19 +1194,28 @@ def writeGetAllElements(output):
   output.write('   * @return a List* of pointers to all child objects.\n   */\n')
   output.write('   virtual List* getAllElements(ElementFilter * filter = NULL);\n\n\n')  
  
- 
+def countMembers(attribs):
+  count = 0
+  for attr in attribs:
+    if attr['type'] == 'element' or attr['type'] == 'lo_element': 
+      count = count + 1
+  return count
+
+
 def writeGetAllElementsCode(output, element, attrib):
   output.write('List*\n')
   output.write('{0}::getAllElements(ElementFilter* filter)\n'.format(element))
   output.write('{\n')
   output.write('  List* ret = new List();\n')
-  output.write('  List* sublist = NULL;\n\n')
-  for i in range(0, len(attrib)):
-    if attrib[i]['type'] == 'element':
-      output.write('  ADD_FILTERED_POINTER(ret, sublist, m{0}, filter);\n'.format(strFunctions.cap(attrib[i]['name'])))
-    elif attrib[i]['type'] == 'lo_element':
-      output.write('  ADD_FILTERED_LIST(ret, sublist, m{0}, filter);\n'.format(strFunctions.capp(attrib[i]['name'])))
-  output.write('\n  ADD_FILTERED_FROM_PLUGIN(ret, sublist, filter);\n\n')
+  numAttr = countMembers(attrib)
+  if numAttr > 0: 
+    output.write('  List* sublist = NULL;\n\n')
+    for i in range(0, len(attrib)):
+      if attrib[i]['type'] == 'element':
+        output.write('  ADD_FILTERED_POINTER(ret, sublist, m{0}, filter);\n'.format(strFunctions.cap(attrib[i]['name'])))
+      elif attrib[i]['type'] == 'lo_element':
+        output.write('  ADD_FILTERED_LIST(ret, sublist, m{0}, filter);\n'.format(strFunctions.capp(attrib[i]['name'])))
+    output.write('\n  ADD_FILTERED_FROM_PLUGIN(ret, sublist, filter);\n\n')
   output.write('  return ret;\n}\n\n\n')
 
 def writeGetAllElementsCodePlug(output, element, members, attribs):
@@ -1208,17 +1223,19 @@ def writeGetAllElementsCodePlug(output, element, members, attribs):
   output.write('{0}::getAllElements(ElementFilter* filter)\n'.format(element))
   output.write('{\n')
   output.write('  List* ret = new List();\n')
-  output.write('  List* sublist = NULL;\n\n')
-  for i in range(0, len(members)):
-    if members[i]['isListOf'] == True:
-      output.write('  ADD_FILTERED_LIST(ret, sublist, m{0}, filter);\n'.format(strFunctions.capp(members[i]['name'])))
-    else:
-      output.write('  ADD_FILTERED_POINTER(ret, sublist, m{0}, filter);\n'.format(strFunctions.cap(members[i]['name'])))
-  for i in range(0, len(attribs)):
-    if attribs[i]['type'] == 'lo_element':
-      output.write('  ADD_FILTERED_LIST(ret, sublist, m{0}, filter);\n'.format(strFunctions.capp(attribs[i]['name'])))
-    elif attribs[i]['type'] == 'element':
-      output.write('  ADD_FILTERED_POINTER(ret, sublist, m{0}, filter);\n'.format(strFunctions.cap(attribs[i]['name'])))
+  numAttr = countMembers(attribs)
+  if numAttr + len(members) > 0: 
+    output.write('  List* sublist = NULL;\n\n')
+    for i in range(0, len(members)):
+      if members[i]['isListOf'] == True:
+        output.write('  ADD_FILTERED_LIST(ret, sublist, m{0}, filter);\n'.format(strFunctions.capp(members[i]['name'])))
+      else:
+        output.write('  ADD_FILTERED_POINTER(ret, sublist, m{0}, filter);\n'.format(strFunctions.cap(members[i]['name'])))
+    for i in range(0, len(attribs)):
+      if attribs[i]['type'] == 'lo_element':
+        output.write('  ADD_FILTERED_LIST(ret, sublist, m{0}, filter);\n'.format(strFunctions.capp(attribs[i]['name'])))
+      elif attribs[i]['type'] == 'element':
+        output.write('  ADD_FILTERED_POINTER(ret, sublist, m{0}, filter);\n'.format(strFunctions.cap(attribs[i]['name'])))
   output.write('\n  return ret;\n}\n\n\n')
 
 def hasSIdRef(attributes):

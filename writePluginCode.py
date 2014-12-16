@@ -12,9 +12,9 @@ import strFunctions
 
 import writeCode
 
-def writeClassDefn(fileOut, nameOfClass, pkg, members, attribs):
+def writeClassDefn(fileOut, nameOfClass, pkg, members, attribs, plugin = None):
   writeConstructors(fileOut, nameOfClass, pkg, members, attribs)
-  writeRequiredMethods(fileOut, nameOfClass, members, pkg, attribs)
+  writeRequiredMethods(fileOut, nameOfClass, members, pkg, attribs, plugin)
   writeGetFunctions(fileOut, pkg, members, nameOfClass, attribs)
   writeOtherFunctions(fileOut, nameOfClass, members, attribs)
 
@@ -171,12 +171,19 @@ def writeConstructors(fileOut, nameOfClass, pkg, members, attrs):
   fileOut.write('{0}::{0}(const {1}& orig) :\n'.format(nameOfClass, nameOfClass))
   fileOut.write('    SBasePlugin(orig)\n')
   for i in range (0, len(members)):
-    mem = members[i]
+    mem = members[i]    
     if mem['isListOf'] == True:
       fileOut.write('  , m{0}s ( orig.m{0}s)\n'.format(mem['name']))
     else:
-      fileOut.write('  , m{0} ( orig.m{0} )\n'.format(mem['name']))
+      fileOut.write('  , m{0} ( NULL )\n'.format(mem['name']))
   fileOut.write('{\n')
+  for i in range (0, len(members)):
+    mem = members[i]    
+    if mem['isListOf'] == False:
+      fileOut.write('  if (orig.m{0} != NULL)\n'.format(mem['name']))
+      fileOut.write('  {\n')
+      fileOut.write('    m{0} = orig.m{0}->clone();\n'.format(mem['name']))
+      fileOut.write('  }\n')
   writeCode.writeCopyAttributes(attrs, fileOut, '    ', 'orig')
   fileOut.write('}\n\n\n')
   fileOut.write('/*\n' )
@@ -193,7 +200,10 @@ def writeConstructors(fileOut, nameOfClass, pkg, members, attrs):
     if mem['isListOf'] == True:
       fileOut.write('    m{0}s = rhs.m{0}s;\n'.format(mem['name']))
     else:
-      fileOut.write('    m{0} = rhs.m{0};\n'.format(mem['name']))
+      fileOut.write('    delete m{0};\n'.format(mem['name']))
+      fileOut.write('    m{0} = NULL;\n'.format(mem['name']))
+      fileOut.write('    if (rhs.m{0} != NULL)\n'.format(mem['name']))
+      fileOut.write('      m{0} = rhs.m{0}->clone();\n'.format(mem['name']))
   writeCode.writeCopyAttributes(attrs, fileOut, '    ', 'rhs')
   fileOut.write('  }\n\n')
   fileOut.write('  return *this;\n')
@@ -211,6 +221,11 @@ def writeConstructors(fileOut, nameOfClass, pkg, members, attrs):
   fileOut.write(' */\n')
   fileOut.write('{0}::~{0}()\n'.format(nameOfClass))
   fileOut.write('{\n')
+  for i in range (0, len(members)):
+    mem = members[i]
+    if mem['isListOf'] == False:
+      fileOut.write('  delete m{0};\n'.format(mem['name']))
+      fileOut.write('  m{0} = NULL;\n'.format(mem['name']))
   fileOut.write('}\n\n\n')
 
 def writeGetFunctions(fileOut, pkg, members, nameOfClass, attribs):
@@ -298,6 +313,7 @@ def writeFunctions(fileOut, object, nameOfClass, pkg):
   fileOut.write('{0}*\n'.format(object))
   fileOut.write('{0}::create{1}()\n'.format(nameOfClass, object))
   fileOut.write('{\n')
+  fileOut.write('  delete m{0};\n'.format(object))
   fileOut.write('  {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(pkg.upper(), pkg.lower()))
   fileOut.write('  m{0} = new {0}({1}ns);\n\n'.format(object, pkg.lower()))
   fileOut.write('  m{0}->setSBMLDocument(this->getSBMLDocument());\n\n'.format(object))
@@ -457,7 +473,7 @@ def writeIncludeEnds(fileOut, element):
   fileOut.write('\n\n');
   fileOut.write('#endif /* __cplusplus */\n\n\n')
 
-def writeRequiredMethods(fileOut, nameOfClass, members, pkg, attribs):
+def writeRequiredMethods(fileOut, nameOfClass, members, pkg, attribs, plugin = None):
   fileOut.write('//---------------------------------------------------------------\n')
   fileOut.write('//\n')
   fileOut.write('// overridden virtual functions for read/write/check\n')
@@ -469,33 +485,40 @@ def writeRequiredMethods(fileOut, nameOfClass, members, pkg, attribs):
   fileOut.write('SBase*\n')
   fileOut.write('{0}::createObject (XMLInputStream& stream)\n'.format(nameOfClass))
   fileOut.write('{\n')
-  fileOut.write('  SBase* object = NULL; \n\n')
-  fileOut.write('  const std::string&      name   = stream.peek().getName(); \n')
-  fileOut.write('  const XMLNamespaces&    xmlns  = stream.peek().getNamespaces(); \n')
-  fileOut.write('  const std::string&      prefix = stream.peek().getPrefix(); \n\n')
-  fileOut.write('  const std::string& targetPrefix = (xmlns.hasURI(mURI)) ? xmlns.getPrefix(mURI) : mPrefix;\n\n')
-  fileOut.write('  if (prefix == targetPrefix) \n')
-  fileOut.write('  { \n')
-  fileOut.write('    {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(pkg.upper(), pkg.lower()))
-  ifCount = 1
-  for i in range (0, len(members)):
-    mem = members[i]
-    if mem['isListOf'] == True:
-      writeCreateLOObject(fileOut, mem, ifCount)
-    else:
-      writeCreateObject(fileOut, mem, ifCount, pkg)
-    ifCount = ifCount + 1  
-  for i in range (0, len(attribs)):
-    mem = attribs[i]
-    if mem['type'] == 'lo_element':
-      writeCreateLOObject(fileOut, mem, ifCount)
-      ifCount = ifCount + 1
-    elif mem['type'] == 'element':
-      writeCreateObject(fileOut, mem, ifCount, pkg)
-      ifCount = ifCount + 1
-  fileOut.write('\n    delete {0}ns;\n'.format(pkg.lower()))
-  fileOut.write('  } \n\n')
-  fileOut.write('  return object; \n')
+
+  numMembers = len(members)
+  numAttribs = generalFunctions.countMembers(attribs)
+
+  if numMembers + numAttribs > 0: 
+    fileOut.write('  SBase* object = NULL; \n\n')
+    fileOut.write('  const std::string&      name   = stream.peek().getName(); \n')
+    fileOut.write('  const XMLNamespaces&    xmlns  = stream.peek().getNamespaces(); \n')
+    fileOut.write('  const std::string&      prefix = stream.peek().getPrefix(); \n\n')
+    fileOut.write('  const std::string& targetPrefix = (xmlns.hasURI(mURI)) ? xmlns.getPrefix(mURI) : mPrefix;\n\n')
+    fileOut.write('  if (prefix == targetPrefix) \n')
+    fileOut.write('  { \n')
+    fileOut.write('    {0}_CREATE_NS({1}ns, getSBMLNamespaces());\n'.format(pkg.upper(), pkg.lower()))
+    ifCount = 1
+    for i in range (0, len(members)):
+      mem = members[i]
+      if mem['isListOf'] == True:
+        writeCreateLOObject(fileOut, mem, ifCount)
+      else:
+        writeCreateObject(fileOut, mem, ifCount, pkg)
+      ifCount = ifCount + 1  
+    for i in range (0, len(attribs)):
+      mem = attribs[i]
+      if mem['type'] == 'lo_element':
+        writeCreateLOObject(fileOut, mem, ifCount)
+        ifCount = ifCount + 1
+      elif mem['type'] == 'element':
+        writeCreateObject(fileOut, mem, ifCount, pkg)
+        ifCount = ifCount + 1
+    fileOut.write('\n    delete {0}ns;\n'.format(pkg.lower()))
+    fileOut.write('  } \n\n')
+    fileOut.write('  return object; \n')
+  else: 
+    fileOut.write('  return NULL; \n')
   fileOut.write('}\n\n\n')
   fileOut.write('/*\n')
   fileOut.write(' * write elements\n')
@@ -542,7 +565,7 @@ def writeRequiredMethods(fileOut, nameOfClass, members, pkg, attribs):
   fileOut.write('}\n\n\n')
 
   generalFunctions.writeAddExpectedCPPCode(fileOut, nameOfClass, attribs, 'SBasePlugin')
-  generalFunctions.writeReadAttributesCPPCode(fileOut, nameOfClass, attribs, pkg, False, 'SBasePlugin')
+  generalFunctions.writeReadAttributesCPPCode(fileOut, nameOfClass, attribs, pkg, False, 'SBasePlugin', plugin)
   generalFunctions.writeWriteAttributesCPPCode(fileOut, nameOfClass, attribs, 'SBasePlugin')
 
 def writeCreateObject(fileOut, mem, ifCount, pkg):
@@ -556,7 +579,6 @@ def writeCreateObject(fileOut, mem, ifCount, pkg):
   fileOut.write('      object = m{0};\n\n'.format(name))
   fileOut.write('    } \n')
 
-  
 def writeCreateLOObject(fileOut, mem, ifCount):
   name = strFunctions.cap(mem['name'])
   if ifCount == 1:
@@ -580,7 +602,7 @@ def createCode(package, plugin):
   fileHeaders.addFilename(code, codeName, nameOfClass)
   fileHeaders.addLicence(code)
   writeIncludes(code, nameOfPackage, nameOfClass)
-  writeClassDefn(code, nameOfClass, nameOfPackage, plugin['extension'],plugin['attribs'])
+  writeClassDefn(code, nameOfClass, nameOfPackage, plugin['extension'],plugin['attribs'], plugin)
   
   if plugin.has_key('addDefs'):
     code.write(open(plugin['addDefs'], 'r').read())
