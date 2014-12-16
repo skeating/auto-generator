@@ -789,6 +789,7 @@ def createCode(element):
     code.write('    }\n')
     code.write('\n')
     code.write('    set{0}(data, length);\n'.format(strFunctions.cap(att['name'])))
+    code.write('    delete[] data;\n')
     code.write('  }\n')     
     code.write('}\n')
 

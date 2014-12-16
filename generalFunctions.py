@@ -576,7 +576,7 @@ def writeReadAttribute(output, attrib, element, pkg, baseClass = ''):
     output.write('    }\n')
     output.write('  }\n')
     if use == 'required':
-      output.write('  else if(m{0} == {1}_UNKNOWN)\n'.format(capAttName, attrib['element'].upper()))
+      output.write('  if(m{0} == {1}_UNKNOWN)\n'.format(capAttName, attrib['element'].upper()))
       output.write('  {\n')
       output.write('    std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, strFunctions.lowerFirst(element)))
       output.write('    getErrorLog()->logPackageError("{0}", {1}UnknownError,\n'.format(pkg.lower(), pkg))
@@ -920,11 +920,19 @@ def writeReadAttributesCPPCode(outFile, element, attribs, pkg, isListOf, baseCla
   outFile.write('      }\n')
   outFile.write('    }\n')
   outFile.write('  }\n\n')
-  outFile.write('  bool assigned = false;\n\n')
+  if hasReadAttributes(attribs) > 0:
+    outFile.write('  bool assigned = false;\n\n')
   for i in range (0, len(attribs)):
     writeReadAttribute(outFile, attribs[i], element, pkg, baseClass)
   outFile.write('}\n\n\n')
   writeInternalEnd(outFile)
+
+def hasReadAttributes(attribs):
+  for attr in attribs:
+    type = attr['type']
+    if type == 'SId' or type == 'SIdRef' or type == 'UnitSIdRef' or type == 'UnitSId' or type == 'enum' or type == 'string' or type == 'uint' or type == 'bool':
+      return True
+  return False
 
 def writeWriteAttributesHeader(outFile):
   writeInternalStart(outFile)
