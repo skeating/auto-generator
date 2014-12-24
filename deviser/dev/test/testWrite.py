@@ -74,7 +74,7 @@ def createParameter():
   return element
 
 if len(sys.argv) != 1:
-  print 'Usage: testWrite.py name'
+  print ('Usage: testWrite.py name')
 else:
 #  object = createQualTranisition()
 #  object = createObject()
