@@ -81,5 +81,5 @@ else:
   object = createParameter()
   ff = CppHeaderFile.CppHeaderFile(object)
   ff.writeFile()
-  ff.closeFile()
+  ff.close_file()
 
