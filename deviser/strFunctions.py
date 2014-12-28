@@ -1,25 +1,22 @@
 #!/usr/bin/env python
 
 
-def cap(word):
-    capWord = word[0].upper() + word[1:len(word)]
-    return capWord
+def upper_first(word):
+    returned_word = word[0].upper() + word[1:len(word)]
+    return returned_word
 
 
-def lowerFirst(word):
-    capWord = word[0].lower() + word[1:len(word)]
-    return capWord
+def lower_first(word):
+    returned_word = word[0].lower() + word[1:len(word)]
+    return returned_word
 
 
-def getIndent(element):
+def get_indent(element):
     s1 = '{0}('.format(element)
-    #  indent = ''
-    #  for i in range(0, len(s1)):
-    #    indent = indent + ' ';
     return len(s1)
 
 
-def objAbbrev(element):
+def abbrev_name(element):
     abbrev = ''
     for i in range(0, len(element)):
         if element[i].isupper():
@@ -27,27 +24,27 @@ def objAbbrev(element):
     return abbrev.lower()
 
 
-def listOfName(name):
+def list_of_name(name):
     if name.endswith('s'):
-        listOf = 'ListOf' + name
+        listof = 'ListOf' + name
     elif name.endswith('x'):
-        listOf = 'ListOf' + name + 'es'
+        listof = 'ListOf' + name + 'es'
     else:
-        listOf = 'ListOf' + name + 's'
-    return listOf
+        listof = 'ListOf' + name + 's'
+    return listof
 
 
 def plural(name):
     if name.endswith('s'):
-        pluralN = name
+        returned_word = name
     elif name.endswith('x'):
-        pluralN = name[0:len(name)-1] + 'es'
+        returned_word = name[0:len(name)-1] + 'es'
     else:
-        pluralN = name + 's'
-    return pluralN
+        returned_word = name + 's'
+    return returned_word
 
 
-def getIndefinite(name):
+def get_indefinite(name):
     if name.startswith('a'):
         return 'an'
     elif name.startswith('e'):

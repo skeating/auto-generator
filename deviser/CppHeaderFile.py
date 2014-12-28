@@ -6,695 +6,707 @@ import strFunctions
 
 
 class CppHeaderFile(BaseCppFile.BaseCppFile):
-    'Class for all Cpp Header files'
+    """Class for all Cpp Header files"""
 
-    def __init__(self, object):
+    def __init__(self, class_object):
         # members from object
-        self.name = object['name']
-        self.package = object['package']
-        self.childElements = object['childElements']
-        self.hasListOf = object['hasListOf']
-        self.listOfAttributes = object['loattrib']
+        self.name = class_object['name']
+        self.package = class_object['package']
+        self.child_elements = class_object['childElements']
+        self.has_list_of = class_object['hasListOf']
+        self.attributes_on_list_of = class_object['loattrib']
 
         # derived members
-        self.listOfName = strFunctions.listOfName(self.name)
+        self.list_of_name = strFunctions.list_of_name(self.name)
 
         # derived members for description
-        if object['hasListOf'] is True:
-            self.briefDescription = 'Definitions of {0} and {1}.'\
-                .format(self.name, self.listOfName)
+        if class_object['hasListOf'] is True:
+            self.brief_description = 'Definitions of {0} and {1}.'\
+                .format(self.name, self.list_of_name)
         else:
-            self.briefDescription = 'Definition of {0}.'.format(self.name)
+            self.brief_description = 'Definition of {0}.'.format(self.name)
 
         BaseCppFile.BaseCppFile.__init__(self, self.name, 'h',
-                                         object['attribs'])
+                                         class_object['attribs'])
 
     ########################################################################
 
     # Functions for writing specific includes
 
-    def writeCommonIncludes(self):
-        self.writeLine('#include <{0}/common/extern.h>'.format(self.language))
-        self.writeLine('#include <{0}/common/{0}fwd.h>'.format(self.language))
+    def write_common_includes(self):
+        self.write_line('#include <{0}/common/extern.h>'.format(self.language))
+        self.write_line('#include <{0}/common/{0}fwd.h>'.format(self.language))
         if self.package:
-            self.writeLine('#include <{0}/packages/{1}/common/{1}fwd.h>'.
-                           format(self.language, self.package.lower()))
+            self.write_line('#include <{0}/packages/{1}/common/{1}fwd.h>'.
+                            format(self.language, self.package.lower()))
 
-    def writeGeneralIncludes(self):
-        self.writeLine('#include <{0}/{1}.h>'.
-                       format(self.language, self.baseClass))
-        if self.hasListOf:
-            self.writeLine('#include <{0}/ListOf.h>'.format(self.language))
+    def write_general_includes(self):
+        self.write_line('#include <{0}/{1}.h>'.
+                        format(self.language, self.baseClass))
+        if self.has_list_of:
+            self.write_line('#include <{0}/ListOf.h>'.format(self.language))
         if self.package:
-            self.writeLine(
+            self.write_line(
                 '#include <{0}/packages/{1}/extension/{2}Extension.h>'
                 .format(self.language, self.package.lower(), self.package))
 
-        for i in range(0, len(self.childElements)):
-            self.writeLine('#include <{0}/packages/{1}/{0}/{2}.h>'
-                           .format(self.language, self.package.lower(),
-                                   self.childElements[i]))
+        for i in range(0, len(self.child_elements)):
+            self.write_line('#include <{0}/packages/{1}/{0}/{2}.h>'
+                            .format(self.language, self.package.lower(),
+                                    self.child_elements[i]))
 
     ########################################################################
 
     # Functions for writing the class
-    def writeClass(self, baseClass, className, classAttributes):
-        self.writeLine('class {0}_EXTERN {1} : public {2}'
-                       .format(self.libraryName.upper(), className, baseClass))
-        self.writeLine('{')
-        self.writeLine('protected:')
-        self.upIndent()
-        self.writeDoxygenStart()
-        self.writeDataMembers(classAttributes)
-        self.writeDoxygenEnd()
-        self.downIndent()
-        self.writeLine('public:')
-        self.upIndent()
-        self.writeConstructors(className)
-        self.writeAttributeFunctions(className, classAttributes)
-        self.writeElementsFunctions(className, classAttributes)
-        self.writeListOfElementFunctions(className, classAttributes)
-        self.downIndent()
-        self.writeLine('};\n')
+    def write_class(self, base_class, class_name, class_attributes):
+        self.write_line('class {0}_EXTERN {1} : public {2}'
+                        .format(self.library_name.upper(),
+                                class_name, base_class))
+        self.write_line('{')
+        self.write_line('protected:')
+        self.up_indent()
+        self.write_doxygen_start()
+        self.write_data_members(class_attributes)
+        self.write_doxygen_end()
+        self.down_indent()
+        self.write_line('public:')
+        self.up_indent()
+        self.write_constructors(class_name)
+        self.write_attribute_functions(class_name, class_attributes)
+        self.write_elements_functions(class_name, class_attributes)
+        self.write_listofelement_functions(class_name, class_attributes)
+        self.down_indent()
+        self.write_line('};\n')
 
-    def writeCHeader(self):
-        self.writeConstructors(self.name, False)
-        self.writeAttributeFunctions(self.name, self.attributes, False)
+    def write_c_header(self):
+        self.write_constructors(self.name, False)
+        self.write_attribute_functions(self.name, self.attributes, False)
 
     ########################################################################
 
     # function to write the data members
-    def writeDataMembers(self, attributes):
+    def write_data_members(self, attributes):
         for i in range(0, len(attributes)):
             if attributes[i]['attType'] != 'string':
-                self.writeLine('{0} {1};'.format(attributes[i]['attTypeCode'],
-                                                 attributes[i]['memberName']))
+                self.write_line('{0} {1};'.format(attributes[i]['attTypeCode'],
+                                                  attributes[i]['memberName']))
             else:
-                self.writeLine('std::string {0};'
-                               .format(attributes[i]['memberName']))
+                self.write_line('std::string {0};'
+                                .format(attributes[i]['memberName']))
             if attributes[i]['isNumber'] is True \
                     or attributes[i]['attType'] == 'boolean':
-                self.writeLine('bool mIsSet{0};'
-                               .format(attributes[i]['capAttName']))
+                self.write_line('bool mIsSet{0};'
+                                .format(attributes[i]['capAttName']))
 
     ########################################################################
 
     # Functions for writing constructors
 
     # function to write the constructors
-    def writeConstructors(self, className, is_CPP_API=True):
-        self.writeLevelVersionConstructor(className, is_CPP_API)
-        self.writeNamespaceConstructor(className, is_CPP_API)
-        self.writeCopyConstructor(className, is_CPP_API)
-        self.writeAssignmentOperator(className, is_CPP_API)
-        self.writeClone(className, is_CPP_API)
-        self.writeDestructor(className, is_CPP_API)
+    def write_constructors(self, class_name, is_cpp_api=True):
+        self.write_level_version_constructor(class_name, is_cpp_api)
+        self.write_namespace_constructor(class_name, is_cpp_api)
+        self.write_copy_constructor(class_name, is_cpp_api)
+        self.write_assignment_operator(class_name, is_cpp_api)
+        self.write_clone(class_name, is_cpp_api)
+        self.write_destructor(class_name, is_cpp_api)
 
     # function to write level version constructor
-    def writeLevelVersionConstructor(self, className, is_CPP_API):
-        if is_CPP_API is False:
-            classNameC = className + '_t'
+    def write_level_version_constructor(self, class_name, is_cpp_api):
+        if is_cpp_api is False:
+            object_name = class_name + '_t'
         else:
-            classNameC = className
-        indent = strFunctions.getIndent(className)
-        self.openComment()
+            object_name = class_name
+        indent = strFunctions.get_indent(class_name)
+        self.open_comment()
         line = 'Creates a new {0} using the given SBML @p level'\
-            .format(classNameC)
+            .format(object_name)
         if self.package:
             line = line + ', @ p version and package version values.'
         else:
             line = line + 'and @ p version values.'
-        self.writeCommentLine(line)
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@param level an unsigned int, the SBML Level '
-                              'to assign to this {0}'.format(classNameC))
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@param version an unsigned int, the SBML '
-                              'Version to assign to this {0}'
-                              .format(classNameC))
+        self.write_comment_line(line)
+        self.write_blank_comment_line()
+        self.write_comment_line('@param level an unsigned int, the SBML Level '
+                                'to assign to this {0}'.format(object_name))
+        self.write_blank_comment_line()
+        self.write_comment_line('@param version an unsigned int, '
+                                'the SBML Version to assign to this {0}'
+                                .format(object_name))
         if self.package:
-            self.writeBlankCommentLine()
-            self.writeCommentLine('@param pkgVersion an unsigned int, '
-                                  'the SBML {0} Version to assign to this {1}'
-                                  .format(self.package, classNameC))
-        self.writeCommentLine('@throws @if python ValueError '
-                              '@else SBMLConstructorException @endif@~')
-        self.writeCommentLine('Thrown if the given @p level and @p '
-                              'version combination, or this kind')
-        self.writeCommentLine('of SBML object, are either invalid or '
-                              'mismatched with respect to the')
-        self.writeCommentLine('parent SBMLDocument object.')
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@copydetails doc_note_setting_lv')
-        self.closeComment()
+            self.write_blank_comment_line()
+            self.write_comment_line('@param pkgVersion an unsigned int, the '
+                                    'SBML {0} Version to assign to this {1}'
+                                    .format(self.package, object_name))
+        self.write_comment_line('@throws @if python ValueError '
+                                '@else SBMLConstructorException @endif@~')
+        self.write_comment_line('Thrown if the given @p level and @p '
+                                'version combination, or this kind')
+        self.write_comment_line('of SBML object, are either invalid or '
+                                'mismatched with respect to the')
+        self.write_comment_line('parent SBMLDocument object.')
+        self.write_blank_comment_line()
+        self.write_comment_line('@copydetails doc_note_setting_lv')
+        self.close_comment()
         if self.package:
-            if is_CPP_API:
-                self.writeLine('{0}(unsigned int level = '
-                               '{1}Extension::getDefaultLevel(),'
-                               .format(className, self.package))
-                self.upIndent(indent/2)
-                self.writeLine('unsigned int version = '
-                               '{0}Extension::getDefaultVersion(),'
-                               .format(self.package))
-                self.writeLine('unsigned int pkgVersion = '
-                               '{0}Extension::getDefaultPackageVersion());'
-                               .format(self.package))
-                self.downIndent(indent/2)
+            if is_cpp_api:
+                self.write_line('{0}(unsigned int level = '
+                                '{1}Extension::getDefaultLevel(),'
+                                .format(class_name, self.package))
+                self.up_indent(indent/2)
+                self.write_line('unsigned int version = '
+                                '{0}Extension::getDefaultVersion(),'
+                                .format(self.package))
+                self.write_line('unsigned int pkgVersion = '
+                                '{0}Extension::getDefaultPackageVersion());'
+                                .format(self.package))
+                self.down_indent(indent/2)
             else:
-                self.writeExternDecl()
-                self.writeLine('{0} *'.format(classNameC))
-                self.writeLine('{0}_create(unsigned int level, unsigned int '
-                               'version, unsigned int pkgVersion);'
-                               .format(className))
+                self.write_extern_decl()
+                self.write_line('{0} *'.format(object_name))
+                self.write_line('{0}_create(unsigned int level, unsigned int '
+                                'version, unsigned int pkgVersion);'
+                                .format(class_name))
         else:
             # code for constructor without packages
-            if is_CPP_API:
-                self.writeLine('{0}(unsigned int level = getDefaultLevel(),'
-                               .format(className))
-                self.upIndent(indent/2)
-                self.writeLine('unsigned int version = getDefaultVersion());')
-                self.downIndent(indent/2)
+            if is_cpp_api:
+                self.write_line('{0}(unsigned int level = getDefaultLevel(),'
+                                .format(class_name))
+                self.up_indent(indent/2)
+                self.write_line('unsigned int version = getDefaultVersion());')
+                self.down_indent(indent/2)
             else:
-                self.writeExternDecl()
-                self.writeLine('{0} *'.format(classNameC))
-                self.writeLine('{0}_create(unsigned int level, '
-                               'unsigned int version);'.format(className))
-        self.skipLine(2)
+                self.write_extern_decl()
+                self.write_line('{0} *'.format(object_name))
+                self.write_line('{0}_create(unsigned int level, '
+                                'unsigned int version);'.format(class_name))
+        self.skip_line(2)
 
     # function to write namespace constructor
-    def writeNamespaceConstructor(self, className, is_CPP_API):
+    def write_namespace_constructor(self, class_name, is_cpp_api):
         # do not write for C API
-        if is_CPP_API is False:
+        if is_cpp_api is False:
             return
-        self.openComment()
-        line = 'Creates a new {0} with the given '.format(className)
+        self.open_comment()
+        line = 'Creates a new {0} with the given '.format(class_name)
         if self.package:
             line = line + '{0}PkgNamespaces object.'.format(self.package)
         else:
             line = line + 'Namespaces object.'
-        self.writeCommentLine(line)
-        self.writeCommentLine('')
+        self.write_comment_line(line)
+        self.write_comment_line('')
         if self.package:
-            self.writeCommentLine('@param {0}ns the {1}PkgNamespaces object'
-                                  .format(self.package.lower(), self.package))
+            self.write_comment_line('@param {0}ns the {1}PkgNamespaces object'
+                                    .format(self.package.lower(),
+                                            self.package))
         else:
-            self.writeCommentLine('@param {0}ns the {1}Namespaces object'
-                                  .format(self.language,
-                                          self.language.upper()))
-        self.closeComment()
+            self.write_comment_line('@param {0}ns the {1}Namespaces object'
+                                    .format(self.language,
+                                            self.language.upper()))
+        self.close_comment()
         if self.package:
-            self.writeLine('{0}({1}PkgNamespaces* {2}ns);'
-                           .format(className, self.package,
-                                   self.package.lower()))
+            self.write_line('{0}({1}PkgNamespaces* {2}ns);'
+                            .format(class_name, self.package,
+                                    self.package.lower()))
         else:
             # code for constructor without packages
-            self.writeLine('{0}({1}Namespaces* {2}ns);'
-                           .format(className, self.language.upper(),
-                                   self.language))
-        self.skipLine(2)
+            self.write_line('{0}({1}Namespaces* {2}ns);'
+                            .format(class_name, self.language.upper(),
+                                    self.language))
+        self.skip_line(2)
 
     # function to write copy constructor
-    def writeCopyConstructor(self, className, is_CPP_API):
+    def write_copy_constructor(self, class_name, is_cpp_api):
         # do not write for C API
-        if is_CPP_API is False:
+        if is_cpp_api is False:
             return
-        self.openComment()
-        self.writeCommentLine('Copy constructor for {0}.'.format(className))
-        self.writeCommentLine('')
-        self.writeCommentLine('@param orig; the {0} instance to copy'
-                              .format(className))
-        self.closeComment()
-        self.writeLine('{0}(const {0}& orig);'.format(className))
-        self.skipLine(2)
+        self.open_comment()
+        self.write_comment_line('Copy constructor for {0}.'.format(class_name))
+        self.write_comment_line('')
+        self.write_comment_line('@param orig; the {0} instance to copy'
+                                .format(class_name))
+        self.close_comment()
+        self.write_line('{0}(const {0}& orig);'.format(class_name))
+        self.skip_line(2)
 
     # function to write assignment operator
-    def writeAssignmentOperator(self, className, is_CPP_API):
+    def write_assignment_operator(self, class_name, is_cpp_api):
         # do not write for C API
-        if is_CPP_API is False:
+        if is_cpp_api is False:
             return
-        self.openComment()
-        self.writeCommentLine('Assignment operator for {0}.'
-                              .format(className))
-        self.writeCommentLine('')
-        self.writeCommentLine('@param rhs; the {0} object whose values are '
-                              'to be used as the basis of the assignment'
-                              .format(className))
-        self.closeComment()
-        self.writeLine('{0}& operator=(const {0}& rhs);'.format(className))
-        self.skipLine(2)
+        self.open_comment()
+        self.write_comment_line('Assignment operator for {0}.'
+                                .format(class_name))
+        self.write_comment_line('')
+        self.write_comment_line('@param rhs; the {0} object whose values are '
+                                'to be used as the basis of the assignment'
+                                .format(class_name))
+        self.close_comment()
+        self.write_line('{0}& operator=(const {0}& rhs);'.format(class_name))
+        self.skip_line(2)
 
     # function to write clone
-    def writeClone(self, className, is_CPP_API):
-        object = ''
-        if is_CPP_API is False:
-            classNameC = className + '_t'
-            object = strFunctions.objAbbrev(className)
+    def write_clone(self, class_name, is_cpp_api):
+        abbrev_object = ''
+        if is_cpp_api is False:
+            object_name = class_name + '_t'
+            abbrev_object = strFunctions.abbrev_name(class_name)
         else:
-            classNameC = className
-        self.openComment()
-        self.writeCommentLine('Creates and returns a deep copy of '
-                              'this {0} object.'.format(classNameC))
-        if not is_CPP_API:
-            self.writeCommentLine('')
-            self.writeCommentLine('@param {0} the {1} structure'
-                                  .format(object, classNameC))
-        self.writeCommentLine('')
-        self.writeCommentLine('@returns a (deep) copy of this {0} object'
-                              .format(classNameC))
-        self.closeComment()
-        if is_CPP_API:
-            self.writeLine('virtual {0}* clone () const;'.format(className))
+            object_name = class_name
+        self.open_comment()
+        self.write_comment_line('Creates and returns a deep copy of '
+                                'this {0} object.'.format(object_name))
+        if not is_cpp_api:
+            self.write_comment_line('')
+            self.write_comment_line('@param {0} the {1} structure'
+                                    .format(abbrev_object, object_name))
+        self.write_comment_line('')
+        self.write_comment_line('@returns a (deep) copy of this {0} object'
+                                .format(object_name))
+        self.close_comment()
+        if is_cpp_api:
+            self.write_line('virtual {0}* clone () const;'.format(class_name))
         else:
-            self.writeExternDecl()
-            self.writeLine('{0} *'.format(classNameC))
-            self.writeLine('{0}_clone({1} * {2});'
-                           .format(className, classNameC,
-                                   strFunctions.objAbbrev(className)))
+            self.write_extern_decl()
+            self.write_line('{0} *'.format(object_name))
+            self.write_line('{0}_clone({1} * {2});'
+                            .format(class_name, object_name, abbrev_object))
 
-        self.skipLine(2)
+        self.skip_line(2)
 
     # function to write destructor
-    def writeDestructor(self, className, is_CPP_API):
-        object = ''
-        if is_CPP_API is False:
-            classNameC = className + '_t'
+    def write_destructor(self, class_name, is_cpp_api):
+        abbrev_object = ''
+        if is_cpp_api is False:
+            object_name = class_name + '_t'
         else:
-            classNameC = className
-            object = strFunctions.objAbbrev(className)
-        self.openComment()
-        if is_CPP_API:
-            self.writeCommentLine('Destructor for {0}.'.format(className))
+            object_name = class_name
+            abbrev_object = strFunctions.abbrev_name(class_name)
+        self.open_comment()
+        if is_cpp_api:
+            self.write_comment_line('Destructor for {0}.'.format(class_name))
         else:
-            self.writeCommentLine('Frees this {0} object.'.format(classNameC))
-            self.writeCommentLine('')
-            self.writeCommentLine('@param {0} the {1} structure'
-                                  .format(object, classNameC))
-        self.closeComment()
-        if is_CPP_API:
-            self.writeLine('virtual ~{0}();'.format(className))
+            self.write_comment_line('Frees this {0} object.'
+                                    .format(object_name))
+            self.write_comment_line('')
+            self.write_comment_line('@param {0} the {1} structure'
+                                    .format(abbrev_object, object_name))
+        self.close_comment()
+        if is_cpp_api:
+            self.write_line('virtual ~{0}();'.format(class_name))
         else:
-            self.writeExternDecl()
-            self.writeLine('void')
-            self.writeLine('{0}_free({1} * {2});'
-                           .format(className, classNameC, object))
-        self.skipLine(2)
+            self.write_extern_decl()
+            self.write_line('void')
+            self.write_line('{0}_free({1} * {2});'
+                            .format(class_name, object_name, abbrev_object))
+        self.skip_line(2)
 
     ########################################################################
 
     # Functions for writing the attribute manipulation functions
 
     # function to write the get/set/isSet/unset functions for attributes
-    def writeAttributeFunctions(self, className, classAttributes,
-                                is_CPP_API=True):
-        numAttrs = len(classAttributes)
-        for i in range(0, numAttrs):
-            attribute = classAttributes[i]
+    def write_attribute_functions(self, class_name, class_attributes,
+                                  is_cpp_api=True):
+        num_attributes = len(class_attributes)
+        for i in range(0, num_attributes):
+            attribute = class_attributes[i]
             if attribute['attType'] != 'element' \
                     and attribute['attType'] != 'lo_element':
-                self.writeGetFunction(className, attribute, True, is_CPP_API)
-        for i in range(0, numAttrs):
-            attribute = classAttributes[i]
+                self.write_get_function(class_name, attribute, True,
+                                        is_cpp_api)
+        for i in range(0, num_attributes):
+            attribute = class_attributes[i]
             if attribute['attType'] != 'element' \
                     and attribute['attType'] != 'lo_element':
-                self.writeIsSetFunction(className, attribute, True, is_CPP_API)
-        for i in range(0, numAttrs):
-            attribute = classAttributes[i]
+                self.write_is_set_function(class_name, attribute, True,
+                                           is_cpp_api)
+        for i in range(0, num_attributes):
+            attribute = class_attributes[i]
             if attribute['attType'] != 'element' \
                     and attribute['attType'] != 'lo_element':
-                self.writeSetFunction(className, attribute, True, is_CPP_API)
-        for i in range(0, numAttrs):
-            attribute = classAttributes[i]
+                self.write_set_function(class_name, attribute, True,
+                                        is_cpp_api)
+        for i in range(0, num_attributes):
+            attribute = class_attributes[i]
             if attribute['attType'] != 'element' \
                     and attribute['attType'] != 'lo_element':
-                self.writeUnsetFunction(attribute, True)
+                self.write_unset_function(attribute, True)
 
     # function to write the get/set/isSet/unset functions for elements
-    def writeElementsFunctions(self, className, classAttributes,
-                               is_CPP_API=True):
-        numAttrs = len(classAttributes)
-        for i in range(0, numAttrs):
-            attribute = classAttributes[i]
+    def write_elements_functions(self, class_name, class_attributes,
+                                 is_cpp_api=True):
+        num_attributes = len(class_attributes)
+        for i in range(0, num_attributes):
+            attribute = class_attributes[i]
             if attribute['attType'] == 'element':
-                self.writeGetFunction(className, attribute, False, is_CPP_API)
-        for i in range(0, numAttrs):
-            attribute = classAttributes[i]
+                self.write_get_function(class_name, attribute, False,
+                                        is_cpp_api)
+        for i in range(0, num_attributes):
+            attribute = class_attributes[i]
             if attribute['attType'] == 'element':
-                self.writeIsSetFunction(className, attribute, False,
-                                        is_CPP_API)
-        for i in range(0, numAttrs):
-            attribute = classAttributes[i]
+                self.write_is_set_function(class_name, attribute, False,
+                                           is_cpp_api)
+        for i in range(0, num_attributes):
+            attribute = class_attributes[i]
             if attribute['attType'] == 'element':
-                self.writeSetFunction(className, attribute, True, is_CPP_API)
-        for i in range(0, numAttrs):
-            attribute = classAttributes[i]
+                self.write_set_function(class_name, attribute, True,
+                                        is_cpp_api)
+        for i in range(0, num_attributes):
+            attribute = class_attributes[i]
             if attribute['attType'] == 'element':
-                self.writeUnsetFunction(attribute, False)
+                self.write_unset_function(attribute, False)
 
     # function to write get function
-    def writeGetFunction(self, className, attribute, isAttribute, is_CPP_API):
-        object = ''
-        if is_CPP_API is False:
-            classNameC = className + '_t'
-            object = strFunctions.objAbbrev(className)
+    def write_get_function(self, class_name, attribute, is_attribute,
+                           is_cpp_api):
+        abbrev_object = ''
+        if is_cpp_api is False:
+            object_name = class_name + '_t'
+            abbrev_object = strFunctions.abbrev_name(class_name)
         else:
-            classNameC = className
-        self.openComment()
-        self.writeCommentLine('Returns the value of the \"{0}\" {1} of '
-                              'this {2}.'
-                              .format(attribute['name'],
-                                      ('attribute'
-                                       if isAttribute else 'element'),
-                                      (className
-                                       if is_CPP_API else classNameC)))
-        if not is_CPP_API:
-            self.writeBlankCommentLine()
-            self.writeCommentLine('@param {0} the {1} structure '
-                                  'whose {2} is sought.'
-                                  .format(object, classNameC,
-                                          attribute['name']))
-        self.writeBlankCommentLine()
-        if is_CPP_API:
-            self.writeCommentLine('@return the value of the \"{0}\" '
-                                  '{1} of this {2} as a {3}.'
-                                  .format(attribute['name'],
-                                          ('attribute' if isAttribute
-                                           else 'element'),
-                                          className,
-                                          (attribute['attType']
-                                           if isAttribute
-                                           else attribute['attTypeCode'])))
+            object_name = class_name
+        self.open_comment()
+        self.write_comment_line('Returns the value of the \"{0}\" '
+                                '{1} of this {2}.'
+                                .format(attribute['name'],
+                                        ('attribute'
+                                         if is_attribute else 'element'),
+                                        (class_name
+                                         if is_cpp_api else object_name)))
+        if not is_cpp_api:
+            self.write_blank_comment_line()
+            self.write_comment_line('@param {0} the {1} structure whose {2} '
+                                    'is sought.'
+                                    .format(abbrev_object, object_name,
+                                            attribute['name']))
+        self.write_blank_comment_line()
+        if is_cpp_api:
+            self.write_comment_line('@return the value of the \"{0}\" {1} of '
+                                    'this {2} as a {3}.'
+                                    .format(attribute['name'],
+                                            ('attribute'
+                                             if is_attribute else 'element'),
+                                            class_name,
+                                            (attribute['attType']
+                                             if is_attribute
+                                             else attribute['attTypeCode'])))
         else:
-            self.writeCommentLine('@return the value of the \"{0}\" {1} of '
-                                  'this {2} as a {3} {4}.'
-                                  .format(attribute['name'],
-                                          ('attribute'
-                                           if isAttribute
-                                           else 'element'),
-                                          classNameC,
-                                          ('pointer to a'
-                                           if (isAttribute
-                                               and attribute['attType']
-                                               == 'string')
-                                           else ''),
-                                          (attribute['attType']
-                                           if isAttribute
-                                           else attribute['attTypeCode'])))
-        self.closeComment()
-        if is_CPP_API:
-            self.writeLine('{0}{1} get{2}() const;'
-                           .format(('virtual '
+            self.write_comment_line('@return the value of the \"{0}\" {1} of '
+                                    'this {2} as a {3} {4}.'
+                                    .format(attribute['name'],
+                                            ('attribute'
+                                             if is_attribute
+                                             else 'element'),
+                                            object_name,
+                                            ('pointer to a'
+                                             if (is_attribute and
+                                                 attribute['attType']
+                                                 == 'string')
+                                             else ''),
+                                            (attribute['attType']
+                                             if is_attribute
+                                             else attribute['attTypeCode'])))
+        self.close_comment()
+        if is_cpp_api:
+            self.write_line('{0}{1} get{2}() const;'
+                            .format(('virtual '
                                     if attribute['virtual'] is True
                                     else ''),
-                                   ('const ' + attribute['attTypeCode']
+                                    ('const ' + attribute['attTypeCode']
                                     if attribute['attType'] == 'string'
                                     else attribute['attTypeCode']),
-                                   attribute['capAttName']))
+                                    attribute['capAttName']))
         else:
-            self.writeExternDecl()
-            self.writeLine('{0}'.format(attribute['CType']))
-            self.writeLine('{0}_get{1}(const {2} * {3});'
-                           .format(className, attribute['capAttName'],
-                                   classNameC, object))
-        self.skipLine(2)
+            self.write_extern_decl()
+            self.write_line('{0}'.format(attribute['CType']))
+            self.write_line('{0}_get{1}(const {2} * {3});'
+                            .format(class_name, attribute['capAttName'],
+                                    object_name, abbrev_object))
+        self.skip_line(2)
 
-    # function to write get function
-    def writeIsSetFunction(self, className, attribute, isAttribute,
-                           is_CPP_API):
-        object = ''
-        if is_CPP_API is False:
-            classNameC = className + '_t'
-            object = strFunctions.objAbbrev(className)
+    # function to write is set function
+    def write_is_set_function(self, class_name, attribute, is_attribute,
+                              is_cpp_api):
+        abbrev_object = ''
+        if is_cpp_api is False:
+            object_name = class_name + '_t'
+            abbrev_object = strFunctions.abbrev_name(class_name)
         else:
-            classNameC = className
-        self.openComment()
-        self.writeCommentLine('Predicate returning {0} false depending on '
-                              'whether this {1}\'s \"{2}\" {3} has been set.'
-                              .format(('@c true or @c false'
-                                       if is_CPP_API else '@c 1 or @c 0'),
-                                      classNameC,
-                                      attribute['name'],
-                                      ('attribute' if isAttribute
-                                       else 'element')))
-        if not is_CPP_API:
-            self.writeBlankCommentLine()
-            self.writeCommentLine('@param {0} the {1} structure'
-                                  .format(object, classNameC))
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@return {0} if this {1}\'s {2} {3} has been '
-                              'set, otherwise {4} is returned.'
-                              .format(('@c true'
-                                       if is_CPP_API else '@c 1'),
-                                      classNameC,
-                                      attribute['name'],
-                                      ('attribute'
-                                       if isAttribute else 'element'),
-                                      ('@c false' if is_CPP_API else '@c 0')))
-        self.closeComment()
-        if is_CPP_API:
-            self.writeLine('{0}bool isSet{1}() const;'
-                           .format('virtual '
-                                   if attribute['virtual'] is True else '',
-                                   attribute['capAttName']))
+            object_name = class_name
+        self.open_comment()
+        self.write_comment_line('Predicate returning {0} false depending on '
+                                'whether this {1}\'s \"{2}\" {3} has been set.'
+                                .format(('@c true or @c false'
+                                         if is_cpp_api else '@c 1 or @c 0'),
+                                        object_name,
+                                        attribute['name'],
+                                        ('attribute' if is_attribute
+                                         else 'element')))
+        if not is_cpp_api:
+            self.write_blank_comment_line()
+            self.write_comment_line('@param {0} the {1} structure'
+                                    .format(abbrev_object, object_name))
+        self.write_blank_comment_line()
+        self.write_comment_line('@return {0} if this {1}\'s {2} {3} has been '
+                                'set, otherwise {4} is returned.'
+                                .format(('@c true'
+                                         if is_cpp_api else '@c 1'),
+                                        object_name,
+                                        attribute['name'],
+                                        ('attribute'
+                                         if is_attribute else 'element'),
+                                        ('@c false' if is_cpp_api
+                                         else '@c 0')))
+        self.close_comment()
+        if is_cpp_api:
+            self.write_line('{0}bool isSet{1}() const;'
+                            .format('virtual '
+                                    if attribute['virtual'] is True else '',
+                                    attribute['capAttName']))
         else:
-            self.writeExternDecl()
-            self.writeLine('int')
-            self.writeLine('{0}_isSet{1}(const {2} * {3});'
-                           .format(className, attribute['capAttName'],
-                                   classNameC, object))
-        self.skipLine(2)
+            self.write_extern_decl()
+            self.write_line('int')
+            self.write_line('{0}_isSet{1}(const {2} * {3});'
+                            .format(class_name, attribute['capAttName'],
+                                    object_name, abbrev_object))
+        self.skip_line(2)
 
-    # function to write get function
-    def writeSetFunction(self, className, attribute, isAttribute, is_CPP_API):
-        object = ''
-        if is_CPP_API is False:
-            classNameC = className + '_t'
-            object = strFunctions.objAbbrev(className)
+    # function to write set function
+    def write_set_function(self, class_name, attribute, is_attribute,
+                           is_cpp_api):
+        abbrev_object = ''
+        if is_cpp_api is False:
+            object_name = class_name + '_t'
+            abbrev_object = strFunctions.abbrev_name(class_name)
         else:
-            classNameC = className
-        self.openComment()
-        self.writeCommentLine('Sets the value of the \"{0}\" {1} of this {2}.'
-                              .format(attribute['name'],
-                                      ('attribute' if isAttribute
-                                       else 'element'), classNameC))
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@param {0} {1} value of the \"{0}\" '
-                              '{2} to be set.'
-                              .format(attribute['name'],
-                                      attribute['attTypeCode'],
-                                      ('attribute' if isAttribute
-                                       else 'element')))
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@return integer value indicating '
-                              'success/failure of the operation. The possible '
-                              'return values are:')
-        self.writeCommentLine('@li @sbmlconstant{LIBSBML_OPERATION_SUCCESS, '
-                              'OperationReturnValues_t}')
-        self.writeCommentLine('@li '
-                              '@sbmlconstant{LIBSBML_INVALID_ATTRIBUTE_VALUE,'
-                              ' OperationReturnValues_t}')
-        self.closeComment()
-        self.writeLine('{0}int set{1}({2} {3});'
-                       .format(('virtual '
-                                if attribute['virtual'] is True else ''),
-                               attribute['capAttName'],
-                               ('const ' + attribute['attTypeCode']
-                                if attribute['attType'] == 'string'
-                                else attribute['attTypeCode']),
-                               attribute['name']))
-        self.skipLine(2)
+            object_name = class_name
+        self.open_comment()
+        self.write_comment_line('Sets the value of the \"{0}\" {1} of '
+                                'this {2}.'
+                                .format(attribute['name'],
+                                        ('attribute' if is_attribute
+                                         else 'element'), object_name))
+        self.write_blank_comment_line()
+        self.write_comment_line('@param {0} {1} value of the \"{0}\" '
+                                '{2} to be set.'
+                                .format(attribute['name'],
+                                        attribute['attTypeCode'],
+                                        ('attribute' if is_attribute
+                                         else 'element')))
+        self.write_blank_comment_line()
+        self.write_comment_line('@return integer value indicating '
+                                'success/failure of the operation. '
+                                'The possible return values are:')
+        self.write_comment_line('@li @sbmlconstant{LIBSBML_OPERATION_SUCCESS, '
+                                'OperationReturnValues_t}')
+        self.write_comment_line('@li '
+                                '@sbmlconstant'
+                                '{LIBSBML_INVALID_ATTRIBUTE_VALUE,'
+                                ' OperationReturnValues_t}')
+        self.close_comment()
+        self.write_line('{0}int set{1}({2} {3});'
+                        .format(('virtual '
+                                 if attribute['virtual'] is True else ''),
+                                attribute['capAttName'],
+                                ('const ' + attribute['attTypeCode']
+                                 if attribute['attType'] == 'string'
+                                 else attribute['attTypeCode']),
+                                attribute['name']))
+        self.skip_line(2)
 
     # function to write unset function
-    def writeUnsetFunction(self, attribute, isAttribute):
-        self.openComment()
-        self.writeCommentLine('Unsets the value of the \"{0}\" {1} '
-                              'of this {2}.'
-                              .format(attribute['name'],
-                                      ('attribute'
-                                       if isAttribute else 'element'),
-                                      self.name))
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@return integer value indicating success/'
-                              'failure of the operation. The possible return '
-                              'values are:')
-        self.writeCommentLine('@li @sbmlconstant{LIBSBML_OPERATION_SUCCESS, '
-                              'OperationReturnValues_t}')
-        self.writeCommentLine('@li @sbmlconstant{LIBSBML_OPERATION_FAILED, '
-                              'OperationReturnValues_t}')
-        self.closeComment()
-        self.writeLine('{0}int unset{1}();'
-                       .format(('virtual '
-                                if attribute['virtual'] is True else ''),
-                               attribute['capAttName']))
-        self.skipLine(2)
+    def write_unset_function(self, attribute, is_attribute):
+        self.open_comment()
+        self.write_comment_line('Unsets the value of the \"{0}\" {1} '
+                                'of this {2}.'
+                                .format(attribute['name'],
+                                        ('attribute'
+                                         if is_attribute else 'element'),
+                                        self.name))
+        self.write_blank_comment_line()
+        self.write_comment_line('@return integer value indicating success/'
+                                'failure of the operation. '
+                                'The possible return values are:')
+        self.write_comment_line('@li @sbmlconstant{LIBSBML_OPERATION_SUCCESS, '
+                                'OperationReturnValues_t}')
+        self.write_comment_line('@li @sbmlconstant{LIBSBML_OPERATION_FAILED, '
+                                'OperationReturnValues_t}')
+        self.close_comment()
+        self.write_line('{0}int unset{1}();'
+                        .format(('virtual '
+                                 if attribute['virtual'] is True else ''),
+                                attribute['capAttName']))
+        self.skip_line(2)
 
     ########################################################################
 
     # Functions for writing function dealing with a child listOf element
 
     # main function to write the functions dealing with a child listOf element
-    def writeListOfElementFunctions(self, className, classAttributes):
-        numAttrs = len(classAttributes)
-        for i in range(0, numAttrs):
-            attribute = classAttributes[i]
+    def write_listofelement_functions(self, class_name, class_attributes):
+        num_attributes = len(class_attributes)
+        for i in range(0, num_attributes):
+            attribute = class_attributes[i]
             if attribute['attType'] == 'lo_element':
-                self.writeGetListOfFunctions(className, attribute)
-                self.writeGetElementFunctions(className, attribute)
-                self.writeAddElementFunction(className, attribute)
+                self.write_get_listof_functions(class_name, attribute)
+                self.write_get_element_functions(class_name, attribute)
+                self.write_add_element_function(class_name, attribute)
                 # getNum
                 # create
                 # remove
 
     # function to write the getListOf functions
-    def writeGetListOfFunctions(self, className, attribute):
-        self.openComment()
-        self.writeCommentLine('Returns the \"{0}\" from this {1}.'
-                              .format(attribute['attTypeCode'], className))
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@return the \"{0}\" from this {1}.'
-                              .format(attribute['attTypeCode'], className))
-        self.closeComment()
-        self.writeLine('const {0}* get{0}() const;'
-                       .format(attribute['attTypeCode']))
-        self.skipLine(2)
-        self.openComment()
-        self.writeCommentLine('Returns the \"{0}\" from this {1}.'
-                              .format(attribute['attTypeCode'], className))
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@return the \"{0}\" from this {1}.'
-                              .format(attribute['attTypeCode'], className))
-        self.closeComment()
-        self.writeLine('{0}* get{0}();'.format(attribute['attTypeCode']))
-        self.skipLine(2)
+    def write_get_listof_functions(self, class_name, attribute):
+        self.open_comment()
+        self.write_comment_line('Returns the \"{0}\" from this {1}.'
+                                .format(attribute['attTypeCode'], class_name))
+        self.write_blank_comment_line()
+        self.write_comment_line('@return the \"{0}\" from this {1}.'
+                                .format(attribute['attTypeCode'], class_name))
+        self.close_comment()
+        self.write_line('const {0}* get{0}() const;'
+                        .format(attribute['attTypeCode']))
+        self.skip_line(2)
+        self.open_comment()
+        self.write_comment_line('Returns the \"{0}\" from this {1}.'
+                                .format(attribute['attTypeCode'], class_name))
+        self.write_blank_comment_line()
+        self.write_comment_line('@return the \"{0}\" from this {1}.'
+                                .format(attribute['attTypeCode'], class_name))
+        self.close_comment()
+        self.write_line('{0}* get{0}();'.format(attribute['attTypeCode']))
+        self.skip_line(2)
 
     # function to write the getElement functions
-    def writeGetElementFunctions(self, className, attribute):
+    def write_get_element_functions(self, class_name, attribute):
         name = attribute['name']
-        indefName = strFunctions.getIndefinite(name)
-        capName = attribute['capAttName']
-        type = attribute['attTypeCode']
-        plural = strFunctions.cap(attribute['pluralName'])
+        indef_name = strFunctions.get_indefinite(name)
+        cap_name = attribute['capAttName']
+        element_type = attribute['attTypeCode']
+        plural = strFunctions.upper_first(attribute['pluralName'])
 
         # non const get by index
-        self.openComment()
-        self.writeCommentLine('Get {0} {1} from the {2}.'
-                              .format(indefName, capName, type))
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@param n an unsigned int representing the '
-                              'index number of the {0} to retrieve.'
-                              .format(capName))
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@return the nth {0} in the {1} '
-                              'within this {2}.'
-                              .format(capName, type, className))
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@see getNum{0}()'.format(plural))
-        self.closeComment()
-        self.writeLine('{0}* get{0}(unsigned int n);'.format(capName))
-        self.skipLine(2)
+        self.open_comment()
+        self.write_comment_line('Get {0} {1} from the {2}.'
+                                .format(indef_name, cap_name, element_type))
+        self.write_blank_comment_line()
+        self.write_comment_line('@param n an unsigned int representing the '
+                                'index number of the {0} to retrieve.'
+                                .format(cap_name))
+        self.write_blank_comment_line()
+        self.write_comment_line('@return the nth {0} in the {1} '
+                                'within this {2}.'
+                                .format(cap_name, element_type, class_name))
+        self.write_blank_comment_line()
+        self.write_comment_line('@see getNum{0}()'.format(plural))
+        self.close_comment()
+        self.write_line('{0}* get{0}(unsigned int n);'.format(cap_name))
+        self.skip_line(2)
         # const get by index
-        self.openComment()
-        self.writeCommentLine('Get {0} {1} from the {2}.'
-                              .format(indefName, capName, type))
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@param n an unsigned int representing the '
-                              'index number of the {0} to retrieve.'
-                              .format(capName))
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@return the nth {0} in the {1} within '
-                              'this {2}.'
-                              .format(capName, type, className))
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@see getNum{0}()'
-                              .format(plural))
-        self.closeComment()
-        self.writeLine('const {0}* get{0}(unsigned int n) const;'
-                       .format(attribute['capAttName']))
-        self.skipLine(2)
+        self.open_comment()
+        self.write_comment_line('Get {0} {1} from the {2}.'
+                                .format(indef_name, cap_name, element_type))
+        self.write_blank_comment_line()
+        self.write_comment_line('@param n an unsigned int representing the '
+                                'index number of the {0} to retrieve.'
+                                .format(cap_name))
+        self.write_blank_comment_line()
+        self.write_comment_line('@return the nth {0} in the {1} within '
+                                'this {2}.'
+                                .format(cap_name, element_type, class_name))
+        self.write_blank_comment_line()
+        self.write_comment_line('@see getNum{0}()'
+                                .format(plural))
+        self.close_comment()
+        self.write_line('const {0}* get{0}(unsigned int n) const;'
+                        .format(attribute['capAttName']))
+        self.skip_line(2)
         # non const get by id
-        self.openComment()
-        self.writeCommentLine('Get {0} {1} from the {2} based on it\'s '
-                              'identifier.'
-                              .format(indefName, capName, type))
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@param sid a string representing the '
-                              'identifier of the {0} to retrieve.'
-                              .format(capName))
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@return the {0} in the {1} with the given '
-                              'id or NULL if no such {0} exists.'
-                              .format(capName, type))
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@see get{0}(unsigned int n)'
-                              .format(capName))
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@see getNum{0}()'
-                              .format(plural))
-        self.closeComment()
-        self.writeLine('{0}* get{0}(const std::string& sid);'
-                       .format(attribute['capAttName']))
-        self.skipLine(2)
+        self.open_comment()
+        self.write_comment_line('Get {0} {1} from the {2} based on it\'s '
+                                'identifier.'
+                                .format(indef_name, cap_name, element_type))
+        self.write_blank_comment_line()
+        self.write_comment_line('@param sid a string representing the '
+                                'identifier of the {0} to retrieve.'
+                                .format(cap_name))
+        self.write_blank_comment_line()
+        self.write_comment_line('@return the {0} in the {1} with the given '
+                                'id or NULL if no such {0} exists.'
+                                .format(cap_name, element_type))
+        self.write_blank_comment_line()
+        self.write_comment_line('@see get{0}(unsigned int n)'
+                                .format(cap_name))
+        self.write_blank_comment_line()
+        self.write_comment_line('@see getNum{0}()'
+                                .format(plural))
+        self.close_comment()
+        self.write_line('{0}* get{0}(const std::string& sid);'
+                        .format(attribute['capAttName']))
+        self.skip_line(2)
         # const get by id
-        self.openComment()
-        self.writeCommentLine('Get {0} {1} from the {2} based on it\'s '
-                              'identifier.'
-                              .format(indefName, capName, type))
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@param sid a string representing the '
-                              'identifier of the {0} to retrieve.'
-                              .format(capName))
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@return the {0} in the {1} with the given '
-                              'id or NULL if no such {0} exists.'
-                              .format(capName, type))
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@see get{0}(unsigned int n)'
-                              .format(capName))
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@see getNum{0}()'
-                              .format(plural))
-        self.closeComment()
-        self.writeLine('const {0}* get{0}(const std::string& sid) const;'
-                       .format(capName))
-        self.skipLine(2)
+        self.open_comment()
+        self.write_comment_line('Get {0} {1} from the {2} based on it\'s '
+                                'identifier.'
+                                .format(indef_name, cap_name, element_type))
+        self.write_blank_comment_line()
+        self.write_comment_line('@param sid a string representing the '
+                                'identifier of the {0} to retrieve.'
+                                .format(cap_name))
+        self.write_blank_comment_line()
+        self.write_comment_line('@return the {0} in the {1} with the given '
+                                'id or NULL if no such {0} exists.'
+                                .format(cap_name, element_type))
+        self.write_blank_comment_line()
+        self.write_comment_line('@see get{0}(unsigned int n)'
+                                .format(cap_name))
+        self.write_blank_comment_line()
+        self.write_comment_line('@see getNum{0}()'
+                                .format(plural))
+        self.close_comment()
+        self.write_line('const {0}* get{0}(const std::string& sid) const;'
+                        .format(cap_name))
+        self.skip_line(2)
 
     # function to write the addElement function
-    def writeAddElementFunction(self, className, attribute):
-        abbrev = strFunctions.objAbbrev(attribute['capAttName'])
-        self.openComment()
-        self.writeCommentLine('Adds a copy of the given {0} to this {1}.'
-                              .format(attribute['capAttName'], className))
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@param {0}; the {1} object to add.'
-                              .format(abbrev,
-                                      attribute['capAttName']))
-        self.writeBlankCommentLine()
-        self.writeCommentLine('@return integer value indicating success/'
-                              'failure of the operation. The possible return'
-                              ' values are:')
-        self.writeCommentLine('@li @sbmlconstant{LIBSBML_OPERATION_SUCCESS,'
-                              ' OperationReturnValues_t}')
-        self.writeCommentLine('@li @sbmlconstant'
-                              '{LIBSBML_INVALID_ATTRIBUTE_VALUE, '
-                              'OperationReturnValues_t}')
-        self.closeComment()
-        self.writeLine('int add{0}(const {0}* {1});'
-                       .format(attribute['capAttName'], abbrev))
-        self.skipLine(2)
+    def write_add_element_function(self, class_name, attribute):
+        abbrev = strFunctions.abbrev_name(attribute['capAttName'])
+        self.open_comment()
+        self.write_comment_line('Adds a copy of the given {0} to this {1}.'
+                                .format(attribute['capAttName'], class_name))
+        self.write_blank_comment_line()
+        self.write_comment_line('@param {0}; the {1} object to add.'
+                                .format(abbrev,
+                                        attribute['capAttName']))
+        self.write_blank_comment_line()
+        self.write_comment_line('@return integer value indicating success/'
+                                'failure of the operation. The possible return'
+                                ' values are:')
+        self.write_comment_line('@li @sbmlconstant{LIBSBML_OPERATION_SUCCESS,'
+                                ' OperationReturnValues_t}')
+        self.write_comment_line('@li @sbmlconstant'
+                                '{LIBSBML_INVALID_ATTRIBUTE_VALUE, '
+                                'OperationReturnValues_t}')
+        self.close_comment()
+        self.write_line('int add{0}(const {0}* {1});'
+                        .format(attribute['capAttName'], abbrev))
+        self.skip_line(2)
 
     ########################################################################
 
     # Functions for writing definition declaration
 
-    def writeDefnBegin(self):
-        self.skipLine(2)
-        self.writeLine('#ifndef {0}_H__'.format(self.name))
-        self.writeLine('#define {0}_H__'.format(self.name))
-        self.skipLine(2)
+    def write_defn_begin(self):
+        self.skip_line(2)
+        self.write_line('#ifndef {0}_H__'.format(self.name))
+        self.write_line('#define {0}_H__'.format(self.name))
+        self.skip_line(2)
 
-    def writeDefnEnd(self):
-        self.skipLine(2)
-        self.writeLine('#endif  /*  !{0}_H__  */'.format(self.name))
-        self.skipLine(2)
+    def write_defn_end(self):
+        self.skip_line(2)
+        self.write_line('#endif  /*  !{0}_H__  */'.format(self.name))
+        self.skip_line(2)
 
     ########################################################################
 
@@ -702,21 +714,22 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
 
     def writeFile(self):
         BaseFile.BaseFile.writeFile(self)
-        self.writeDefnBegin()
-        self.writeCommonIncludes()
-        self.writeCppBegin()
-        self.writeGeneralIncludes()
-        self.writeCppNsBegin()
-        self.writeClass(self.baseClass, self.name, self.attributes)
-        if self.hasListOf:
-            self.writeClass('ListOf', self.listOfName, self.listOfAttributes)
-        self.writeCppNsEnd()
-        self.writeCppEnd()
-        self.writeSwigBegin()
-        self.writeCppNsBegin()
-        self.writeCDeclBegin()
-        self.writeCHeader()
-        self.writeCDeclEnd()
-        self.writeCppNsEnd()
-        self.writeSwigEnd()
-        self.writeDefnEnd()
+        self.write_defn_begin()
+        self.write_common_includes()
+        self.write_cpp_begin()
+        self.write_general_includes()
+        self.write_cppns_begin()
+        self.write_class(self.baseClass, self.name, self.attributes)
+        if self.has_list_of:
+            self.write_class('ListOf', self.list_of_name,
+                             self.attributes_on_list_of)
+        self.write_cppns_end()
+        self.write_cpp_end()
+        self.write_swig_begin()
+        self.write_cppns_begin()
+        self.write_cdecl_begin()
+        self.write_c_header()
+        self.write_cdecl_end()
+        self.write_cppns_end()
+        self.write_swig_end()
+        self.write_defn_end()
