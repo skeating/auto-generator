@@ -5,6 +5,7 @@ __author__ = 'Sarah'
 import sys
 import os
 import CppHeaderFile
+from createPackageFromXml import *
 
 
 def createObject():
@@ -78,8 +79,11 @@ if len(sys.argv) != 1:
 else:
 #  object = createQualTranisition()
 #  object = createObject()
-  object = createParameter()
-  ff = CppHeaderFile.CppHeaderFile(object)
+
+#  object = createParameter()
+  ob = parse_deviser_xml('param.xml')
+  sbml_object = ob['sbmlElements'][0]
+  ff = CppHeaderFile.CppHeaderFile(sbml_object)
   ff.writeFile()
   ff.close_file()
 

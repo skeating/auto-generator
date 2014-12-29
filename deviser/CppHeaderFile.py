@@ -12,9 +12,9 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         # members from object
         self.name = class_object['name']
         self.package = class_object['package']
-        self.child_elements = class_object['childElements']
+        self.child_elements = [] #class_object['childElements']
         self.has_list_of = class_object['hasListOf']
-        self.attributes_on_list_of = class_object['loattrib']
+        self.attributes_on_list_of = ''#class_object['loattrib']
 
         # derived members
         self.list_of_name = strFunctions.list_of_name(self.name)
@@ -138,8 +138,8 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
             self.write_comment_line('@param pkgVersion an unsigned int, the '
                                     'SBML {0} Version to assign to this {1}'
                                     .format(self.package, object_name))
-        self.write_comment_line('@throws @if python ValueError '
-                                '@else SBMLConstructorException @endif@~')
+        self.write_blank_comment_line()
+        self.write_comment_line('@throws SBMLConstructorException')
         self.write_comment_line('Thrown if the given @p level and @p '
                                 'version combination, or this kind')
         self.write_comment_line('of SBML object, are either invalid or '
@@ -188,13 +188,14 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         if is_cpp_api is False:
             return
         self.open_comment()
-        line = 'Creates a new {0} with the given '.format(class_name)
+        line = 'Creates a new {0} with using the given '.format(class_name)
         if self.package:
             line = line + '{0}PkgNamespaces object.'.format(self.package)
         else:
-            line = line + 'Namespaces object.'
+            line = line + '{0}Namespaces object @p {1}ns.'\
+                .format(self.language.upper(), self.language)
         self.write_comment_line(line)
-        self.write_comment_line('')
+        self.write_blank_comment_line()
         if self.package:
             self.write_comment_line('@param {0}ns the {1}PkgNamespaces object'
                                     .format(self.package.lower(),
@@ -411,7 +412,7 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         if is_cpp_api:
             self.write_line('{0}{1} get{2}() const;'
                             .format(('virtual '
-                                    if attribute['virtual'] is True
+                                    if attribute['abstract'] is True
                                     else ''),
                                     ('const ' + attribute['attTypeCode']
                                     if attribute['attType'] == 'string'
@@ -462,7 +463,7 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         if is_cpp_api:
             self.write_line('{0}bool isSet{1}() const;'
                             .format('virtual '
-                                    if attribute['virtual'] is True else '',
+                                    if attribute['abstract'] is True else '',
                                     attribute['capAttName']))
         else:
             self.write_extern_decl()
@@ -507,7 +508,7 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         self.close_comment()
         self.write_line('{0}int set{1}({2} {3});'
                         .format(('virtual '
-                                 if attribute['virtual'] is True else ''),
+                                 if attribute['abstract'] is True else ''),
                                 attribute['capAttName'],
                                 ('const ' + attribute['attTypeCode']
                                  if attribute['attType'] == 'string'
@@ -535,7 +536,7 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         self.close_comment()
         self.write_line('{0}int unset{1}();'
                         .format(('virtual '
-                                 if attribute['virtual'] is True else ''),
+                                 if attribute['abstract'] is True else ''),
                                 attribute['capAttName']))
         self.skip_line(2)
 
@@ -716,8 +717,8 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         BaseFile.BaseFile.writeFile(self)
         self.write_defn_begin()
         self.write_common_includes()
-        self.write_cpp_begin()
         self.write_general_includes()
+        self.write_cpp_begin()
         self.write_cppns_begin()
         self.write_class(self.baseClass, self.name, self.attributes)
         if self.has_list_of:
