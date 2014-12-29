@@ -32,7 +32,7 @@ class BaseCppFile(BaseFile.BaseFile):
                 attributes[i]['attTypeCode'] = 'std::string&'
                 attributes[i]['CType'] = 'const char *'
                 attributes[i]['isNumber'] = False
-            elif 'UnitSId' or att_type == 'UnitSIdRef':
+            elif att_type == 'UnitSId' or att_type == 'UnitSIdRef':
                 attributes[i]['attType'] = 'string'
                 attributes[i]['attTypeCode'] = 'std::string&'
                 attributes[i]['CType'] = 'const char *'
