@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<package name="Package1">
+<package name="">
   <elements>
     <element name="Parameter" typeCode="SBML_PARAMETER" hasListOf="true" hasChildren="false" hasMath="false" childrenOverwriteElementName="false" baseClass="SBase" abstract="false">
       <attributes>
-        <attribute name="id" required="true" type="string" abstract="true" />
-        <attribute name="name" required="false" type="string" abstract="true" />
+        <attribute name="id" required="true" type="string" abstract="false" />
+        <attribute name="name" required="false" type="string" abstract="false" />
         <attribute name="value" required="false" type="double" abstract="false" />
         <attribute name="constant" required="true" type="boolean" abstract="false" />
         <attribute name="units" required="false" type="string" abstract="false" />
