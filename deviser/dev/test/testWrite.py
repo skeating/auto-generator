@@ -84,6 +84,6 @@ else:
   ob = parse_deviser_xml('param.xml')
   sbml_object = ob['sbmlElements'][0]
   ff = CppHeaderFile.CppHeaderFile(sbml_object)
-  ff.writeFile()
+  ff.write_file()
   ff.close_file()
 
