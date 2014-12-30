@@ -57,7 +57,7 @@ class BaseCppFile(BaseFile.BaseFile):
                 attributes[i]['attTypeCode'] = 'unsigned int'
                 attributes[i]['CType'] = 'unsigned int'
                 attributes[i]['isNumber'] = True
-            elif att_type == 'bool':
+            elif att_type == 'bool' or att_type == 'boolean':
                 attributes[i]['attType'] = 'boolean'
                 attributes[i]['attTypeCode'] = 'bool'
                 attributes[i]['CType'] = 'int'
@@ -134,3 +134,34 @@ class BaseCppFile(BaseFile.BaseFile):
         self.skip_line(2)
         self.write_line('#endif  /*  __cplusplus  */')
         self.skip_line(2)
+
+########################################################################
+
+# FUNCTIONS FOR WRITING STANDARD FUNCTION DECLARATIONS
+
+    def write_function_header(self, is_cpp,
+                              function_name, arguments, return_type):
+        line = ''
+        num_arguments = len(arguments)
+        if not is_cpp:
+            self.write_extern_decl()
+            self.write_line(return_type)
+            line = function_name + '('
+        else:
+            if return_type != '':
+                line = return_type + ' ' + function_name + '('
+            else:
+                line = function_name + '('
+
+        if num_arguments == 0:
+            line = line + ');'
+        else:
+            line = line + arguments[0]
+        for i in range(1,num_arguments-1):
+            line = line + ', ' + arguments[i]
+        if num_arguments > 1:
+            line = line + ', ' + arguments[num_arguments-1] + ');'
+
+        self.write_line(line)
+
+
