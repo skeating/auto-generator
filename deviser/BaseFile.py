@@ -23,7 +23,7 @@ class BaseFile:
             self.brief_description = 'Base file'
 
             # derived members for spacing
-        self.line_length = 75
+        self.line_length = 79
         self.num_tabs = 0
 
         # members that might get overridden if creating another library
@@ -36,23 +36,55 @@ class BaseFile:
 
     # based on the number of tabs and the length of line specified
 
+    # function to create lines of size specified
+    def create_lines(self, line, tabsize, is_comment=False):
+        max_length = self.line_length - tabsize
+        if is_comment:
+            max_length -= 3
+
+        lines = []
+        words = line.split()
+        num_words = len(words)
+        if num_words == 1:
+            lines.append(line)
+        else:
+            i = 1
+            temp = words[0]
+            newline = words[0]
+            while i < num_words:
+                if len(newline) < max_length:
+                    if len(temp) > 0:
+                        temp = temp + ' ' + words[i]
+                    else:
+                        temp = words[i]
+                    i += 1
+                    if len(temp) <= max_length:
+                        newline = temp
+                    else:
+                        if len(newline) == 0:
+                            lines.append(temp)
+                            temp = ''
+                        else:
+                            lines.append(newline)
+                            newline = ''
+                            temp = ''
+                            i -= 1
+                else:
+                    lines.append(newline)
+                    newline = ''
+                    temp = ''
+            if len(newline) > 0:
+                lines.append(newline)
+        return lines
+
     # functions for writing lines
     def write_line(self, line):
         tabs = ''
         for i in range(0, int(self.num_tabs)):
             tabs = tabs + '  '
-        if len(line) > self.line_length:
-            words = line.split()
-            newline = words[0]
-            i = 1
-            while i < len(words):
-                while i < len(words) and len(newline) < self.line_length:
-                    newline = newline + ' ' + words[i]
-                    i = i + 1
-                self.file_out.write('{0}{1}\n'.format(tabs, newline))
-                newline = '  '
-        else:
-            self.file_out.write('{0}{1}\n'.format(tabs, line))
+        lines = self.create_lines(line, len(tabs))
+        for i in range(0, len(lines)):
+            self.file_out.write('{0}{1}\n'.format(tabs, lines[i]))
 
     # function for blankLines
     def skip_line(self, num=1):
@@ -60,29 +92,14 @@ class BaseFile:
             self.file_out.write('\n')
 
     # functions for writing comments
-
     def write_comment_line(self, line):
         tabs = ''
         for i in range(0, int(self.num_tabs)):
             tabs = tabs + '  '
-        if len(line) > self.line_length:
-            words = line.split()
-            newline = words[0]
-            i = 1
-            while i < len(words):
-                while i < len(words) and len(newline) < self.line_length:
-                    newline = newline + ' ' + words[i]
-                    i = i + 1
-                self.file_out.write('{0}{1} {2}\n'
-                                    .format(tabs, self.comment, newline))
-                newline = '  '
-            if len(words) == 1:
-                # anomaly where the whole line is one word
-                self.file_out.write('{0}{1} {2}\n'
-                                    .format(tabs, self.comment, line))
-        else:
+        lines = self.create_lines(line, len(tabs), True)
+        for i in range(0, len(lines)):
             self.file_out.write('{0}{1} {2}\n'
-                                .format(tabs, self.comment, line))
+                                .format(tabs, self.comment, lines[i]))
 
     def write_blank_comment_line(self):
         tabs = ''
@@ -150,7 +167,7 @@ class BaseFile:
 
     # Default write file with standard header and licence
 
-    def writeFile(self):
+    def write_file(self):
         self.add_file_header()
 
     def add_file_header(self):
@@ -162,9 +179,8 @@ class BaseFile:
         self.write_comment_line('<!-----------------------------------------'
                                 '---------------------------------')
         self.write_comment_line('This file is part of libSBML.  Please visit '
-                                'http://sbml.org for more')
-        self.write_comment_line('information about SBML, and the latest '
-                                'version of libSBML.')
+                                'http://sbml.org for more information about '
+                                'SBML, and the latest version of libSBML.')
         self.write_blank_comment_line()
         self.write_comment_line('Copyright (C) 2013-2014 jointly by the '
                                 'following organizations:')
@@ -194,14 +210,13 @@ class BaseFile:
                                 'Japan')
         self.write_blank_comment_line()
         self.write_comment_line('This library is free software; you can '
-                                'redistribute it and/or modify it')
-        self.write_comment_line('under the terms of the GNU Lesser General '
-                                'Public License as published by')
-        self.write_comment_line('the Free Software Foundation.  A copy of '
-                                'the license agreement is provided')
-        self.write_comment_line('in the file named "LICENSE.txt" included '
-                                'with this software distribution and')
-        self.write_comment_line('also available online as http://sbml.org'
+                                'redistribute it and/or modify it under the '
+                                'terms of the GNU Lesser General Public '
+                                'License as published by the Free Software '
+                                'Foundation.  A copy of the license agreement'
+                                ' is provided in the file named "LICENSE.txt"'
+                                ' included with this software distribution '
+                                'and also available online as http://sbml.org'
                                 '/software/libsbml/license.html')
         self.write_comment_line('--------------------------------------------'
                                 '---------------------------- -->')
