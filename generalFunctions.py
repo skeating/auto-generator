@@ -450,6 +450,9 @@ def writeReadAttributesHeader(outFile):
 def writeReadAttribute(output, attrib, element, pkg, baseClass = '', extendedElement = ''):
   attName = attrib['name']
   capAttName = strFunctions.cap(attName)
+  elementName = strFunctions.lowerFirst(element)
+  if attrib.has_key('parent') and attrib['parent'] != None and attrib['parent'].has_key('elementName') and attrib['parent']['elementName'] != None: 
+    elementName = attrib['parent']['elementName']
   if attrib['reqd'] == True:
     use = 'required'
   else:
@@ -477,7 +480,7 @@ def writeReadAttribute(output, attrib, element, pkg, baseClass = '', extendedEle
       output.write('  }\n')
       output.write('  else\n')
       output.write('  {\n')
-      output.write('    std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, strFunctions.lowerFirst(element)))
+      output.write('    std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, elementName))
       output.write('    getErrorLog()->logPackageError("{0}", {1}UnknownError,\n'.format(pkg.lower(), pkg))
       output.write('                   getPackageVersion(), sbmlLevel, sbmlVersion, message, getLine(), getColumn());\n')
     output.write('  }\n\n')
@@ -504,7 +507,7 @@ def writeReadAttribute(output, attrib, element, pkg, baseClass = '', extendedEle
       output.write('  }\n')
       output.write('  else\n')
       output.write('  {\n')
-      output.write('    std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, strFunctions.lowerFirst(element)))
+      output.write('    std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, elementName))
       output.write('    getErrorLog()->logPackageError("{0}", {1}UnknownError,\n'.format(pkg.lower(), pkg))
       output.write('                   getPackageVersion(), sbmlLevel, sbmlVersion, message, getLine(), getColumn());\n')
     output.write('  }\n\n')
@@ -528,7 +531,7 @@ def writeReadAttribute(output, attrib, element, pkg, baseClass = '', extendedEle
       output.write('  }\n')
       output.write('  else\n')
       output.write('  {\n')
-      output.write('    std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, strFunctions.lowerFirst(element)))
+      output.write('    std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, elementName))
       output.write('    getErrorLog()->logPackageError("{0}", {1}UnknownError,\n'.format(pkg.lower(), pkg))
       output.write('                   getPackageVersion(), sbmlLevel, sbmlVersion, message, getLine(), getColumn());\n')
     output.write('  }\n\n')
@@ -552,7 +555,7 @@ def writeReadAttribute(output, attrib, element, pkg, baseClass = '', extendedEle
       output.write('  }\n')
       output.write('  else\n')
       output.write('  {\n')
-      output.write('    std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, strFunctions.lowerFirst(element)))
+      output.write('    std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, elementName))
       output.write('    getErrorLog()->logPackageError("{0}", {1}UnknownError,\n'.format(pkg.lower(), pkg))
       output.write('                   getPackageVersion(), sbmlLevel, sbmlVersion, message, getLine(), getColumn());\n')
     output.write('  }\n\n')
@@ -569,7 +572,7 @@ def writeReadAttribute(output, attrib, element, pkg, baseClass = '', extendedEle
     output.write('      m{0} = {1}_parse(stringValue.c_str());\n'.format(capAttName, attrib['element']))
     output.write('      if(m{0} == {1}_UNKNOWN)\n'.format(capAttName, attrib['element'].upper()))
     output.write('      {\n')
-    output.write('        std::string message = "Unknown value for {0} attribute \'{1}\' in \'{2}\' object: " + stringValue;\n'.format(pkg, attName, strFunctions.lowerFirst(element)))
+    output.write('        std::string message = "Unknown value for {0} attribute \'{1}\' in \'{2}\' object: " + stringValue;\n'.format(pkg, attName, elementName))
     output.write('        getErrorLog()->logPackageError("{0}", {1}UnknownError,\n'.format(pkg.lower(), pkg))
     output.write('                       getPackageVersion(), sbmlLevel, sbmlVersion, message, getLine(), getColumn());\n')
     output.write('      }\n')
@@ -578,7 +581,7 @@ def writeReadAttribute(output, attrib, element, pkg, baseClass = '', extendedEle
     if use == 'required':
       output.write('  if(m{0} == {1}_UNKNOWN)\n'.format(capAttName, attrib['element'].upper()))
       output.write('  {\n')
-      output.write('    std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, strFunctions.lowerFirst(element)))
+      output.write('    std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, elementName))
       output.write('    getErrorLog()->logPackageError("{0}", {1}UnknownError,\n'.format(pkg.lower(), pkg))
       output.write('                   getPackageVersion(), sbmlLevel, sbmlVersion, message, getLine(), getColumn());\n')
       output.write('  }\n\n')
@@ -600,7 +603,7 @@ def writeReadAttribute(output, attrib, element, pkg, baseClass = '', extendedEle
       output.write('  }\n')
       output.write('  else\n')
       output.write('  {\n')
-      output.write('    std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, strFunctions.lowerFirst(element)))
+      output.write('    std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, elementName))
       output.write('    getErrorLog()->logPackageError("{0}", {1}UnknownError,\n'.format(pkg.lower(), pkg))
       output.write('                   getPackageVersion(), sbmlLevel, sbmlVersion, message, getLine(), getColumn());\n')
     output.write('  }\n\n')
@@ -612,7 +615,7 @@ def writeReadAttribute(output, attrib, element, pkg, baseClass = '', extendedEle
     # if use == 'required':
     #   output.write('  if (mIsSet{0} == false)\n'.format(capAttName))
     #   output.write('  {\n')
-    #   output.write('    std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, strFunctions.lowerFirst(element)))
+    #   output.write('    std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, elementName))
     #   output.write('    getErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
     #   output.write('                   getPackageVersion(), sbmlLevel, sbmlVersion, message, getLine(), getColumn());\n')
     #   output.write('  }\n')
@@ -630,7 +633,7 @@ def writeReadAttribute(output, attrib, element, pkg, baseClass = '', extendedEle
     if use == 'required':
       output.write('      else\n')
       output.write('      {\n')
-      output.write('    std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, strFunctions.lowerFirst(element)))
+      output.write('        std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, elementName))
       output.write('        getErrorLog()->logPackageError("{0}", {1}UnknownError,\n'.format(pkg.lower(), pkg))
       output.write('                       getPackageVersion(), sbmlLevel, sbmlVersion, message, getLine(), getColumn());\n')
       output.write('      }\n')
@@ -644,7 +647,7 @@ def writeReadAttribute(output, attrib, element, pkg, baseClass = '', extendedEle
     # if use == 'required':
     # output.write('  if (mIsSet{0} == false)\n'.format(capAttName))
     # output.write('  {\n')
-    # output.write('    std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, strFunctions.lowerFirst(element)))
+    # output.write('    std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, elementName))
     # output.write('    getErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
     # output.write('                   getPackageVersion(), sbmlLevel, sbmlVersion, message, getLine(), getColumn());\n')
     # output.write('  }\n')
@@ -662,7 +665,7 @@ def writeReadAttribute(output, attrib, element, pkg, baseClass = '', extendedEle
     if use == 'required':
       output.write('      else\n')
       output.write('      {\n')
-      output.write('        std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, strFunctions.lowerFirst(element)))
+      output.write('        std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, elementName))
       output.write('        getErrorLog()->logPackageError("{0}", {1}UnknownError,\n'.format(pkg.lower(), pkg))
       output.write('                       getPackageVersion(), sbmlLevel, sbmlVersion, message);\n')
       output.write('      }\n')
@@ -676,7 +679,7 @@ def writeReadAttribute(output, attrib, element, pkg, baseClass = '', extendedEle
     # if use == 'required':
     #   output.write('  if (mIsSet{0} == false)\n'.format(capAttName))
     #   output.write('  {\n')
-    #   output.write('    std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, strFunctions.lowerFirst(element)))
+    #   output.write('    std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, elementName))
     #   output.write('    getErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
     #   output.write('                   getPackageVersion(), sbmlLevel, sbmlVersion, message, getLine(), getColumn());\n')
     #   output.write('  }\n')
@@ -694,7 +697,7 @@ def writeReadAttribute(output, attrib, element, pkg, baseClass = '', extendedEle
     if use == 'required':
       output.write('      else\n')
       output.write('      {\n')
-      output.write('        std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, strFunctions.lowerFirst(element)))
+      output.write('        std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, elementName))
       output.write('        getErrorLog()->logPackageError("{0}", {1}UnknownError,\n'.format(pkg.lower(), pkg))
       output.write('                       getPackageVersion(), sbmlLevel, sbmlVersion, message, getLine(), getColumn());\n')
       output.write('      }\n')
@@ -720,9 +723,9 @@ def writeReadAttribute(output, attrib, element, pkg, baseClass = '', extendedEle
       output.write('      else\n')
       output.write('      {\n')
       if baseClass.endswith('Plugin'):
-        output.write('        std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, strFunctions.lowerFirst(extendedElement)))
+        output.write('        std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, elementName))
       else:
-        output.write('        std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, strFunctions.lowerFirst(element)))
+        output.write('        std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, elementName))
       output.write('        getErrorLog()->logPackageError("{0}", {1}UnknownError,\n'.format(pkg.lower(), pkg))
       output.write('                       getPackageVersion(), sbmlLevel, sbmlVersion, message, getLine(), getColumn());\n')
       output.write('      }\n')
@@ -731,7 +734,7 @@ def writeReadAttribute(output, attrib, element, pkg, baseClass = '', extendedEle
     # if use == 'required':
     #   output.write('  if (mIsSet{0} == false)\n'.format(capAttName))
     #   output.write('  {\n')
-    #   output.write('    std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, strFunctions.lowerFirst(element)))
+    #   output.write('    std::string message = "{0} attribute \'{1}\' is missing from \'{2}\' object.";\n'.format(pkg, attName, elementName))
     #   output.write('    getErrorLog()->logPackageError("{0}", UnknownError,\n'.format(pkg.lower()))
     #   output.write('                   getPackageVersion(), sbmlLevel, sbmlVersion, message, getLine(), getColumn());\n')
     #   output.write('  }\n\n')
