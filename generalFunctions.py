@@ -755,6 +755,17 @@ def writeReadAttribute(output, attrib, element, pkg, baseClass = '', extendedEle
     attTypeCode = 'FIX ME'
     num = False
 
+def findLoElementName(current):
+  if current.has_key('lo_elementName'):
+    return current['lo_elementName']	
+  if current.has_key('element') and current.has_key('root'):
+    element = current['element']
+    root = current['root']
+    for el in root['sbmlElements']:
+      if el['name'] == element and el.has_key('lo_elementName'):
+        return el['lo_elementName']
+  return None
+
 def writeCreateObjectCPPCode(outFile, element, attribs, pkg, isListOf, hasChildren=False, hasMath=False, baseClass='SBase'):
   writeInternalStart(outFile)
   outFile.write('/*\n')
@@ -800,8 +811,9 @@ def writeCreateObjectCPPCode(outFile, element, attribs, pkg, isListOf, hasChildr
         outFile.write('  }\n')
 
     else:
-      if current.has_key('lo_elementName'):        
-        outFile.write('  if (name == "{0}")\n'.format(current['lo_elementName']))	
+      lo_elementName = findLoElementName(current)
+      if lo_elementName != None:
+        outFile.write('  if (name == "{0}")\n'.format(lo_elementName))	
         outFile.write('  {\n')	
         outFile.write('    object = &m{0};\n'.format(strFunctions.capp(current['name'])))	
         outFile.write('  }\n\n')
