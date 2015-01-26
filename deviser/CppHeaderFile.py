@@ -12,9 +12,13 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         # members from object
         self.name = class_object['name']
         self.package = class_object['package']
-        self.child_elements = [] #class_object['childElements']
+        self.child_elements = []  # class_object['childElements']
         self.has_list_of = class_object['hasListOf']
-        self.attributes_on_list_of = ''#class_object['loattrib']
+        self.attributes_on_list_of = ''  # class_object['loattrib']
+
+        # check case of things where we assume upper/lower
+        if self.package[0].islower():
+            self.package = strFunctions.upper_first(class_object['package'])
 
         # derived members
         self.list_of_name = strFunctions.list_of_name(self.name)
@@ -63,13 +67,17 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
                         .format(self.library_name.upper(),
                                 class_name, base_class))
         self.write_line('{')
-        self.write_line('protected:')
-        self.up_indent()
-        self.write_doxygen_start()
-        self.write_data_members(class_attributes)
-        self.write_doxygen_end()
-        self.down_indent()
+        if len(class_attributes) > 0:
+            self.write_line('protected:')
+            self.up_indent()
+            self.write_doxygen_start()
+            self.write_data_members(class_attributes)
+            self.write_doxygen_end()
+            self.down_indent()
+        else:
+            self.skip_line()
         self.write_line('public:')
+        self.skip_line()
         self.up_indent()
         self.write_constructors(class_name)
         self.write_attribute_functions(class_name, class_attributes)
@@ -117,103 +125,118 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
             object_name = class_name + '_t'
         else:
             object_name = class_name
-        indent = strFunctions.get_indent(class_name)
-        self.open_comment()
-        line = 'Creates a new {0} using the given SBML @p level'\
+
+        # create doc string header
+        title_line = 'Creates a new {0} using the given SBML @p level'\
             .format(object_name)
         if self.package:
-            line = line + ', @ p version and package version values.'
+            title_line += ', @ p version and package version values.'
         else:
-            line = line + 'and @ p version values.'
-        self.write_comment_line(line)
-        self.write_blank_comment_line()
-        self.write_comment_line('@param level an unsigned int, the SBML Level '
-                                'to assign to this {0}'.format(object_name))
-        self.write_blank_comment_line()
-        self.write_comment_line('@param version an unsigned int, '
-                                'the SBML Version to assign to this {0}'
-                                .format(object_name))
+            title_line += ' and @ p version values.'
+
+        params = ['@param level an unsigned int, the SBML Level to '
+                  'assign to this {0}'.format(object_name),
+                  '@param version an unsigned int, the SBML Version to '
+                  'assign to this {0}'.format(object_name)]
         if self.package:
-            self.write_blank_comment_line()
-            self.write_comment_line('@param pkgVersion an unsigned int, the '
-                                    'SBML {0} Version to assign to this {1}'
-                                    .format(self.package, object_name))
-        self.write_blank_comment_line()
-        self.write_comment_line('@throws SBMLConstructorException')
-        self.write_comment_line('Thrown if the given @p level and @p '
-                                'version combination, or this kind')
-        self.write_comment_line('of SBML object, are either invalid or '
-                                'mismatched with respect to the')
-        self.write_comment_line('parent SBMLDocument object.')
-        self.write_blank_comment_line()
-        self.write_comment_line('@copydetails doc_note_setting_lv')
-        self.close_comment()
-        if self.package:
-            if is_cpp_api:
-                self.write_line('{0}(unsigned int level = '
-                                '{1}Extension::getDefaultLevel(),'
-                                .format(class_name, self.package))
-                self.up_indent(indent/2)
-                self.write_line('unsigned int version = '
-                                '{0}Extension::getDefaultVersion(),'
-                                .format(self.package))
-                self.write_line('unsigned int pkgVersion = '
-                                '{0}Extension::getDefaultPackageVersion());'
-                                .format(self.package))
-                self.down_indent(indent/2)
-            else:
-                self.write_extern_decl()
-                self.write_line('{0} *'.format(object_name))
-                self.write_line('{0}_create(unsigned int level, unsigned int '
-                                'version, unsigned int pkgVersion);'
-                                .format(class_name))
+            params.append('@param pkgVersion an unsigned int, the SBML {0} '
+                          'Version to assign to this {1}'
+                          .format(self.package, object_name))
+
+        return_lines = ['@throws SBMLConstructorException',
+                        'Thrown if the given @p level and @p version '
+                        'combination, or this kind of SBML object, are '
+                        'either invalid or mismatched with respect to the '
+                        'parent SBMLDocument object.',
+                        '@copydetails doc_note_setting_lv']
+        self.write_comment_header(title_line, params, return_lines,
+                                  object_name)
+
+        # create the function declaration
+        if is_cpp_api:
+            function = class_name
+            return_type = ''
         else:
-            # code for constructor without packages
-            if is_cpp_api:
-                self.write_line('{0}(unsigned int level = getDefaultLevel(),'
-                                .format(class_name))
-                self.up_indent(indent/2)
-                self.write_line('unsigned int version = getDefaultVersion());')
-                self.down_indent(indent/2)
-            else:
-                self.write_extern_decl()
-                self.write_line('{0} *'.format(object_name))
-                self.write_line('{0}_create(unsigned int level, '
-                                'unsigned int version);'.format(class_name))
+            function = '{}_create'.format(class_name)
+            return_type = '{0} *'.format(object_name)
+
+        if self.package:
+            arguments = [
+                'unsigned int level = '
+                '{}Extension::getDefaultLevel()'.format(self.package),
+                'unsigned int version = '
+                '{}Extension::getDefaultVersion()'.format(self.package),
+                'unsigned int pkgVersion = '
+                '{}Extension::getDefaultPackageVersion()'.format(self.package)]
+        else:
+            arguments = ['unsigned int level',
+                         'unsigned int version']
+
+        self.write_function_header(is_cpp_api, function,
+                                   arguments, return_type)
         self.skip_line(2)
 
     # function to write namespace constructor
     def write_namespace_constructor(self, class_name, is_cpp_api):
-        # do not write for C API
         if is_cpp_api is False:
-            return
-        self.open_comment()
-        line = 'Creates a new {0} with using the given '.format(class_name)
-        if self.package:
-            line = line + '{0}PkgNamespaces object.'.format(self.package)
+            object_name = class_name + '_t'
         else:
-            line = line + '{0}Namespaces object @p {1}ns.'\
+            object_name = class_name
+
+        # create doc string header
+        title_line = 'Creates a new {0} using the given'.format(object_name)
+        if self.package:
+            title_line = title_line + ' {0}PkgNamespaces object.'\
+                .format(self.package)
+        else:
+            title_line = title_line + ' {0}Namespaces object @p {1}ns.'\
                 .format(self.language.upper(), self.language)
-        self.write_comment_line(line)
-        self.write_blank_comment_line()
+
+        params = []
         if self.package:
-            self.write_comment_line('@param {0}ns the {1}PkgNamespaces object'
-                                    .format(self.package.lower(),
-                                            self.package))
+            params.append('@param {0}ns the {1}PkgNamespaces object'
+                          .format(self.package.lower(), self.package))
         else:
-            self.write_comment_line('@param {0}ns the {1}Namespaces object'
-                                    .format(self.language,
-                                            self.language.upper()))
-        self.close_comment()
+            params.append('@param {0}ns the {1}Namespaces object'
+                          .format(self.language, self.language.upper()))
+
+        return_lines = ['@throws SBMLConstructorException',
+                        'Thrown if the given @p level and @p version '
+                        'combination, or this kind of SBML object, are '
+                        'either invalid or mismatched with respect to the '
+                        'parent SBMLDocument object.',
+                        '@copydetails doc_note_setting_lv']
+
+        self.write_comment_header(title_line, params, return_lines,
+                                  object_name)
+
+        # create the function declaration
+        if is_cpp_api:
+            function = class_name
+            return_type = ''
+        else:
+            function = '{0}_createWithNS'.format(class_name)
+            return_type = '{0} *'.format(object_name)
+
+        arguments = []
         if self.package:
-            self.write_line('{0}({1}PkgNamespaces* {2}ns);'
-                            .format(class_name, self.package,
-                                    self.package.lower()))
+            if is_cpp_api:
+                arguments.append('{0}PkgNamespaces *{1}ns'
+                                 .format(self.package, self.package.lower()))
+            else:
+                arguments.append('{0}PkgNamespaces_t *{1}ns'
+                                 .format(self.package, self.package.lower()))
+
         else:
-            # code for constructor without packages
-            self.write_line('{0}({1}Namespaces* {2}ns);'
-                            .format(class_name, self.language.upper(),
-                                    self.language))
+            if is_cpp_api:
+                arguments.append('{0}Namespaces *{1}ns'
+                                 .format(self.language.upper(), self.language))
+            else:
+                arguments.append('{0}Namespaces_t *{1}ns'
+                                 .format(self.language.upper(), self.language))
+
+        self.write_function_header(is_cpp_api, function,
+                                   arguments, return_type)
         self.skip_line(2)
 
     # function to write copy constructor
@@ -223,7 +246,7 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
             return
         self.open_comment()
         self.write_comment_line('Copy constructor for {0}.'.format(class_name))
-        self.write_comment_line('')
+        self.write_blank_comment_line()
         self.write_comment_line('@param orig; the {0} instance to copy'
                                 .format(class_name))
         self.close_comment()
@@ -238,7 +261,7 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         self.open_comment()
         self.write_comment_line('Assignment operator for {0}.'
                                 .format(class_name))
-        self.write_comment_line('')
+        self.write_blank_comment_line()
         self.write_comment_line('@param rhs; the {0} object whose values are '
                                 'to be used as the basis of the assignment'
                                 .format(class_name))
@@ -258,11 +281,11 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         self.write_comment_line('Creates and returns a deep copy of '
                                 'this {0} object.'.format(object_name))
         if not is_cpp_api:
-            self.write_comment_line('')
+            self.write_blank_comment_line()
             self.write_comment_line('@param {0} the {1} structure'
                                     .format(abbrev_object, object_name))
-        self.write_comment_line('')
-        self.write_comment_line('@returns a (deep) copy of this {0} object'
+        self.write_blank_comment_line()
+        self.write_comment_line('@return a (deep) copy of this {0} object'
                                 .format(object_name))
         self.close_comment()
         if is_cpp_api:
@@ -270,7 +293,7 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         else:
             self.write_extern_decl()
             self.write_line('{0} *'.format(object_name))
-            self.write_line('{0}_clone({1} * {2});'
+            self.write_line('{0}_clone(const {1} * {2});'
                             .format(class_name, object_name, abbrev_object))
 
         self.skip_line(2)
@@ -280,16 +303,16 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         abbrev_object = ''
         if is_cpp_api is False:
             object_name = class_name + '_t'
+            abbrev_object = strFunctions.abbrev_name(class_name)
         else:
             object_name = class_name
-            abbrev_object = strFunctions.abbrev_name(class_name)
         self.open_comment()
         if is_cpp_api:
             self.write_comment_line('Destructor for {0}.'.format(class_name))
         else:
             self.write_comment_line('Frees this {0} object.'
                                     .format(object_name))
-            self.write_comment_line('')
+            self.write_blank_comment_line()
             self.write_comment_line('@param {0} the {1} structure'
                                     .format(abbrev_object, object_name))
         self.close_comment()
@@ -332,7 +355,8 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
             attribute = class_attributes[i]
             if attribute['attType'] != 'element' \
                     and attribute['attType'] != 'lo_element':
-                self.write_unset_function(attribute, True)
+                self.write_unset_function(class_name, attribute, True,
+                                          is_cpp_api)
 
     # function to write the get/set/isSet/unset functions for elements
     def write_elements_functions(self, class_name, class_attributes,
@@ -356,7 +380,8 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         for i in range(0, num_attributes):
             attribute = class_attributes[i]
             if attribute['attType'] == 'element':
-                self.write_unset_function(attribute, False)
+                self.write_unset_function(class_name, attribute, False,
+                                          is_cpp_api)
 
     # function to write get function
     def write_get_function(self, class_name, attribute, is_attribute,
@@ -367,63 +392,63 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
             abbrev_object = strFunctions.abbrev_name(class_name)
         else:
             object_name = class_name
-        self.open_comment()
-        self.write_comment_line('Returns the value of the \"{0}\" '
-                                '{1} of this {2}.'
-                                .format(attribute['name'],
-                                        ('attribute'
-                                         if is_attribute else 'element'),
-                                        (class_name
-                                         if is_cpp_api else object_name)))
+
+        # create doc string header
+        params = []
+        return_lines = []
+        title_line = 'Returns the value of the \"{0}\" {1} of this {2}.'\
+            .format(attribute['name'],
+                    ('attribute' if is_attribute else 'element'),
+                    (class_name if is_cpp_api else object_name))
+
         if not is_cpp_api:
-            self.write_blank_comment_line()
-            self.write_comment_line('@param {0} the {1} structure whose {2} '
-                                    'is sought.'
-                                    .format(abbrev_object, object_name,
-                                            attribute['name']))
-        self.write_blank_comment_line()
+            params.append('@param {0} the {1} structure whose {2} is sought.'
+                          .format(abbrev_object, object_name,
+                                  attribute['name']))
+
         if is_cpp_api:
-            self.write_comment_line('@return the value of the \"{0}\" {1} of '
-                                    'this {2} as a {3}.'
-                                    .format(attribute['name'],
-                                            ('attribute'
-                                             if is_attribute else 'element'),
-                                            class_name,
-                                            (attribute['attType']
-                                             if is_attribute
-                                             else attribute['attTypeCode'])))
+            return_lines.append('@return the value of the \"{0}\" {1} of '
+                                'this {2} as a {3}.'
+                                .format(attribute['name'],
+                                        ('attribute' if is_attribute
+                                         else 'element'),
+                                        class_name,
+                                        (attribute['attType'] if is_attribute
+                                         else attribute['attTypeCode'])))
         else:
-            self.write_comment_line('@return the value of the \"{0}\" {1} of '
-                                    'this {2} as a {3} {4}.'
-                                    .format(attribute['name'],
-                                            ('attribute'
-                                             if is_attribute
-                                             else 'element'),
-                                            object_name,
-                                            ('pointer to a'
-                                             if (is_attribute and
-                                                 attribute['attType']
-                                                 == 'string')
-                                             else ''),
-                                            (attribute['attType']
-                                             if is_attribute
-                                             else attribute['attTypeCode'])))
-        self.close_comment()
+            return_lines.append('@return the value of the \"{0}\" {1} of '
+                                'this {2} as a {3} {4}.'
+                                .format(attribute['name'],
+                                        ('attribute' if is_attribute
+                                         else 'element'),
+                                        object_name,
+                                        ('pointer to a'
+                                         if (is_attribute and
+                                             attribute['attType'] == 'string')
+                                         else ''),
+                                        (attribute['attType'] if is_attribute
+                                         else attribute['attTypeCode'])))
+        self.write_comment_header(title_line, params, return_lines,
+                                  object_name)
+
+        # create the function declaration
         if is_cpp_api:
-            self.write_line('{0}{1} get{2}() const;'
-                            .format(('virtual '
-                                    if attribute['abstract'] is True
-                                    else ''),
-                                    ('const ' + attribute['attTypeCode']
-                                    if attribute['attType'] == 'string'
-                                    else attribute['attTypeCode']),
-                                    attribute['capAttName']))
+            function = 'get{0}'.format(attribute['capAttName'])
+            if attribute['attType'] == 'string':
+                return_type = 'const ' + attribute['attTypeCode']
+            else:
+                return_type = attribute['attTypeCode']
         else:
-            self.write_extern_decl()
-            self.write_line('{0}'.format(attribute['CType']))
-            self.write_line('{0}_get{1}(const {2} * {3});'
-                            .format(class_name, attribute['capAttName'],
-                                    object_name, abbrev_object))
+            function = '{0}_get{1}'.format(class_name, attribute['capAttName'])
+            return_type = '{0}'.format(attribute['CType'])
+
+        arguments = []
+        if not is_cpp_api:
+            arguments.append('const {0} * {1}'
+                             .format(object_name, abbrev_object))
+
+        self.write_function_header(is_cpp_api, function,
+                                   arguments, return_type, True)
         self.skip_line(2)
 
     # function to write is set function
@@ -435,42 +460,48 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
             abbrev_object = strFunctions.abbrev_name(class_name)
         else:
             object_name = class_name
-        self.open_comment()
-        self.write_comment_line('Predicate returning {0} false depending on '
-                                'whether this {1}\'s \"{2}\" {3} has been set.'
-                                .format(('@c true or @c false'
-                                         if is_cpp_api else '@c 1 or @c 0'),
-                                        object_name,
-                                        attribute['name'],
-                                        ('attribute' if is_attribute
-                                         else 'element')))
+
+        # create doc string header
+        params = []
+        return_lines = []
+        title_line = 'Predicate returning {0} depending on whether ' \
+                     'this {1}\'s \"{2}\" {3} has been set.'\
+            .format(('@c true or @c false' if is_cpp_api else '@c 1 or @c 0'),
+                    object_name, attribute['name'],
+                    ('attribute' if is_attribute else 'element'))
         if not is_cpp_api:
-            self.write_blank_comment_line()
-            self.write_comment_line('@param {0} the {1} structure'
-                                    .format(abbrev_object, object_name))
-        self.write_blank_comment_line()
-        self.write_comment_line('@return {0} if this {1}\'s {2} {3} has been '
-                                'set, otherwise {4} is returned.'
-                                .format(('@c true'
-                                         if is_cpp_api else '@c 1'),
-                                        object_name,
-                                        attribute['name'],
-                                        ('attribute'
-                                         if is_attribute else 'element'),
-                                        ('@c false' if is_cpp_api
-                                         else '@c 0')))
-        self.close_comment()
+            params.append('@param {0} the {1} structure.'
+                          .format(abbrev_object, object_name))
+
+        return_lines.append('@return {0} if this {1}\'s \"{2}\" {3} has been '
+                            'set, otherwise {4} is returned.'
+                            .format(('@c true'
+                                     if is_cpp_api else '@c 1'),
+                                    object_name,
+                                    attribute['name'],
+                                    ('attribute'
+                                     if is_attribute else 'element'),
+                                    ('@c false' if is_cpp_api
+                                     else '@c 0')))
+        self.write_comment_header(title_line, params, return_lines,
+                                  object_name)
+
+        # create the function declaration
         if is_cpp_api:
-            self.write_line('{0}bool isSet{1}() const;'
-                            .format('virtual '
-                                    if attribute['abstract'] is True else '',
-                                    attribute['capAttName']))
+            function = 'isSet{0}'.format(attribute['capAttName'])
+            return_type = 'bool'
         else:
-            self.write_extern_decl()
-            self.write_line('int')
-            self.write_line('{0}_isSet{1}(const {2} * {3});'
-                            .format(class_name, attribute['capAttName'],
-                                    object_name, abbrev_object))
+            function = '{0}_isSet{1}'.format(class_name,
+                                             attribute['capAttName'])
+            return_type = 'int'
+
+        arguments = []
+        if not is_cpp_api:
+            arguments.append('const {0} * {1}'
+                             .format(object_name, abbrev_object))
+
+        self.write_function_header(is_cpp_api, function,
+                                   arguments, return_type, True)
         self.skip_line(2)
 
     # function to write set function
@@ -482,62 +513,100 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
             abbrev_object = strFunctions.abbrev_name(class_name)
         else:
             object_name = class_name
-        self.open_comment()
-        self.write_comment_line('Sets the value of the \"{0}\" {1} of '
-                                'this {2}.'
-                                .format(attribute['name'],
-                                        ('attribute' if is_attribute
-                                         else 'element'), object_name))
-        self.write_blank_comment_line()
-        self.write_comment_line('@param {0} {1} value of the \"{0}\" '
-                                '{2} to be set.'
-                                .format(attribute['name'],
-                                        attribute['attTypeCode'],
-                                        ('attribute' if is_attribute
-                                         else 'element')))
-        self.write_blank_comment_line()
-        self.write_comment_line('@return integer value indicating '
-                                'success/failure of the operation. '
-                                'The possible return values are:')
-        self.write_comment_line('@li @sbmlconstant{LIBSBML_OPERATION_SUCCESS, '
-                                'OperationReturnValues_t}')
-        self.write_comment_line('@li '
-                                '@sbmlconstant'
-                                '{LIBSBML_INVALID_ATTRIBUTE_VALUE,'
-                                ' OperationReturnValues_t}')
-        self.close_comment()
-        self.write_line('{0}int set{1}({2} {3});'
-                        .format(('virtual '
-                                 if attribute['abstract'] is True else ''),
-                                attribute['capAttName'],
-                                ('const ' + attribute['attTypeCode']
-                                 if attribute['attType'] == 'string'
-                                 else attribute['attTypeCode']),
-                                attribute['name']))
+        # create doc string header
+        params = []
+        return_lines = []
+        title_line = 'Sets the value of the \"{0}\" {1} of this {2}.'\
+            .format(attribute['name'],
+                    ('attribute' if is_attribute else 'element'), object_name)
+
+        if not is_cpp_api:
+            params.append('@param {0} the {1} structure.'
+                          .format(abbrev_object, object_name))
+        params.append('@param {0} {1} value of the \"{0}\" {2} to be set.'
+                      .format(attribute['name'], attribute['attTypeCode'],
+                              ('attribute' if is_attribute else 'element')))
+
+        return_lines.append("@copydetails doc_returns_success_code")
+        return_lines.append('@li @sbmlconstant{LIBSBML_OPERATION_SUCCESS, '
+                            'OperationReturnValues_t}')
+
+        return_lines.append('@li @sbmlconstant '
+                            '{LIBSBML_INVALID_ATTRIBUTE_VALUE,'
+                            ' OperationReturnValues_t}')
+        self.write_comment_header(title_line, params, return_lines,
+                                  object_name)
+
+        # create the function declaration
+        if is_cpp_api:
+            function = 'set{0}'.format(attribute['capAttName'])
+            return_type = 'int'
+        else:
+            function = '{0}_set{1}'.format(class_name, attribute['capAttName'])
+            return_type = 'int'
+
+        arguments = []
+        if is_cpp_api:
+            arguments.append('{0} {1}'
+                             .format(('const ' + attribute['attTypeCode']
+                                      if attribute['attType'] == 'string'
+                                      else attribute['attTypeCode']),
+                                     attribute['name']))
+        else:
+            arguments.append('{0} * {1}'
+                             .format(object_name, abbrev_object))
+            arguments.append('{0} {1}'
+                             .format(attribute['CType'], attribute['name']))
+
+        self.write_function_header(is_cpp_api, function,
+                                   arguments, return_type, False)
         self.skip_line(2)
 
     # function to write unset function
-    def write_unset_function(self, attribute, is_attribute):
-        self.open_comment()
-        self.write_comment_line('Unsets the value of the \"{0}\" {1} '
-                                'of this {2}.'
-                                .format(attribute['name'],
-                                        ('attribute'
-                                         if is_attribute else 'element'),
-                                        self.name))
-        self.write_blank_comment_line()
-        self.write_comment_line('@return integer value indicating success/'
-                                'failure of the operation. '
-                                'The possible return values are:')
-        self.write_comment_line('@li @sbmlconstant{LIBSBML_OPERATION_SUCCESS, '
-                                'OperationReturnValues_t}')
-        self.write_comment_line('@li @sbmlconstant{LIBSBML_OPERATION_FAILED, '
-                                'OperationReturnValues_t}')
-        self.close_comment()
-        self.write_line('{0}int unset{1}();'
-                        .format(('virtual '
-                                 if attribute['abstract'] is True else ''),
-                                attribute['capAttName']))
+    def write_unset_function(self, class_name, attribute, is_attribute,
+                             is_cpp_api):
+        abbrev_object = ''
+        if is_cpp_api is False:
+            object_name = class_name + '_t'
+            abbrev_object = strFunctions.abbrev_name(class_name)
+        else:
+            object_name = class_name
+        # create doc string header
+        params = []
+        return_lines = []
+        title_line = 'Unsets the value of the \"{0}\" {1} of this {2}.' \
+            .format(attribute['name'],
+                    ('attribute' if is_attribute else 'element'), object_name)
+
+        if not is_cpp_api:
+            params.append('@param {0} the {1} structure.'
+                          .format(abbrev_object, object_name))
+
+        return_lines.append('@copydetails doc_returns_success_code')
+        return_lines.append('@li @sbmlconstant{LIBSBML_OPERATION_SUCCESS, '
+                            'OperationReturnValues_t}')
+
+        return_lines.append('@li @sbmlconstant{LIBSBML_OPERATION_FAILED,'
+                            ' OperationReturnValues_t}')
+        self.write_comment_header(title_line, params, return_lines,
+                                  object_name)
+
+        # create the function declaration
+        if is_cpp_api:
+            function = 'unset{0}'.format(attribute['capAttName'])
+            return_type = 'int'
+        else:
+            function = '{0}_unset{1}'.format(class_name,
+                                             attribute['capAttName'])
+            return_type = 'int'
+
+        arguments = []
+        if not is_cpp_api:
+            arguments.append('{0} * {1}'
+                             .format(object_name, abbrev_object))
+
+        self.write_function_header(is_cpp_api, function,
+                                   arguments, return_type, False)
         self.skip_line(2)
 
     ########################################################################
@@ -713,8 +782,8 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
 
     # Write file
 
-    def writeFile(self):
-        BaseFile.BaseFile.writeFile(self)
+    def write_file(self):
+        BaseFile.BaseFile.write_file(self)
         self.write_defn_begin()
         self.write_common_includes()
         self.write_general_includes()

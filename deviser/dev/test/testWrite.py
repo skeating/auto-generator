@@ -81,8 +81,8 @@ else:
 #  object = createObject()
 
 #  object = createParameter()
-  ob = parse_deviser_xml('param.xml')
-  sbml_object = ob['sbmlElements'][0]
+  ob = parse_deviser_xml('qual_partial.xml')
+  sbml_object = ob['sbmlElements'][1]
   ff = CppHeaderFile.CppHeaderFile(sbml_object)
   ff.write_file()
   ff.close_file()

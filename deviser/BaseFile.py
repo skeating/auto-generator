@@ -78,10 +78,12 @@ class BaseFile:
         return lines
 
     # functions for writing lines
-    def write_line(self, line):
+    def write_line(self, line, space=0):
         tabs = ''
         for i in range(0, int(self.num_tabs)):
-            tabs = tabs + '  '
+            tabs += '  '
+        for i in range(0, space):
+            tabs += ' '
         lines = self.create_lines(line, len(tabs))
         for i in range(0, len(lines)):
             self.file_out.write('{0}{1}\n'.format(tabs, lines[i]))
@@ -95,7 +97,7 @@ class BaseFile:
     def write_comment_line(self, line):
         tabs = ''
         for i in range(0, int(self.num_tabs)):
-            tabs = tabs + '  '
+            tabs += '  '
         lines = self.create_lines(line, len(tabs), True)
         for i in range(0, len(lines)):
             self.file_out.write('{0}{1} {2}\n'
@@ -104,25 +106,25 @@ class BaseFile:
     def write_blank_comment_line(self):
         tabs = ''
         for i in range(0, int(self.num_tabs)):
-            tabs = tabs + '  '
+            tabs += '  '
         self.file_out.write('{0}{1}\n'.format(tabs, self.comment))
 
     def open_comment(self):
         tabs = ''
         for i in range(0, int(self.num_tabs)):
-            tabs = tabs + '  '
+            tabs += '  '
         self.file_out.write('{0}{1}\n'.format(tabs, self.comment_start))
 
     def close_comment(self):
         tabs = ''
         for i in range(0, int(self.num_tabs)):
-            tabs = tabs + '  '
+            tabs += '  '
         self.file_out.write('{0} {1}\n'.format(tabs, self.comment_end))
 
     def write_doxygen_start(self):
         tabs = ''
         for i in range(0, int(self.num_tabs)):
-            tabs = tabs + '  '
+            tabs += '  '
         self.file_out.write('\n{0}{1} @cond doxygenLibsbmlInternal {2}\n\n'
                             .format(tabs, self.comment_start,
                                     self.comment_end))
@@ -130,7 +132,7 @@ class BaseFile:
     def write_doxygen_end(self):
         tabs = ''
         for i in range(0, int(self.num_tabs)):
-            tabs = tabs + '  '
+            tabs += '  '
         self.file_out.write('\n{0}{1} @endcond {2}\n\n'
                             .format(tabs, self.comment_start,
                                     self.comment_end))
@@ -139,7 +141,7 @@ class BaseFile:
     def write_extern_decl(self):
         tabs = ''
         for i in range(0, int(self.num_tabs)):
-            tabs = tabs + '  '
+            tabs += '  '
         self.file_out.write('{0}{1}_EXTERN\n'
                             .format(tabs, self.library_name.upper()))
 
@@ -148,10 +150,10 @@ class BaseFile:
     # Functions to alter the number of tabs being used in writing lines
 
     def up_indent(self, num=1):
-        self.num_tabs = self.num_tabs + num
+        self.num_tabs += num
 
     def down_indent(self, num=1):
-        self.num_tabs = self.num_tabs - num
+        self.num_tabs -= num
         # just checking
         if self.num_tabs < 0:
             self.num_tabs = 0

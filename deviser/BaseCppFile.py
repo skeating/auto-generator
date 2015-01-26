@@ -19,7 +19,8 @@ class BaseCppFile(BaseFile.BaseFile):
     ########################################################################
 
     # Function to expand the attribute information
-    def expand_attributes(self, attributes):
+    @staticmethod
+    def expand_attributes(attributes):
         for i in range(0, len(attributes)):
             capname = strFunctions.upper_first(attributes[i]['name'])
             attributes[i]['capAttName'] = capname
@@ -140,8 +141,8 @@ class BaseCppFile(BaseFile.BaseFile):
 # FUNCTIONS FOR WRITING STANDARD FUNCTION DECLARATIONS
 
     def write_function_header(self, is_cpp,
-                              function_name, arguments, return_type):
-        line = ''
+                              function_name, arguments, return_type,
+                              is_const=False):
         num_arguments = len(arguments)
         if not is_cpp:
             self.write_extern_decl()
@@ -154,14 +155,62 @@ class BaseCppFile(BaseFile.BaseFile):
                 line = function_name + '('
 
         if num_arguments == 0:
-            line = line + ');'
+            if is_cpp and is_const:
+                line += ') const;'
+            else:
+                line += ');'
+            self.write_line(line)
+        elif num_arguments == 1:
+            if is_cpp and is_const:
+                line = line + arguments[0] + ') const;'
+            else:
+                line = line + arguments[0] + ');'
+            self.write_line(line)
         else:
-            line = line + arguments[0]
-        for i in range(1,num_arguments-1):
-            line = line + ', ' + arguments[i]
-        if num_arguments > 1:
-            line = line + ', ' + arguments[num_arguments-1] + ');'
+            saved_line = line
+            line = line + arguments[0] + ', '
+            # create the full line
+            for n in range(1, num_arguments-1):
+                line = line + arguments[n] + ', '
+            if is_cpp and is_const:
+                line = line + arguments[num_arguments-1] + '); const'
+            else:
+                line = line + arguments[num_arguments-1] + ');'
+            # look at length and adjust
+            if len(line) > self.line_length:
+                # do something else
+                line = saved_line
+                att_start = len(line)
+                line += arguments[0]
+                self.write_line(line)
+                for i in range(1, num_arguments - 1):
+                    line = arguments[i] + ','
+                    self.write_line(line, att_start)
+                if is_cpp and is_const:
+                    line = arguments[num_arguments - 1] + ') const;'
+                else:
+                    line = arguments[num_arguments - 1] + ');'
+                self.write_line(line, att_start)
+            else:
+                self.write_line(line)
 
-        self.write_line(line)
+########################################################################
+
+# FUNCTIONS FOR WRITING STANDARD DOC COMMENTS
+
+    def write_comment_header(self, title_line, params, return_line,
+                             object_name):
+        self.open_comment()
+        self.write_comment_line(title_line)
+        self.write_blank_comment_line()
+        for i in range(0, len(params)):
+            self.write_comment_line(params[i])
+            self.write_blank_comment_line()
+        for i in range(0, len(return_line)):
+            self.write_comment_line((return_line[i]))
+        if object_name.endswith('_t'):
+            self.write_blank_comment_line()
+            self.write_comment_line('@memberof {}'.format(object_name))
+        self.close_comment()
 
 
