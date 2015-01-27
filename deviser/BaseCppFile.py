@@ -27,6 +27,7 @@ class BaseCppFile(BaseFile.BaseFile):
             attributes[i]['memberName'] = 'm' + capname
             attributes[i]['pluralName'] = \
                 strFunctions.plural(attributes[i]['name'])
+            attributes[i]['isEnum'] = False
             att_type = attributes[i]['type']
             if att_type == 'SId' or att_type == 'SIdRef':
                 attributes[i]['attType'] = 'string'
@@ -62,6 +63,12 @@ class BaseCppFile(BaseFile.BaseFile):
                 attributes[i]['attType'] = 'boolean'
                 attributes[i]['attTypeCode'] = 'bool'
                 attributes[i]['CType'] = 'int'
+                attributes[i]['isNumber'] = False
+            elif att_type == 'enum':
+                attributes[i]['isEnum'] = True
+                attributes[i]['attType'] = 'enum'
+                attributes[i]['attTypeCode'] = attributes[i]['element'] + '_t'
+                attributes[i]['CType'] = attributes[i]['element'] + '_t'
                 attributes[i]['isNumber'] = False
             elif att_type == 'element':
                 attributes[i]['attType'] = 'element'

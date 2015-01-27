@@ -25,7 +25,7 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
 
         # derived members for description
         if class_object['hasListOf'] is True:
-            self.brief_description = 'Definitions of {0} and {1}.'\
+            self.brief_description = 'Definitions of {0} and {1}.' \
                 .format(self.name, self.list_of_name)
         else:
             self.brief_description = 'Definition of {0}.'.format(self.name)
@@ -127,7 +127,7 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
             object_name = class_name
 
         # create doc string header
-        title_line = 'Creates a new {0} using the given SBML @p level'\
+        title_line = 'Creates a new {0} using the given SBML @p level' \
             .format(object_name)
         if self.package:
             title_line += ', @ p version and package version values.'
@@ -186,10 +186,10 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         # create doc string header
         title_line = 'Creates a new {0} using the given'.format(object_name)
         if self.package:
-            title_line = title_line + ' {0}PkgNamespaces object.'\
+            title_line = title_line + ' {0}PkgNamespaces object.' \
                 .format(self.package)
         else:
-            title_line = title_line + ' {0}Namespaces object @p {1}ns.'\
+            title_line = title_line + ' {0}Namespaces object @p {1}ns.' \
                 .format(self.language.upper(), self.language)
 
         params = []
@@ -247,7 +247,7 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         self.open_comment()
         self.write_comment_line('Copy constructor for {0}.'.format(class_name))
         self.write_blank_comment_line()
-        self.write_comment_line('@param orig; the {0} instance to copy'
+        self.write_comment_line('@param orig; the {0} instance to copy.'
                                 .format(class_name))
         self.close_comment()
         self.write_line('{0}(const {0}& orig);'.format(class_name))
@@ -285,7 +285,7 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
             self.write_comment_line('@param {0} the {1} structure'
                                     .format(abbrev_object, object_name))
         self.write_blank_comment_line()
-        self.write_comment_line('@return a (deep) copy of this {0} object'
+        self.write_comment_line('@return a (deep) copy of this {0} object.'
                                 .format(object_name))
         self.close_comment()
         if is_cpp_api:
@@ -396,7 +396,7 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         # create doc string header
         params = []
         return_lines = []
-        title_line = 'Returns the value of the \"{0}\" {1} of this {2}.'\
+        title_line = 'Returns the value of the \"{0}\" {1} of this {2}.' \
             .format(attribute['name'],
                     ('attribute' if is_attribute else 'element'),
                     (class_name if is_cpp_api else object_name))
@@ -413,7 +413,9 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
                                         ('attribute' if is_attribute
                                          else 'element'),
                                         class_name,
-                                        (attribute['attType'] if is_attribute
+                                        (attribute['attType']
+                                         if (is_attribute
+                                             and attribute['isEnum'] is False)
                                          else attribute['attTypeCode'])))
         else:
             return_lines.append('@return the value of the \"{0}\" {1} of '
@@ -426,7 +428,9 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
                                          if (is_attribute and
                                              attribute['attType'] == 'string')
                                          else ''),
-                                        (attribute['attType'] if is_attribute
+                                        (attribute['attType']
+                                         if (is_attribute
+                                             and attribute['isEnum'] is False)
                                          else attribute['attTypeCode'])))
         self.write_comment_header(title_line, params, return_lines,
                                   object_name)
@@ -441,6 +445,59 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         else:
             function = '{0}_get{1}'.format(class_name, attribute['capAttName'])
             return_type = '{0}'.format(attribute['CType'])
+
+        arguments = []
+        if not is_cpp_api:
+            arguments.append('const {0} * {1}'
+                             .format(object_name, abbrev_object))
+
+        self.write_function_header(is_cpp_api, function,
+                                   arguments, return_type, True)
+        self.skip_line(2)
+        if attribute['isEnum'] is True:
+            self.write_get_string_for_enum_function(class_name, attribute,
+                                                    is_cpp_api)
+
+    # function to write get function string version for enums
+    def write_get_string_for_enum_function(self, class_name, attribute,
+                                           is_cpp_api):
+        abbrev_object = ''
+        if is_cpp_api is False:
+            object_name = class_name + '_t'
+            abbrev_object = strFunctions.abbrev_name(class_name)
+        else:
+            object_name = class_name
+
+        # create doc string header
+        params = []
+        return_lines = []
+        title_line = 'Returns the value of the \"{0}\" attribute of this {1}.' \
+            .format(attribute['name'],
+                    (class_name if is_cpp_api else object_name))
+
+        if not is_cpp_api:
+            params.append('@param {0} the {1} structure whose {2} is sought.'
+                          .format(abbrev_object, object_name,
+                                  attribute['name']))
+
+        if is_cpp_api:
+            return_lines.append('@return the value of the \"{0}\" attribute '
+                                'of this {1} as a string.'
+                                .format(attribute['name'], class_name))
+        else:
+            return_lines.append('@return the value of the \"{0}\" attribute '
+                                'of this {1} as a const char *.'
+                                .format(attribute['name'], object_name))
+        self.write_comment_header(title_line, params, return_lines,
+                                  object_name)
+
+        # create the function declaration
+        if is_cpp_api:
+            function = 'get{0}'.format(attribute['capAttName'])
+            return_type = 'const std::string&'
+        else:
+            function = '{0}_get{1}'.format(class_name, attribute['capAttName'])
+            return_type = 'const char *'
 
         arguments = []
         if not is_cpp_api:
@@ -465,7 +522,7 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         params = []
         return_lines = []
         title_line = 'Predicate returning {0} depending on whether ' \
-                     'this {1}\'s \"{2}\" {3} has been set.'\
+                     'this {1}\'s \"{2}\" {3} has been set.' \
             .format(('@c true or @c false' if is_cpp_api else '@c 1 or @c 0'),
                     object_name, attribute['name'],
                     ('attribute' if is_attribute else 'element'))
@@ -516,7 +573,7 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         # create doc string header
         params = []
         return_lines = []
-        title_line = 'Sets the value of the \"{0}\" {1} of this {2}.'\
+        title_line = 'Sets the value of the \"{0}\" {1} of this {2}.' \
             .format(attribute['name'],
                     ('attribute' if is_attribute else 'element'), object_name)
 
@@ -549,7 +606,8 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         if is_cpp_api:
             arguments.append('{0} {1}'
                              .format(('const ' + attribute['attTypeCode']
-                                      if attribute['attType'] == 'string'
+                                      if (attribute['attType'] == 'string' or
+                                          attribute['attType'] == 'enum')
                                       else attribute['attTypeCode']),
                                      attribute['name']))
         else:
@@ -557,6 +615,63 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
                              .format(object_name, abbrev_object))
             arguments.append('{0} {1}'
                              .format(attribute['CType'], attribute['name']))
+
+        self.write_function_header(is_cpp_api, function,
+                                   arguments, return_type, False)
+        self.skip_line(2)
+
+        if attribute['isEnum'] is True:
+            self.write_set_for_enums_function(class_name, attribute,
+                                              is_cpp_api)
+
+    # function to write set function with string version for enums
+    def write_set_for_enums_function(self, class_name, attribute, is_cpp_api):
+        abbrev_object = ''
+        if is_cpp_api is False:
+            object_name = class_name + '_t'
+            abbrev_object = strFunctions.abbrev_name(class_name)
+        else:
+            object_name = class_name
+        # create doc string header
+        params = []
+        return_lines = []
+        title_line = 'Sets the value of the \"{0}\" attribute of this {1}.' \
+            .format(attribute['name'], object_name)
+
+        if not is_cpp_api:
+            params.append('@param {0} the {1} structure.'
+                          .format(abbrev_object, object_name))
+        params.append('@param {0} {1} of the \"{0}\" attribute to be set.'
+                      .format(attribute['name'],
+                              'std::string&'
+                              if is_cpp_api else 'const char *'))
+
+        return_lines.append("@copydetails doc_returns_success_code")
+        return_lines.append('@li @sbmlconstant{LIBSBML_OPERATION_SUCCESS, '
+                            'OperationReturnValues_t}')
+
+        return_lines.append('@li @sbmlconstant '
+                            '{LIBSBML_INVALID_ATTRIBUTE_VALUE,'
+                            ' OperationReturnValues_t}')
+        self.write_comment_header(title_line, params, return_lines,
+                                  object_name)
+
+        # create the function declaration
+        if is_cpp_api:
+            function = 'set{0}'.format(attribute['capAttName'])
+            return_type = 'int'
+        else:
+            function = '{0}_set{1}'.format(class_name, attribute['capAttName'])
+            return_type = 'int'
+
+        arguments = []
+        if is_cpp_api:
+            arguments.append('{0} {1}'.format('const std::string&',
+                                              attribute['name']))
+        else:
+            arguments.append('{0} * {1}'
+                             .format(object_name, abbrev_object))
+            arguments.append('const char * {}'.format(attribute['name']))
 
         self.write_function_header(is_cpp_api, function,
                                    arguments, return_type, False)
