@@ -45,6 +45,8 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
                             format(self.language, self.package.lower()))
 
     def write_general_includes(self):
+        self.write_line('#include <string>')
+        self.skip_line(2)
         self.write_line('#include <{0}/{1}.h>'.
                         format(self.language, self.baseClass))
         if self.has_list_of:
@@ -81,7 +83,6 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         self.up_indent()
         self.write_constructors(class_name)
         self.write_attribute_functions(class_name, class_attributes)
-        self.write_elements_functions(class_name, class_attributes)
         self.write_listofelement_functions(class_name, class_attributes)
         self.down_indent()
         self.write_line('};\n')
@@ -330,6 +331,7 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
     # Functions for writing the attribute manipulation functions
 
     # function to write the get/set/isSet/unset functions for attributes
+    # and child elements
     def write_attribute_functions(self, class_name, class_attributes,
                                   is_cpp_api=True):
         num_attributes = len(class_attributes)
@@ -339,17 +341,26 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
                     and attribute['attType'] != 'lo_element':
                 self.write_get_function(class_name, attribute, True,
                                         is_cpp_api)
+            else:
+                self.write_get_function(class_name, attribute, False,
+                                        is_cpp_api)
         for i in range(0, num_attributes):
             attribute = class_attributes[i]
             if attribute['attType'] != 'element' \
                     and attribute['attType'] != 'lo_element':
                 self.write_is_set_function(class_name, attribute, True,
                                            is_cpp_api)
+            else:
+                self.write_is_set_function(class_name, attribute, False,
+                                           is_cpp_api)
         for i in range(0, num_attributes):
             attribute = class_attributes[i]
             if attribute['attType'] != 'element' \
                     and attribute['attType'] != 'lo_element':
                 self.write_set_function(class_name, attribute, True,
+                                        is_cpp_api)
+            else:
+                self.write_set_function(class_name, attribute, False,
                                         is_cpp_api)
         for i in range(0, num_attributes):
             attribute = class_attributes[i]
@@ -357,31 +368,34 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
                     and attribute['attType'] != 'lo_element':
                 self.write_unset_function(class_name, attribute, True,
                                           is_cpp_api)
-
-    # function to write the get/set/isSet/unset functions for elements
-    def write_elements_functions(self, class_name, class_attributes,
-                                 is_cpp_api=True):
-        num_attributes = len(class_attributes)
-        for i in range(0, num_attributes):
-            attribute = class_attributes[i]
-            if attribute['attType'] == 'element':
-                self.write_get_function(class_name, attribute, False,
-                                        is_cpp_api)
-        for i in range(0, num_attributes):
-            attribute = class_attributes[i]
-            if attribute['attType'] == 'element':
-                self.write_is_set_function(class_name, attribute, False,
-                                           is_cpp_api)
-        for i in range(0, num_attributes):
-            attribute = class_attributes[i]
-            if attribute['attType'] == 'element':
-                self.write_set_function(class_name, attribute, True,
-                                        is_cpp_api)
-        for i in range(0, num_attributes):
-            attribute = class_attributes[i]
-            if attribute['attType'] == 'element':
+            else:
                 self.write_unset_function(class_name, attribute, False,
                                           is_cpp_api)
+
+    # function to write the get/set/isSet/unset functions for elements
+    # def write_elements_functions(self, class_name, class_attributes,
+    #                              is_cpp_api=True):
+    #     num_attributes = len(class_attributes)
+    #     for i in range(0, num_attributes):
+    #         attribute = class_attributes[i]
+    #         if attribute['attType'] == 'element':
+    #             self.write_get_function(class_name, attribute, False,
+    #                                     is_cpp_api)
+    #     for i in range(0, num_attributes):
+    #         attribute = class_attributes[i]
+    #         if attribute['attType'] == 'element':
+    #             self.write_is_set_function(class_name, attribute, False,
+    #                                        is_cpp_api)
+    #     for i in range(0, num_attributes):
+    #         attribute = class_attributes[i]
+    #         if attribute['attType'] == 'element':
+    #             self.write_set_function(class_name, attribute, True,
+    #                                     is_cpp_api)
+    #     for i in range(0, num_attributes):
+    #         attribute = class_attributes[i]
+    #         if attribute['attType'] == 'element':
+    #             self.write_unset_function(class_name, attribute, False,
+    #                                       is_cpp_api)
 
     # function to write get function
     def write_get_function(self, class_name, attribute, is_attribute,
@@ -438,13 +452,17 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         # create the function declaration
         if is_cpp_api:
             function = 'get{0}'.format(attribute['capAttName'])
-            if attribute['attType'] == 'string':
+            if attribute['attType'] == 'string' \
+                    or attribute['attType'] == 'element':
                 return_type = 'const ' + attribute['attTypeCode']
             else:
                 return_type = attribute['attTypeCode']
         else:
             function = '{0}_get{1}'.format(class_name, attribute['capAttName'])
-            return_type = '{0}'.format(attribute['CType'])
+            if attribute['attType'] == 'element':
+                return_type = 'const {0}'.format(attribute['CType'])
+            else:
+                return_type = '{0}'.format(attribute['CType'])
 
         arguments = []
         if not is_cpp_api:
@@ -607,14 +625,21 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
             arguments.append('{0} {1}'
                              .format(('const ' + attribute['attTypeCode']
                                       if (attribute['attType'] == 'string' or
-                                          attribute['attType'] == 'enum')
+                                          attribute['attType'] == 'enum' or
+                                          attribute['attType'] == 'element')
                                       else attribute['attTypeCode']),
                                      attribute['name']))
         else:
             arguments.append('{0} * {1}'
                              .format(object_name, abbrev_object))
-            arguments.append('{0} {1}'
-                             .format(attribute['CType'], attribute['name']))
+            if attribute['attType'] == 'element':
+                arguments.append('const {0} {1}'
+                                 .format(attribute['CType'],
+                                         attribute['name']))
+            else:
+                arguments.append('{0} {1}'
+                                 .format(attribute['CType'],
+                                         attribute['name']))
 
         self.write_function_header(is_cpp_api, function,
                                    arguments, return_type, False)
@@ -901,8 +926,8 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         BaseFile.BaseFile.write_file(self)
         self.write_defn_begin()
         self.write_common_includes()
-        self.write_general_includes()
         self.write_cpp_begin()
+        self.write_general_includes()
         self.write_cppns_begin()
         self.write_class(self.baseClass, self.name, self.attributes)
         if self.has_list_of:

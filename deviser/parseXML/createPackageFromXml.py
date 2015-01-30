@@ -51,6 +51,7 @@ def parse_deviser_xml(filename):
     package_name = get_value(dom.documentElement, 'name')
     number = to_int(get_value(dom.documentElement, 'number'))
     offset = to_int(get_value(dom.documentElement, 'offset'))
+    fullname = get_value(dom.documentElement, 'fullname')
 
     concrete_dict = dict({})
 
@@ -210,7 +211,8 @@ def parse_deviser_xml(filename):
                     'number': number,
                     'sbmlElements': sbml_elements,
                     'enums': enums,
-                    'offset': offset
+                    'offset': offset,
+                    'fullname': fullname
                     })
 
     # link elements

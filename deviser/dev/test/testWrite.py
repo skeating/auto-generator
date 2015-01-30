@@ -5,6 +5,7 @@ __author__ = 'Sarah'
 import sys
 import os
 import CppHeaderFile
+import TexValidationRulesFile
 from createPackageFromXml import *
 
 
@@ -83,7 +84,8 @@ else:
 #  object = createParameter()
   ob = parse_deviser_xml('qual_partial.xml')
   sbml_object = ob['sbmlElements'][1]
-  ff = CppHeaderFile.CppHeaderFile(sbml_object)
+#  ff = CppHeaderFile.CppHeaderFile(sbml_object)
+  ff = TexValidationRulesFile.TexValidationRulesFile(ob)
   ff.write_file()
   ff.close_file()
 

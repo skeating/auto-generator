@@ -45,15 +45,20 @@ def plural(name):
 
 
 def get_indefinite(name):
-    if name.startswith('a'):
-        return 'an'
-    elif name.startswith('e'):
-        return 'an'
-    elif name.startswith('i'):
-        return 'an'
-    elif name.startswith('o'):
-        return 'an'
-    elif name.startswith('u'):
+    if name.startswith('a') or name.startswith('A') \
+            or name.startswith('e') or name.startswith('E') \
+            or name.startswith('i') or name.startswith('I') \
+            or name.startswith('o') or name.startswith('O') \
+            or name.startswith('u') or name.startswith('U'):
         return 'an'
     else:
         return 'a'
+
+def wrap_token(name, pkg=''):
+    if pkg == '':
+        return '\\token{' + name + '}'
+    else:
+        return '\\token{' + pkg + ':\\-' + name + '}'
+
+def wrap_section(name):
+    return '\\sec{' + name.lower() + '-class}'
