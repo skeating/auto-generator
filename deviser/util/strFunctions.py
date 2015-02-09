@@ -62,3 +62,11 @@ def wrap_token(name, pkg=''):
 
 def wrap_section(name):
     return '\\sec{' + name.lower() + '-class}'
+
+def get_element_name(attribute):
+    if attribute['type'] == 'lo_element':
+        return '\{}'.format(list_of_name(attribute['element']))
+    elif attribute['element'] == 'ASTNode*':
+        return 'MathML math'
+    else:
+        return 'FIX_ME'
