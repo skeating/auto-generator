@@ -54,38 +54,86 @@ class ValidationRulesForClass():
 
         for i in range(0, len(self.reqd_att)):
             self.number += 1
-#        rule = self.write_attribute_type_rule()
-#        if rule != None:
-#            self.rules.append(rule)
+            rule = self.write_attribute_type_rule(self, self.reqd_att[i])
+            if rule is not None:
+                self.rules.append(rule)
+
+        for i in range(0, len(self.opt_att)):
+            self.number += 1
+            rule = self.write_attribute_type_rule(self, self.opt_att[i])
+            if rule is not None:
+                self.rules.append(rule)
 
 
 ###############################################################################
 
     # Functions for parsing each rule type
 
+    # write rule about attribute type
     @staticmethod
-    def write_package_object_rule(self):
-        if len(self.reqd_elem) == 0 and len(self.opt_elem) == 0:
+    def write_attribute_type_rule(self, attribute):
+        att_type = attribute['type']
+        name = strFunctions.wrap_token(attribute['name'], self.package)
+        if att_type == 'SId':
             return
-        reqd = self.parse_required_elements(self.reqd_elem)
-        opt = self.parse_optional_elements(self.opt_elem)
-        no_other_statement = 'No other elements from the SBML Level 3 {} ' \
-                             'namespaces are permitted on {} {} object. '\
-            .format(self.fullname, self.indef, self.formatted_name)
-        if len(opt) == 0 and len(reqd) > 0:
-            text = '{} {} object must contain {}. {}'\
-                .format(self.indef_u, self.formatted_name,
-                        reqd, no_other_statement)
-        elif len(reqd) == 0 and len(opt) > 0:
-            text = '{} {} object may contain {}. {}'\
-                .format(self.indef_u, self.formatted_name,
-                        opt, no_other_statement)
+        elif att_type == 'SIdRef':
+
+            ref_name = strFunctions.upper_first(attribute['name'])
+            text = 'The value of the attribute {} of {} {} object must be ' \
+                   'the identifier of an existing \{} object defined in the ' \
+                   'enclosing \Model object.'\
+                .format(name, self.indef, self.formatted_name, ref_name)
+        elif att_type == 'string':
+            text = 'The attribute {} on {} {} must have a value of data ' \
+                   'type {}.'\
+                .format(name, self.indef, self.formatted_name,
+                        strFunctions.wrap_token('string'))
+        elif att_type == 'int':
+            text = 'The attribute {} on {} {} must have a value of data ' \
+                   'type {}.'\
+                .format(name, self.indef, self.formatted_name,
+                        strFunctions.wrap_token('integer'))
+        elif att_type == 'double':
+            text = 'The attribute {} on {} {} must have a value of data ' \
+                   'type {}.'\
+                .format(name, self.indef, self.formatted_name,
+                        strFunctions.wrap_token('double'))
+
+        elif att_type == 'enum':
+            text = 'FIX ME need to deal with {} enum'.format(name)
+
         else:
-            text = '{} {} object must contain {}, and may contain {}. {}'\
-                .format(self.indef_u, self.formatted_name,
-                        reqd, opt, no_other_statement)
+            text = 'FIX ME'
+
         ref = 'SBML Level~3 Specification for {} Version~1, {}.'\
             .format(self.fullname, strFunctions.wrap_section(self.name))
+        sev = 'ERROR'
+        return dict({'number': self.number, 'text': text,
+                     'reference': ref, 'severity': sev})
+
+    @staticmethod
+    # write core attribute rule
+    def write_core_attribute_rule(self):
+        text = '{0} {1} object may have the optional SBML Level~3 ' \
+               'Core attributes {2} and {3}. No other attributes from the ' \
+               'SBML Level 3 Core namespaces are permitted on {4} {1}.'\
+            .format(self.indef_u, self.formatted_name,
+                    strFunctions.wrap_token('metaid'),
+                    strFunctions.wrap_token('sboTerm'), self.indef)
+        ref = 'SBML Level~3 Version~1 Core, Section~3.2.'
+        sev = 'ERROR'
+        return dict({'number': self.number, 'text': text,
+                     'reference': ref, 'severity': sev})
+
+    # write core subobjects rule
+    @staticmethod
+    def write_core_subobject_rule(self):
+        text = '{0} {1} object may have the optional SBML Level~3 ' \
+               'Core subobjects for notes and annotations. No other ' \
+               'elements from the SBML Level 3 Core namespaces are ' \
+               'permitted on {2} {1}.'\
+            .format(self.indef_u, self.formatted_name, self.indef)
+        ref = 'SBML Level~3 Version~1 Core, Section~3.2.'
         sev = 'ERROR'
         return dict({'number': self.number, 'text': text,
                      'reference': ref, 'severity': sev})
@@ -118,28 +166,28 @@ class ValidationRulesForClass():
                      'reference': ref, 'severity': sev})
 
     @staticmethod
-    # write core attribute rule
-    def write_core_attribute_rule(self):
-        text = '{0} {1} object may have the optional SBML Level~3 ' \
-               'Core attributes {2} and {3}. No other attributes from the ' \
-               'SBML Level 3 Core namespaces are permitted on {4} {1}.'\
-            .format(self.indef_u, self.formatted_name,
-                    strFunctions.wrap_token('metaid'),
-                    strFunctions.wrap_token('sboTerm'), self.indef)
-        ref = 'SBML Level~3 Version~1 Core, Section~3.2.'
-        sev = 'ERROR'
-        return dict({'number': self.number, 'text': text,
-                     'reference': ref, 'severity': sev})
-
-    # write core subobjects rule
-    @staticmethod
-    def write_core_subobject_rule(self):
-        text = '{0} {1} object may have the optional SBML Level~3 ' \
-               'Core subobjects for notes and annotations. No other ' \
-               'elements from the SBML Level 3 Core namespaces are ' \
-               'permitted on {2} {1}.'\
-            .format(self.indef_u, self.formatted_name, self.indef)
-        ref = 'SBML Level~3 Version~1 Core, Section~3.2.'
+    def write_package_object_rule(self):
+        if len(self.reqd_elem) == 0 and len(self.opt_elem) == 0:
+            return
+        reqd = self.parse_required_elements(self.reqd_elem)
+        opt = self.parse_optional_elements(self.opt_elem)
+        no_other_statement = 'No other elements from the SBML Level 3 {} ' \
+                             'namespaces are permitted on {} {} object. '\
+            .format(self.fullname, self.indef, self.formatted_name)
+        if len(opt) == 0 and len(reqd) > 0:
+            text = '{} {} object must contain {}. {}'\
+                .format(self.indef_u, self.formatted_name,
+                        reqd, no_other_statement)
+        elif len(reqd) == 0 and len(opt) > 0:
+            text = '{} {} object may contain {}. {}'\
+                .format(self.indef_u, self.formatted_name,
+                        opt, no_other_statement)
+        else:
+            text = '{} {} object must contain {}, and may contain {}. {}'\
+                .format(self.indef_u, self.formatted_name,
+                        reqd, opt, no_other_statement)
+        ref = 'SBML Level~3 Specification for {} Version~1, {}.'\
+            .format(self.fullname, strFunctions.wrap_section(self.name))
         sev = 'ERROR'
         return dict({'number': self.number, 'text': text,
                      'reference': ref, 'severity': sev})
