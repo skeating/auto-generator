@@ -3,6 +3,7 @@
 import BaseCppFile
 import BaseFile
 import strFunctions
+import query
 
 
 class CppHeaderFile(BaseCppFile.BaseCppFile):
@@ -15,6 +16,7 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         self.child_elements = []  # class_object['childElements']
         self.has_list_of = class_object['hasListOf']
         self.attributes_on_list_of = ''  # class_object['loattrib']
+        self.typecode = class_object['typecode']
 
         # check case of things where we assume upper/lower
         if self.package[0].islower():
@@ -84,6 +86,8 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         self.write_constructors(class_name)
         self.write_attribute_functions(class_name, class_attributes)
         self.write_listofelement_functions(class_name, class_attributes)
+        self.write_general_functions(class_name, class_attributes,
+                                     base_class == 'ListOf')
         self.down_indent()
         self.write_line('};\n')
 
@@ -747,6 +751,84 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
 
         self.write_function_header(is_cpp_api, function,
                                    arguments, return_type, False)
+        self.skip_line(2)
+
+    ########################################################################
+
+    # Functions for writing general functions
+
+    # main function
+    def write_general_functions(self, class_name, attributes, is_list_of):
+        if query.hasSIdRef(attributes):
+            self.write_rename_sidrefs_function(class_name)
+        self.write_get_element_name(class_name)
+        self.write_get_typecode(class_name, is_list_of)
+
+    def write_rename_sidrefs_function(self, class_name):
+        # create doc string header
+        title_line = '@copydoc doc_renamesidref_common'
+        self.write_comment_header(title_line, [], [], class_name)
+
+        # create the function declaration
+        function = 'renameSIdRefs'
+        return_type = 'void'
+        arguments = []
+        arguments.append('const std::string& oldid')
+        arguments.append('const std::string& newid')
+
+        self.write_function_header(True, function,
+                                   arguments, return_type, False, True)
+        self.skip_line(2)
+
+    def write_get_element_name(self, class_name):
+        # create doc string header
+        title_line = 'Returns the XML name of this {} object'.format(class_name)
+        return_lines = []
+        return_lines.append('@return the name of this element; that is \"{}\".'
+                            .format(strFunctions.lower_first(class_name)))
+        self.write_comment_header(title_line, [], return_lines, class_name)
+        # create the function declaration
+        function = 'getElementName'
+        return_type = 'const std::string&'
+
+        self.write_function_header(True, function, [], return_type, True, True)
+        self.skip_line(2)
+
+    def write_get_typecode(self, class_name, is_list_of):
+        # create doc string header
+        if is_list_of:
+            title_line = 'Returns the libSBML type code for the SBML objects ' \
+                         'contained in this {} object.'.format(class_name)
+        else:
+            title_line = 'Returns the libSBML typcode of this {} object'\
+                .format(class_name)
+        params = []
+        params.append('@copydetails doc_what_are_typecodes')
+        return_lines = []
+        if is_list_of:
+            return_lines.append('@return the SBML typecode for the '
+                                'objects contained in this list:')
+        else:
+            return_lines.append('@return the SBML type code for this object:')
+        additional = []
+        line = '@sbmlconstant{' + '{}'.format(self.typecode) \
+               + ', SBML{}TypeCode_t'.format(self.package) + '}'
+        additional.append(line)
+        additional.append(' ')
+        additional.append('@copydetails doc_warning_typecodes_not_unique')
+        additional.append(' ')
+        additional.append('@see getElementName()')
+        additional.append('@see getPackageName()')
+        self.write_comment_header(title_line, params, return_lines, class_name,
+                                  additional)
+        # create the function declaration
+        if is_list_of:
+            function = 'getItemTypeCode'
+        else:
+            function = 'getTypeCode'
+        return_type = 'int'
+
+        self.write_function_header(True, function, [], return_type, True, True)
         self.skip_line(2)
 
     ########################################################################

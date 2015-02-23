@@ -149,7 +149,7 @@ class BaseCppFile(BaseFile.BaseFile):
 
     def write_function_header(self, is_cpp,
                               function_name, arguments, return_type,
-                              is_const=False):
+                              is_const=False, is_virtual=False):
         num_arguments = len(arguments)
         if not is_cpp:
             self.write_extern_decl()
@@ -157,7 +157,10 @@ class BaseCppFile(BaseFile.BaseFile):
             line = function_name + '('
         else:
             if return_type != '':
-                line = return_type + ' ' + function_name + '('
+                if is_virtual:
+                    line = 'virtual ' + return_type + ' ' + function_name + '('
+                else:
+                    line = return_type + ' ' + function_name + '('
             else:
                 line = function_name + '('
 
@@ -206,15 +209,21 @@ class BaseCppFile(BaseFile.BaseFile):
 # FUNCTIONS FOR WRITING STANDARD DOC COMMENTS
 
     def write_comment_header(self, title_line, params, return_line,
-                             object_name):
+                             object_name, additional=[]):
         self.open_comment()
         self.write_comment_line(title_line)
-        self.write_blank_comment_line()
         for i in range(0, len(params)):
+            self.write_blank_comment_line()
             self.write_comment_line(params[i])
+        if len(params) > 0 or len(return_line) > 0:
             self.write_blank_comment_line()
         for i in range(0, len(return_line)):
             self.write_comment_line((return_line[i]))
+        for i in range(0, len(additional)):
+            if additional[i] == ' ':
+                self.write_blank_comment_line()
+            else:
+                self.write_comment_line(additional[i])
         if object_name.endswith('_t'):
             self.write_blank_comment_line()
             self.write_comment_line('@memberof {}'.format(object_name))
