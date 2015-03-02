@@ -34,6 +34,17 @@ def list_of_name(name):
     return listof
 
 
+def cap_list_of_name(name):
+    name = upper_first(name)
+    if name.endswith('s'):
+        listof = 'ListOf' + name
+    elif name.endswith('x'):
+        listof = 'ListOf' + name + 'es'
+    else:
+        listof = 'ListOf' + name + 's'
+    return listof
+
+
 def plural(name):
     if name.endswith('s'):
         returned_word = name

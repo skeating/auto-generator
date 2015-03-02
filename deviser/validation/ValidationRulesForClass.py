@@ -27,7 +27,7 @@ class ValidationRulesForClass():
         self.reqd_elem = []
         self.opt_elem = []
 
-        self.parse_attributes(object_desc['attribs'])
+        self.parse_attributes(self, object_desc['attribs'])
         self.rules = []
 
     ########################################################################
@@ -44,26 +44,34 @@ class ValidationRulesForClass():
 
         self.number += 1
         rule = self.write_package_attribute_rule(self)
-        if rule is not None:
-            self.rules.append(rule)
+        self.add_rule(rule)
 
         self.number += 1
         rule = self.write_package_object_rule(self)
-        if rule is not None:
-            self.rules.append(rule)
+        self.add_rule(rule)
 
         for i in range(0, len(self.reqd_att)):
             self.number += 1
             rule = self.write_attribute_type_rule(self, self.reqd_att[i])
-            if rule is not None:
-                self.rules.append(rule)
+            self.add_rule(rule)
 
         for i in range(0, len(self.opt_att)):
             self.number += 1
             rule = self.write_attribute_type_rule(self, self.opt_att[i])
-            if rule is not None:
-                self.rules.append(rule)
+            self.add_rule(rule)
 
+        if self.has_list_of_children(optional=True):
+            self.number += 1
+            rule  = self.write_optional_lo_rule()
+            self.add_rule(rule)
+            rule = None
+
+    def add_rule(self, rule):
+        if rule is not None:
+            self.rules.append(rule)
+        else:
+            #we did not write a rule
+            self.number -= 1
 
 ###############################################################################
 
@@ -98,10 +106,22 @@ class ValidationRulesForClass():
                    'type {}.'\
                 .format(name, self.indef, self.formatted_name,
                         strFunctions.wrap_token('double'))
-
+        elif att_type == 'boolean':
+            text = 'The attribute {} on {} {} must have a value of data ' \
+                   'type {}.'\
+                .format(name, self.indef, self.formatted_name,
+                        strFunctions.wrap_token('boolean'))
         elif att_type == 'enum':
-            text = 'FIX ME need to deal with {} enum'.format(name)
-
+            enum_name = attribute['element']
+            enums = attribute['parent']['root']['enums']
+            enum_values = self.parse_enum_values(enum_name, enums)
+            text = 'The value of the attribute {0} of {1} {2} object must ' \
+                   'conform to the syntax of SBML data type {3} and ' \
+                   'may only take on the allowed values of {3} defined ' \
+                   'in SBML; that is the value must be one of the ' \
+                   'following {4}.'.format(name, self.indef,
+                                           self.formatted_name, enum_name,
+                                           enum_values)
         else:
             text = 'FIX ME'
 
@@ -240,7 +260,7 @@ class ValidationRulesForClass():
                     .format(strFunctions.wrap_token(attributes[i]['name'],
                                                     self.package))
                 i += 1
-            optional_statement += 'and {}' \
+            optional_statement += ' and {}' \
                 .format(strFunctions.wrap_token(attributes[i]['name'],
                                                 self.package))
             return optional_statement
@@ -290,6 +310,7 @@ class ValidationRulesForClass():
     ########################################################################
 
     # divide attributes into elements/attributes required and optional
+    @staticmethod
     def parse_attributes(self, attributes):
         for i in range(0, len(attributes)):
             if attributes[i]['type'] == 'element' \
@@ -303,3 +324,72 @@ class ValidationRulesForClass():
                     self.reqd_att.append(attributes[i])
                 else:
                     self.opt_att.append(attributes[i])
+
+    ########################################################################
+
+    # deal with enumerations
+    @staticmethod
+    def parse_enum_values(enum, enums):
+        this_enum = None
+        for i in range(0, len(enums)):
+            if enum == enums[i]['name']:
+                this_enum = enums[i]
+                break
+        if this_enum is None:
+            return 'FIX ME'
+        else:
+            i = 0
+            values = '\"{}\"'.format(this_enum['values'][i]['value'])
+            for i in range(1, len(this_enum['values'])-1):
+                values += ', \"{}\"'.format(this_enum['values'][i]['value'])
+            values += ' or \"{}\"'.format(this_enum['values'][i+1]['value'])
+            return values
+
+    #######################################################################
+
+    # functions for listOf child elements
+
+    def has_list_of_children(self, optional):
+        if optional:
+            for i in range(0, len(self.opt_elem)):
+                if self.opt_elem[i]['type'] == 'lo_element':
+                    return True
+        else:
+            if len(self.reqd_elem) == 0 and len(self.opt_elem) == 0:
+                return False
+            else:
+                for i in range (0, len(self.reqd_elem)):
+                    if self.reqd_elem[i]['type'] == 'lo_element':
+                        return True
+                for i in range(0, len(self.opt_elem)):
+                    if self.opt_elem[i]['type'] == 'lo_element':
+                        return True
+                return False
+
+    def write_optional_lo_rule(self):
+        number = len(self.opt_elem)
+        if number > 1:
+            obj = 'objects'
+            pred = 'these'
+            i = 0
+            elements = '{}'.format(strFunctions.cap_list_of_name(
+                self.opt_elem[i]['name']))
+            for i in range(1, number-1):
+                elements += ', {}'.format(strFunctions.cap_list_of_name(
+                    self.opt_elem[i]['name']))
+            elements += ' and {}'.format(strFunctions.cap_list_of_name(
+                self.opt_elem[i+1]['name']))
+        else:
+            obj = 'object'
+            pred = 'this'
+            elements = '{}'.format(strFunctions.list_of_name(
+                self.opt_elem[0]['name']))
+
+        text = 'The {0} sub{1} on {2} {3} object are optional, but if ' \
+               'present, {4} container {1} must not be empty.'\
+            .format(elements, obj, self.indef, self.formatted_name, pred)
+        ref = 'SBML Level~3 Specification for {} Version~1, {}.'\
+            .format(self.fullname, strFunctions.wrap_section(self.name))
+        sev = 'ERROR'
+        return dict({'number': self.number, 'text': text,
+                     'reference': ref, 'severity': sev})
