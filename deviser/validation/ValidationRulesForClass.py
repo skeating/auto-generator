@@ -26,6 +26,8 @@ class ValidationRulesForClass():
         self.opt_att = []
         self.reqd_elem = []
         self.opt_elem = []
+        self.reqd_child_lo_elem = []
+        self.opt_child_lo_elem = []
 
         self.parse_attributes(self, object_desc['attribs'])
         self.rules = []
@@ -60,17 +62,40 @@ class ValidationRulesForClass():
             rule = self.write_attribute_type_rule(self, self.opt_att[i])
             self.add_rule(rule)
 
-        if self.has_list_of_children(optional=True):
+        if len(self.opt_child_lo_elem) > 0:
             self.number += 1
-            rule  = self.write_optional_lo_rule()
+            rule = self.write_optional_lo_rule()
             self.add_rule(rule)
-            rule = None
+
+        for i in range(0, len(self.opt_child_lo_elem)):
+            self.number += 1
+            rule = \
+                self.write_core_subobject_rule(self, self.opt_child_lo_elem[i])
+            self.add_rule(rule)
+
+        for i in range(0, len(self.reqd_child_lo_elem)):
+            self.number += 1
+            rule = \
+                self.write_core_subobject_rule(self, self.reqd_child_lo_elem[i])
+            self.add_rule(rule)
+
+        for i in range(0, len(self.opt_child_lo_elem)):
+            self.number += 1
+            rule = \
+                self.write_core_attribute_rule(self, self.opt_child_lo_elem[i])
+            self.add_rule(rule)
+
+        for i in range(0, len(self.reqd_child_lo_elem)):
+            self.number += 1
+            rule = \
+                self.write_core_attribute_rule(self, self.reqd_child_lo_elem[i])
+            self.add_rule(rule)
 
     def add_rule(self, rule):
         if rule is not None:
             self.rules.append(rule)
         else:
-            #we did not write a rule
+            # we did not write a rule
             self.number -= 1
 
 ###############################################################################
@@ -85,7 +110,6 @@ class ValidationRulesForClass():
         if att_type == 'SId':
             return
         elif att_type == 'SIdRef':
-
             ref_name = strFunctions.upper_first(attribute['name'])
             text = 'The value of the attribute {} of {} {} object must be ' \
                    'the identifier of an existing \{} object defined in the ' \
@@ -96,7 +120,7 @@ class ValidationRulesForClass():
                    'type {}.'\
                 .format(name, self.indef, self.formatted_name,
                         strFunctions.wrap_token('string'))
-        elif att_type == 'int':
+        elif att_type == 'int' or att_type == 'uint':
             text = 'The attribute {} on {} {} must have a value of data ' \
                    'type {}.'\
                 .format(name, self.indef, self.formatted_name,
@@ -120,10 +144,17 @@ class ValidationRulesForClass():
                    'may only take on the allowed values of {3} defined ' \
                    'in SBML; that is the value must be one of the ' \
                    'following {4}.'.format(name, self.indef,
-                                           self.formatted_name, enum_name,
+                                           self.formatted_name,
+                                           strFunctions.wrap_enum(enum_name),
                                            enum_values)
+        elif att_type == 'array':
+            text = 'The value of the attribute {} of {} {} object must ' \
+                   'be an array of values of type {}.'\
+                .format(name, self.indef, self.formatted_name,
+                        strFunctions.wrap_token(attribute['element']))
         else:
-            text = 'FIX ME'
+            text = 'FIX ME: Encountered an unknown attribute type {} in ' \
+                   'write_attribute_type_rule'.format(att_type)
 
         ref = 'SBML Level~3 Specification for {} Version~1, {}.'\
             .format(self.fullname, strFunctions.wrap_section(self.name))
@@ -133,28 +164,49 @@ class ValidationRulesForClass():
 
     @staticmethod
     # write core attribute rule
-    def write_core_attribute_rule(self):
-        text = '{0} {1} object may have the optional SBML Level~3 ' \
-               'Core attributes {2} and {3}. No other attributes from the ' \
-               'SBML Level 3 Core namespaces are permitted on {4} {1}.'\
-            .format(self.indef_u, self.formatted_name,
-                    strFunctions.wrap_token('metaid'),
-                    strFunctions.wrap_token('sboTerm'), self.indef)
-        ref = 'SBML Level~3 Version~1 Core, Section~3.2.'
-        sev = 'ERROR'
+    def write_core_attribute_rule(self, lo_child=None):
+        if lo_child is None:
+            text = '{0} {1} object may have the optional SBML Level~3 ' \
+                   'Core attributes {2} and {3}. No other attributes from the ' \
+                   'SBML Level 3 Core namespaces are permitted on {4} {1}.'\
+                .format(self.indef_u, self.formatted_name,
+                        strFunctions.wrap_token('metaid'),
+                        strFunctions.wrap_token('sboTerm'), self.indef)
+            ref = 'SBML Level~3 Version~1 Core, Section~3.2.'
+            sev = 'ERROR'
+        else:
+            text = 'A {0} object may have the optional SBML Level~3 ' \
+                   'Core attributes {1} and {2}. No other attributes from the ' \
+                   'SBML Level 3 Core namespaces are permitted on a {0} object.'\
+                .format(strFunctions.get_element_name(lo_child),
+                        strFunctions.wrap_token('metaid'),
+                        strFunctions.wrap_token('sboTerm'))
+            ref = 'SBML Level~3 Specification for {} Version~1, {}.'\
+                .format(self.fullname, strFunctions.wrap_section(self.name))
+            sev = 'ERROR'
         return dict({'number': self.number, 'text': text,
                      'reference': ref, 'severity': sev})
 
     # write core subobjects rule
     @staticmethod
-    def write_core_subobject_rule(self):
-        text = '{0} {1} object may have the optional SBML Level~3 ' \
-               'Core subobjects for notes and annotations. No other ' \
-               'elements from the SBML Level 3 Core namespaces are ' \
-               'permitted on {2} {1}.'\
-            .format(self.indef_u, self.formatted_name, self.indef)
-        ref = 'SBML Level~3 Version~1 Core, Section~3.2.'
-        sev = 'ERROR'
+    def write_core_subobject_rule(self, lo_child=None):
+        if lo_child is None:
+            text = '{0} {1} object may have the optional SBML Level~3 ' \
+                   'Core subobjects for notes and annotations. No other ' \
+                   'elements from the SBML Level 3 Core namespaces are ' \
+                   'permitted on {2} {1}.'\
+                .format(self.indef_u, self.formatted_name, self.indef)
+            ref = 'SBML Level~3 Version~1 Core, Section~3.2.'
+            sev = 'ERROR'
+        else:
+            loname = strFunctions.get_element_name(lo_child)
+            text = 'Apart from the general notes and annotations subobjects ' \
+                   'permitted on all SBML objects, a {} container object ' \
+                   'may only contain \{} objects.'\
+                .format(loname, lo_child['element'])
+            ref = 'SBML Level~3 Specification for {} Version~1, {}.'\
+                .format(self.fullname, strFunctions.wrap_section(self.name))
+            sev = 'ERROR'
         return dict({'number': self.number, 'text': text,
                      'reference': ref, 'severity': sev})
 
@@ -313,12 +365,18 @@ class ValidationRulesForClass():
     @staticmethod
     def parse_attributes(self, attributes):
         for i in range(0, len(attributes)):
-            if attributes[i]['type'] == 'element' \
-                    or attributes[i]['type'] == 'lo_element':
+            if attributes[i]['type'] == 'element':
                 if attributes[i]['reqd'] is True:
                     self.reqd_elem.append(attributes[i])
                 else:
                     self.opt_elem.append(attributes[i])
+            elif attributes[i]['type'] == 'lo_element':
+                if attributes[i]['reqd'] is True:
+                    self.reqd_child_lo_elem.append(attributes[i])
+                    self.reqd_elem.append(attributes[i])
+                else:
+                    self.opt_elem.append(attributes[i])
+                    self.opt_child_lo_elem.append(attributes[i])
             else:
                 if attributes[i]['reqd'] is True:
                     self.reqd_att.append(attributes[i])
@@ -336,7 +394,8 @@ class ValidationRulesForClass():
                 this_enum = enums[i]
                 break
         if this_enum is None:
-            return 'FIX ME'
+            return 'FIX ME: Failed to find the enum {} in parse_enum_values'\
+                .format(enum)
         else:
             i = 0
             values = '\"{}\"'.format(this_enum['values'][i]['value'])
@@ -349,41 +408,25 @@ class ValidationRulesForClass():
 
     # functions for listOf child elements
 
-    def has_list_of_children(self, optional):
-        if optional:
-            for i in range(0, len(self.opt_elem)):
-                if self.opt_elem[i]['type'] == 'lo_element':
-                    return True
-        else:
-            if len(self.reqd_elem) == 0 and len(self.opt_elem) == 0:
-                return False
-            else:
-                for i in range (0, len(self.reqd_elem)):
-                    if self.reqd_elem[i]['type'] == 'lo_element':
-                        return True
-                for i in range(0, len(self.opt_elem)):
-                    if self.opt_elem[i]['type'] == 'lo_element':
-                        return True
-                return False
-
+    # might not be lo elements
     def write_optional_lo_rule(self):
-        number = len(self.opt_elem)
+        number = len(self.opt_child_lo_elem)
         if number > 1:
             obj = 'objects'
             pred = 'these'
             i = 0
-            elements = '{}'.format(strFunctions.cap_list_of_name(
-                self.opt_elem[i]['name']))
+            elements = '{}'.format(strFunctions.get_element_name(
+                self.opt_child_lo_elem[i]))
             for i in range(1, number-1):
-                elements += ', {}'.format(strFunctions.cap_list_of_name(
-                    self.opt_elem[i]['name']))
-            elements += ' and {}'.format(strFunctions.cap_list_of_name(
-                self.opt_elem[i+1]['name']))
+                elements += ', {}'.format(strFunctions.get_element_name(
+                    self.opt_child_lo_elem[i]))
+            elements += ' and {}'.format(strFunctions.get_element_name(
+                self.opt_child_lo_elem[i+1]))
         else:
             obj = 'object'
             pred = 'this'
-            elements = '{}'.format(strFunctions.list_of_name(
-                self.opt_elem[0]['name']))
+            elements = '{}'.format(strFunctions.get_element_name(
+                self.opt_child_lo_elem[0]))
 
         text = 'The {0} sub{1} on {2} {3} object are optional, but if ' \
                'present, {4} container {1} must not be empty.'\

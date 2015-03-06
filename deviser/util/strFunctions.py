@@ -74,10 +74,16 @@ def wrap_token(name, pkg=''):
 def wrap_section(name):
     return '\\sec{' + name.lower() + '-class}'
 
+def wrap_enum(name):
+    return '\\primtype{' + lower_first(name) + '}'
+
 def get_element_name(attribute):
     if attribute['type'] == 'lo_element':
         return '\{}'.format(list_of_name(attribute['element']))
-    elif attribute['element'] == 'ASTNode*':
-        return 'MathML math'
+    elif attribute['type'] == 'element':
+        if attribute['element'] == 'ASTNode*':
+            return 'MathML math'
+        else:
+            return attribute['element']
     else:
         return 'FIX_ME'

@@ -54,7 +54,7 @@ class TexValidationRulesFile(BaseTexFile.BaseTexFile):
 
     def write_file(self):
         BaseFile.BaseFile.write_file(self)
-        number = self.offset+20500
+        number = self.offset+20300
         for i in range(0, len(self.sbml_classes)):
             rules = ValidationRulesForClass\
                 .ValidationRulesForClass(self.sbml_classes[i],
