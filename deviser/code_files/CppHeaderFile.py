@@ -378,7 +378,7 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
 
     # function to write the get/set/isSet/unset functions for elements
     # def write_elements_functions(self, class_name, class_attributes,
-    #                              is_cpp_api=True):
+    # is_cpp_api=True):
     #     num_attributes = len(class_attributes)
     #     for i in range(0, num_attributes):
     #         attribute = class_attributes[i]
@@ -757,12 +757,18 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
 
     # Functions for writing general functions
 
-    # main function
+    # main general function writing function
     def write_general_functions(self, class_name, attributes, is_list_of):
         if query.hasSIdRef(attributes):
             self.write_rename_sidrefs_function(class_name)
         self.write_get_element_name(class_name)
         self.write_get_typecode(class_name, is_list_of)
+        if not is_list_of:
+            self.write_has_reqd_attributes(class_name, attributes)
+            self.write_write_elements(class_name)
+            self.write_accept_function(class_name)
+            self.write_set_document(class_name)
+            self.write_enable_pkg_internal(class_name)
 
     def write_rename_sidrefs_function(self, class_name):
         # create doc string header
@@ -772,26 +778,28 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         # create the function declaration
         function = 'renameSIdRefs'
         return_type = 'void'
-        arguments = []
-        arguments.append('const std::string& oldid')
-        arguments.append('const std::string& newid')
-
-        self.write_function_header(True, function,
-                                   arguments, return_type, False, True)
+        arguments = ['const std::string& oldid', 'const std::string& newid']
+        is_cpp = True
+        virtual = True
+        constant = False
+        self.write_function_header(is_cpp, function,
+                                   arguments, return_type, constant, virtual)
         self.skip_line(2)
 
     def write_get_element_name(self, class_name):
         # create doc string header
         title_line = 'Returns the XML name of this {} object'.format(class_name)
-        return_lines = []
-        return_lines.append('@return the name of this element; that is \"{}\".'
-                            .format(strFunctions.lower_first(class_name)))
+        return_lines = ['@return the name of this element; that is \"'
+                        '{}\".'.format(strFunctions.lower_first(class_name))]
         self.write_comment_header(title_line, [], return_lines, class_name)
         # create the function declaration
         function = 'getElementName'
         return_type = 'const std::string&'
-
-        self.write_function_header(True, function, [], return_type, True, True)
+        is_cpp = True
+        virtual = True
+        constant = True
+        self.write_function_header(is_cpp, function, [],
+                                   return_type, constant, virtual)
         self.skip_line(2)
 
     def write_get_typecode(self, class_name, is_list_of):
@@ -800,10 +808,9 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
             title_line = 'Returns the libSBML type code for the SBML objects ' \
                          'contained in this {} object.'.format(class_name)
         else:
-            title_line = 'Returns the libSBML typcode of this {} object'\
+            title_line = 'Returns the libSBML typcode of this {} object' \
                 .format(class_name)
-        params = []
-        params.append('@copydetails doc_what_are_typecodes')
+        params = ['@copydetails doc_what_are_typecodes']
         return_lines = []
         if is_list_of:
             return_lines.append('@return the SBML typecode for the '
@@ -827,9 +834,111 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         else:
             function = 'getTypeCode'
         return_type = 'int'
-
-        self.write_function_header(True, function, [], return_type, True, True)
+        is_cpp = True
+        virtual = True
+        constant = True
+        self.write_function_header(is_cpp, function, [],
+                                   return_type, constant, virtual)
         self.skip_line(2)
+
+    def write_has_reqd_attributes(self, class_name, attributes):
+        # create doc string header
+        title_line = 'Predicate returning @c true if all the required ' \
+                     'attributes for this {} object have been set.' \
+            .format(class_name)
+        params = []
+        return_lines = ['@return a boolean indicating whether all the '
+                        'required attributes for this object have been '
+                        'defined.']
+        additional = [' ', '@note The required attributes for the {} object'
+                           ' are:'.format(class_name)]
+        for i in range(0, len(attributes)):
+            if attributes[i]['reqd']:
+                additional.append('@li \"{}\"'.format(attributes[i]['name']))
+        self.write_comment_header(title_line, params, return_lines, class_name,
+                                  additional)
+        # create the function declaration
+        function = 'hasRequiredAttributes'
+        return_type = 'bool'
+        is_cpp = True
+        virtual = True
+        constant = True
+        self.write_function_header(is_cpp, function, [],
+                                   return_type, constant, virtual)
+        self.skip_line(2)
+
+    def write_write_elements(self, class_name):
+        self.write_doxygen_start()
+        # create doc string header
+        title_line = 'Write any contained elements'
+        self.write_comment_header(title_line, [], [], class_name)
+
+        # create the function declaration
+        function = 'writeElements'
+        return_type = 'void'
+        arguments = ['XMLOutputStream& stream']
+        is_cpp = True
+        virtual = True
+        constant = True
+        self.write_function_header(is_cpp, function, arguments,
+                                   return_type, constant, virtual)
+        self.skip_line(2)
+        self.write_doxygen_end()
+
+    def write_accept_function(self, class_name):
+        self.write_doxygen_start()
+        # create doc string header
+        title_line = 'Accepts the given SBMLVisitor'
+        self.write_comment_header(title_line, [], [], class_name)
+
+        # create the function declaration
+        function = 'accept'
+        return_type = 'bool'
+        arguments = ['SBMLVisitor& v']
+        is_cpp = True
+        virtual = True
+        constant = True
+        self.write_function_header(is_cpp, function,
+                                   arguments, return_type, constant, virtual)
+        self.skip_line(2)
+        self.write_doxygen_end()
+
+    def write_set_document(self, class_name):
+        self.write_doxygen_start()
+        # create doc string header
+        title_line = 'Sets the parent SBMLDocument'
+        self.write_comment_header(title_line, [], [], class_name)
+
+        # create the function declaration
+        function = 'setSBMLDocument'
+        return_type = 'void'
+        arguments = ['SBMLDocument* d']
+        is_cpp = True
+        virtual = True
+        constant = False
+        self.write_function_header(is_cpp, function,
+                                   arguments, return_type, constant, virtual)
+        self.skip_line(2)
+        self.write_doxygen_end()
+
+    def write_enable_pkg_internal(self, class_name):
+        self.write_doxygen_start()
+        # create doc string header
+        title_line = 'Enables/disables the given package with this element'
+        self.write_comment_header(title_line, [], [], class_name)
+
+        # create the function declaration
+        function = 'enablePackageInternal'
+        return_type = 'void'
+        arguments = ['const std::string& pkgURI',
+                     'const std::string& pkgPrefix', 'bool flag']
+        is_cpp = True
+        virtual = True
+        constant = False
+        self.write_function_header(is_cpp, function,
+                                   arguments, return_type, constant, virtual)
+        self.skip_line(2)
+        self.write_doxygen_end()
 
     ########################################################################
 

@@ -5,7 +5,6 @@ class BaseFile:
     """Common base class for all files"""
 
     def __init__(self, name, extension):
-        # members assigned
         self.name = name
         self.extension = extension
 
