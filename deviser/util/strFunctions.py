@@ -71,6 +71,21 @@ def wrap_token(name, pkg=''):
     else:
         return '\\token{' + pkg + ':\\-' + name + '}'
 
+def wrap_type(name, element, hack= False):
+    if name == 'array':
+        return 'consisting of an array of \\primtype{' + element + '}'
+    elif name == 'enum':
+        return 'of type \\primtype{' + lower_first(element) + '}'
+    elif name == 'element':
+        if hack:
+            return 'of type ' + wrap_token(element)
+        else:
+            return wrap_token(element)
+    elif name == 'lo_element':
+        return wrap_token(element)
+    else:
+        return 'of type \\primtype{' + name + '}'
+
 def wrap_section(name):
     return '\\sec{' + name.lower() + '-class}'
 
