@@ -18,13 +18,14 @@ import createBindingsFiles
 import createArchiveFile
 import createValidatorFiles
 import createPackageFromXml
+import createDirStruct
 
 if len(sys.argv) < 2:
   print 'Usage: run.py name <fileName>'
 else:
   name = sys.argv[1]
   packageDefn = None
-  if len(sys.argv) == 3:
+  if len(sys.argv) > 2:
     packageDefn = createPackageFromXml.parseDeviserXML(sys.argv[2])
   else:
     packageDefn = createNewPackage.createPackage(name)
@@ -40,8 +41,9 @@ else:
   bindDir = './' + name + '/src/bindings'
   #check directories exist
   if os.path.exists(extDir) == False:
-    print 'directory structure for {0} not available - please run createDirStruct'.format(name)
-    sys.exit(0)
+    createDirStruct.createDirectories(name)
+    #print 'directory structure for {0} not available - please run createDirStruct'.format(name)
+    #sys.exit(0)
   os.chdir(extDir)
   createExtensionFiles.main(packageDefn)
   os.chdir(thisDir)

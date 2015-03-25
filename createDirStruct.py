@@ -17,7 +17,7 @@ def createDir(name):
     done =True
   return done
 
-def main(pkgName):
+def createDirectories(pkgName):
     print 'creating directory structure for {0}'.format(pkgName)
     if createDir(pkgName) == False:
       exit
@@ -48,9 +48,14 @@ def main(pkgName):
       os.chdir('validator')
       createDir('constraints')
     
-if len(sys.argv) != 2:
-  print 'Usage: createDirStruct.py name'
-else:
-  name = sys.argv[1]
-  main(name)
+def main(args):     
+  if len(args) != 2:
+    print 'Usage: createDirStruct.py name'
+  else:
+    name = args[1]
+    createDirectories(name)
+
+if __name__ == '__main__':
+  main(sys.argv)  
+
 
