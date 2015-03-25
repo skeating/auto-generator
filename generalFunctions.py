@@ -1319,7 +1319,7 @@ def getConcretes(root, concretes):
 def overridesElementName(attrib):
   root = attrib['root']
   current = getElement(root, attrib['element'])
-  if current.has_key('childrenOverwriteElementName') and current['childrenOverwriteElementName']:
+  if current != None and current.has_key('childrenOverwriteElementName') and current['childrenOverwriteElementName']:
     return True
   return False
 

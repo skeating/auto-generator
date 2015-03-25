@@ -17,7 +17,7 @@ def replaceTags(line, pkg):
   return line
   
 def createValidatorHeader(pkg):
-  inputFile = '../../../../../../templateValidHead.txt' 
+  inputFile = os.path.dirname(__file__)  + '/templateValidHead.txt' 
   headerName = pkg + 'Validator.h'
   header = open(headerName, 'w')
   nameOfElement = pkg + 'Validator'
@@ -43,7 +43,7 @@ def createValidatorHeader(pkg):
   header.close()
 
 def createValidatorFile(pkg, classes):
-  inputFile = '../../../../../../templateValidCPP.txt' 
+  inputFile = os.path.dirname(__file__)  + '/templateValidCPP.txt' 
   fileName = pkg + 'Validator.cpp'
   output = open(fileName, 'w')
   nameOfElement = pkg + 'Validator'

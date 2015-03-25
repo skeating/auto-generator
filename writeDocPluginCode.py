@@ -5,6 +5,7 @@
 # @author Sarah Keating
 #
 
+import os
 import sys
 import fileHeaders
 import generalFunctions
@@ -24,7 +25,7 @@ def createCode(package):
   code = open(codeName, 'w')
   fileHeaders.addFilename(code, codeName, nameOfClass)
   fileHeaders.addLicence(code)
-  inputFile = '../../../../../../templateDocPluginCPP.txt' 
+  inputFile = os.path.dirname(__file__)  + '/templateDocPluginCPP.txt' 
   input = open(inputFile, 'r')
   for line in input:
     if line[0:13] != 'TEMPLATE_STOP':
