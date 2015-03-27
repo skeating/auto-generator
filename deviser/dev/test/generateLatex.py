@@ -10,9 +10,10 @@ sys.path.append(os.path.dirname(__file__)  + "/../../parseXML")
 sys.path.append(os.path.dirname(__file__)  + "/../../spec_files")
 sys.path.append(os.path.dirname(__file__)  + "/../../util")
 sys.path.append(os.path.dirname(__file__)  + "/../../validation")
-import CppHeaderFile
+sys.path.append(os.path.dirname(__file__)  + "/../..")
 import TexValidationRulesFile
 import TexBodySyntaxFile
+import TexMacrosFile
 from createPackageFromXml import *
 
 def generateLatexFor(file):
@@ -23,6 +24,9 @@ def generateLatexFor(file):
   body = TexBodySyntaxFile.TexBodySyntaxFile(ob)
   body.write_file()
   body.close_file()
+  macros = TexMacrosFile.TexMacrosFile(ob)
+  macros.write_file()
+  macros.close_file()
 
 def main(args):     
   if len(args) != 2:

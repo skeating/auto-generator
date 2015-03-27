@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import re
+
 
 def upper_first(word):
     returned_word = word[0].upper() + word[1:len(word)]
@@ -65,13 +67,19 @@ def get_indefinite(name):
     else:
         return 'a'
 
+
 def wrap_token(name, pkg=''):
+    """ returns the name wrapped as a token
+       e.g. \token{'id'} or \token{'comp:\-id'} """
+    # check for underscores in the name
+    name = re.sub('_', '\_', name)
     if pkg == '':
         return '\\token{' + name + '}'
     else:
         return '\\token{' + pkg + ':\\-' + name + '}'
 
-def wrap_type(name, element, hack= False):
+
+def wrap_type(name, element, hack=False):
     if name == 'array':
         return 'consisting of an array of \\primtype{' + element + '}'
     elif name == 'enum':
@@ -86,11 +94,21 @@ def wrap_type(name, element, hack= False):
     else:
         return 'of type \\primtype{' + name + '}'
 
-def wrap_section(name):
-    return '\\sec{' + name.lower() + '-class}'
+
+def wrap_section(name, add_class=True):
+    if add_class:
+        return '\\sec{' + make_class(name) + '}'
+    else:
+        return '\\sec{' + name + '}'
+
+
+def make_class(name):
+    return name.lower() + '-class'
+
 
 def wrap_enum(name):
     return '\\primtype{' + lower_first(name) + '}'
+
 
 def get_element_name(attribute):
     if attribute['type'] == 'lo_element':
@@ -102,3 +120,9 @@ def get_element_name(attribute):
             return attribute['element']
     else:
         return 'FIX_ME'
+
+def replace_digits(name):
+    name = re.sub('1', 'One', name)
+    name = re.sub('2', 'Two', name)
+    name = re.sub('3', 'Three', name)
+    return name

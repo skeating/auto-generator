@@ -7,6 +7,7 @@ import os
 import CppHeaderFile
 import TexValidationRulesFile
 import TexBodySyntaxFile
+import TexMacrosFile
 from createPackageFromXml import *
 
 
@@ -22,4 +23,7 @@ else:
   body = TexBodySyntaxFile.TexBodySyntaxFile(ob)
   body.write_file()
   body.close_file()
+  macros = TexMacrosFile.TexMacrosFile(ob)
+  macros.write_file()
+  macros.close_file()
 

@@ -1,8 +1,11 @@
 #!/usr/bin/python
 
+import re
+import os
 import BaseTexFile
 import BaseFile
 import ValidationRulesForClass
+import strFunctions
 
 
 class TexValidationRulesFile(BaseTexFile.BaseTexFile):
@@ -25,35 +28,123 @@ class TexValidationRulesFile(BaseTexFile.BaseTexFile):
         self.end_b = '}'
 
         BaseTexFile.BaseTexFile.__init__(self, 'apdx-validation', 'tex',
-                                         None)
+                                         self.sbml_classes)
 
     ########################################################################
 
-    # Write rules for a class
+    # Write a rule
+    def write_rule(self, rule, name='', texname=''):
+        substitute_name = False
+        if name != texname:
+            substitute_name = True
 
-    def write_rules_for_class(self, name, rules):
+        text = rule['text']
+        ref = rule['reference']
+        if substitute_name:
+            text = re.sub(name, texname, text)
+            ref = re.sub(name.lower(), texname.lower(), ref)
+
+        if rule['severity'] == 'ERROR':
+            severity = self.valid
+        else:
+            severity = self.consist
+
+        self.write_line('{}{}-{}{}{}{} (Reference: {}){}'
+                        .format(severity, self.package,
+                                rule['number']-self.offset,
+                                self.end_b, self.start_b, text,
+                                ref, self.end_b))
+
+    ####################################################################
+
+    # Write general rules
+    def write_general_rules(self):
+        self.write_line('\subsubsection*{General rules about this package}')
+        self.skip_line()
+        text = 'To conform to the {} package specification for SBML Level~3 ' \
+               'Version~1, an SBML document must declare the use of the ' \
+               'following XML Namespace: \\uri{}http://www.sbml.org/sbml/' \
+               'level3/version1/{}/version1{}.'.format(self.fullname,
+                                                       self.start_b,
+                                                       self.package,
+                                                       self.end_b)
+        ref = 'SBML Level~3 Package specification for {}, Version~1 {}.'\
+            .format(self.fullname,
+                    strFunctions.wrap_section('xml-namespace', False))
+        rule = {'severity': 'ERROR', 'number': 10101+self.offset,
+                'text': text, 'reference': ref}
+        self.write_rule(rule)
+        self.skip_line()
+        text = 'Wherever they appear in an SBML document, elements and ' \
+               'attributes from the {} package must be declared either ' \
+               'implicitly or explicitly to be in the XML namespace ' \
+               '\\uri{}http://www.sbml.org/sbml/level3/version1/{}/version1{}.'\
+            .format(self.fullname, self.start_b, self.package, self.end_b)
+        ref = 'SBML Level~3 Package specification for {}, Version~1 {}.'\
+            .format(self.fullname,
+                    strFunctions.wrap_section('xml-namespace', False))
+        rule = {'severity': 'ERROR', 'number': 10102+self.offset,
+                'text': text, 'reference': ref}
+        self.write_rule(rule)
+        self.skip_line()
+
+    # Write rules for a class
+    def write_rules_for_class(self, name, texname, rules):
         # section heading
         self.write_line('\subsubsection*{Rules for \class{'
                         + '{}'.format(name) + '} object}')
         self.skip_line()
 
         for i in range(0, len(rules)):
-            rule = rules[i]
-            self.write_line('{}{}-{}{}{}{} (Reference: {}){}'
-                            .format(self.valid
-                                    if rule['severity'] == 'ERROR'
-                                    else self.consist,
-                                    self.package, rule['number']-self.offset,
-                                    self.end_b, self.start_b, rule['text'],
-                                    rule['reference'], self.end_b))
+            self.write_rule(rules[i], name, texname)
             self.skip_line()
 
     ########################################################################
 
+    # write parts of file that can be copied from text
+
+    def get_text(self, filename):
+        file_in = open(os.path.dirname(__file__) + '\\' + filename, 'r')
+        intro = file_in.read()
+        file_in.close()
+        intro = re.sub('PACKAGENAME', self.fullname, intro)
+        intro = re.sub('SHORTNAME', self.package, intro)
+        return intro
+
+    def write_introduction(self):
+        self.write_line('\section{Validation of SBML documents}')
+        self.write_line('\label{apdx-validation}')
+        self.skip_line()
+        self.write_line('\subsection{Validation and consistency rules}')
+        self.write_line('\label{validation-rules}')
+        self.skip_line()
+        self.write_line(self.get_text('valid_intro_para1.txt'))
+        self.skip_line()
+        self.write_line('\\begin{description}')
+        self.skip_line()
+        self.write_line(self.get_text('valid_intro_para2.txt'))
+        self.skip_line()
+        self.write_line(self.get_text('valid_intro_para3.txt'))
+        self.skip_line()
+        self.write_line(self.get_text('valid_intro_para4.txt'))
+        self.skip_line()
+        self.write_line('\\end{description}')
+        self.skip_line()
+        self.write_line(self.get_text('valid_intro_para5.txt'))
+        self.skip_line()
+        self.write_line(self.get_text('valid_intro_para6.txt'))
+        self.skip_line()
+
+    ########################################################################
     # Write file
 
     def write_file(self):
         BaseFile.BaseFile.write_file(self)
+        self.skip_line()
+        self.write_introduction()
+        self.write_general_rules()
+        self.write_line('NOT YET DONE ... IN PROGRESS')
+        self.skip_line(2)
         number = self.offset+20300
         for i in range(0, len(self.sbml_classes)):
             rules = ValidationRulesForClass\
@@ -61,6 +152,7 @@ class TexValidationRulesFile(BaseTexFile.BaseTexFile):
                                          self.fullname, number, self.package)
             rules.determine_rules()
             self.write_rules_for_class(self.sbml_classes[i]['name'],
+                                       self.sbml_classes[i]['texname'],
                                        rules.rules)
             self.skip_line()
             number += 100
