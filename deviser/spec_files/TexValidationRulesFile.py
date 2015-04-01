@@ -17,6 +17,7 @@ class TexValidationRulesFile(BaseTexFile.BaseTexFile):
         self.fullname = object_desc['fullname']
         self.sbml_classes = object_desc['sbmlElements']
         self.offset = object_desc['offset']
+        self.plugins = object_desc['plugins']
 
         # derived members for description
         self.brief_description = 'Validation rules appendix for specification'
@@ -145,7 +146,8 @@ class TexValidationRulesFile(BaseTexFile.BaseTexFile):
         self.skip_line()
         self.write_introduction()
         self.write_general_rules()
-        self.write_line('NOT YET DONE ... IN PROGRESS')
+        self.write_to_do('validation of identifiers')
+        self.write_to_do('validation of extended elements')
         self.skip_line(2)
         number = self.offset+20300
         for i in range(0, len(self.sbml_classes)):

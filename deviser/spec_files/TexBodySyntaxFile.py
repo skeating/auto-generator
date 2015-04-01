@@ -15,6 +15,7 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
         self.sbml_classes = object_desc['sbmlElements']
         self.offset = object_desc['offset']
         self.enums = object_desc['enums']
+        self.plugins = object_desc['plugins']
 
         self.start_b = '{'
         self.end_b = '}'
@@ -23,10 +24,22 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
         self.brief_description = 'Syntax section for specification'
 
         BaseTexFile.BaseTexFile.__init__(self, 'body', 'tex',
-                                         None)
+                                         self.sbml_classes)
 
     ########################################################################
+    # Write rules for an extended class
 
+    def write_body_for_extended_class(self, plugin):
+        # section heading
+        self.write_comment_line('---------------------------------------------'
+                                '---------------------------------------------')
+        self.write_line('\subsection{0}The extended \class{0}{1}{2} class{2}'
+                        .format(self.start_b, plugin['sbase'], self.end_b))
+        self.skip_line()
+        self.write_comment_line('TO DO: finish code for extended {}'.format(plugin['sbase']))
+        self.skip_line()
+
+    ########################################################################
     # Write rules for a class
 
     def write_body_for_class(self, sbml_class):
@@ -40,8 +53,7 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
         self.write_line('\subsection{0}The \class{0}{1}{2} class{2}'
                         .format(self.start_b, sbml_class['name'], self.end_b))
         self.write_line('\label{}{}-class{}'
-                        .format(self.start_b,
-                                sbml_class['name'].lower(),
+                        .format(self.start_b, classname.lower(),
                                 self.end_b))
         self.skip_line()
         self.write_comment_line('TO DO: explain {}'.format(sbml_class['name']))
@@ -78,6 +90,11 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
                 written = True
             att = sbml_class['attribs'][i]
             self.write_attibute_paragraph(att, classname)
+
+        for i in range(0, len(sbml_class['lo_attribs'])):
+            att = sbml_class['lo_attribs'][i]
+            self.write_to_do('deal with attribute {} on a listOf{} element'
+                             .format(att['name'], classname))
 
     # Write rules for an attribute
     def write_attibute_paragraph(self, attrib, name):
@@ -137,6 +154,7 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
 
         self.write_to_do('Paragraph needed')
 
+    #########################################################################
     # Write data types section
     def write_primitive_data_types(self):
         self.write_line('\\subsection{Primitive data types}')
@@ -156,6 +174,27 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
         self.write_to_do('check all necessary types from core are listed')
         for i in range(0, len(self.enums)):
             self.write_enum_type(self.enums[i])
+        for i in range(0, len(self.prim_class)):
+            self.write_prim_class(self.prim_class[i])
+
+
+    # write sub section for an primitive class type
+    def write_prim_class(self, prim_class):
+        self.write_line('\\subsubsection{0}Type \\fixttspace'
+                        '\\primtypeNC{0}{1}{2}{2}'
+                        .format(self.start_b, prim_class['name'], self.end_b))
+        self.skip_line()
+        written = False
+        for i in range(0, len(prim_class['attribs'])):
+            if not written:
+                self.write_line('The  \\{} object has the '
+                                'following attributes.'
+                                .format(prim_class['name']))
+                self.skip_line()
+                written = True
+            att = prim_class['attribs'][i]
+            self.write_attibute_paragraph(att, prim_class['name'])
+        self.write_to_do('Explain use of {}'.format(prim_class['name']))
 
     # write sub section for an enum type
     def write_enum_type(self, enum):
@@ -204,8 +243,12 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
 
         self.write_namespace_section()
         self.write_primitive_data_types()
+        for i in range(0, len(self.plugins)):
+            self.write_body_for_extended_class(self.plugins[i])
         for i in range(0, len(self.sbml_classes)):
-            self.write_body_for_class(self.sbml_classes[i])
+            #hack for render
+            if self.sbml_classes[i]['name'] != 'RelAbsVector':
+                self.write_body_for_class(self.sbml_classes[i])
 
     # override
     def add_file_header(self):

@@ -107,12 +107,35 @@ def parse_deviser_xml(filename):
 
             attributes.append(attribute_dict)
 
+        lo_attributes = []
+
+        # add attributes
+        for attr in node.getElementsByTagName('listOfAttribute'):
+
+            attr_name = get_value(attr, 'name')
+            required = to_bool(get_value(attr, 'required'))
+            attr_type = get_value(attr, 'type')
+            attr_abstract = to_bool(get_value(attr, 'abstract'))
+            attr_element = get_value(attr, 'element')
+
+            attribute_dict = dict({'type': attr_type,
+                                   'reqd': required,
+                                   'name': attr_name,
+                                   'element': attr_element,
+                                   'abstract': attr_abstract,
+            })
+            if attr_abstract:
+                attribute_dict['concrete'] = concrete_dict[attr_element]
+
+            lo_attributes.append(attribute_dict)
+
         # construct element
         element = dict({'name': element_name,
                         'package': package_name,
                         'typecode': type_code,
                         'hasListOf': has_list_of,
                         'attribs': attributes,
+                        'lo_attribs': lo_attributes,
                         'hasChildren': has_children,
                         'hasMath': has_math,
                         'childrenOverwriteElementName':

@@ -14,6 +14,8 @@ class TexMacrosFile(BaseTexFile.BaseTexFile):
         self.fullname = object_desc['fullname']
         self.sbml_classes = object_desc['sbmlElements']
         self.offset = object_desc['offset']
+        self.enums = object_desc['enums']
+        self.plugins = object_desc['plugins']
 
         self.start_b = '{'
         self.end_b = '}'
@@ -61,6 +63,17 @@ class TexMacrosFile(BaseTexFile.BaseTexFile):
                                         strFunctions.make_class(lo_name),
                                         'ListOfRenderPoints'))
 
+    # Write commands for each primitive type
+    def write_macro_for_enum(self, enum):
+        self.write_line('\\newcommand{0}\\{1}{2}{0}\\defRef{0}{4}{2}'
+                        '{0}{3}{2}{2}'
+                        .format(self.start_b, enum['name'],
+                                self.end_b,
+                                'primitive-types',
+                                enum['name']))
+
+
+    #########################################################################
     # Write file
 
     def write_file(self):
@@ -83,9 +96,23 @@ class TexMacrosFile(BaseTexFile.BaseTexFile):
         self.write_line('\\newcommand{0}\\TODO{1}[1]{0}\\colorbox{0}blue{1}'
                         '{0}\\textcolor{0}white{1}{0}TODO: #1{1}{1}{1}'
                         .format(self.start_b, self.end_b))
+        self.skip_line()
+        self.skip_line()
+        self.write_comment_line('commands for classes')
         for i in range(0, len(self.sbml_classes)):
-            self.write_macro_for_class(self.sbml_classes[i])
+            # hack for render
+            if self.sbml_classes[i]['name'] != "RelAbsVector":
+                self.write_macro_for_class(self.sbml_classes[i])
+        self.skip_line()
+        self.write_comment_line('commands for listOfClasses')
+        for i in range(0, len(self.sbml_classes)):
             self.write_macro_for_listof(self.sbml_classes[i])
+        self.skip_line()
+        self.write_comment_line('commands for types')
+        for i in range(0, len(self.enums)):
+            self.write_macro_for_enum(self.enums[i])
+        for i in range(0, len(self.prim_class)):
+            self.write_macro_for_enum(self.prim_class[i])
 
     # override
     def add_file_header(self):
