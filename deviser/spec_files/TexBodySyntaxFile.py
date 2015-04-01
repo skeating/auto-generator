@@ -29,6 +29,10 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
     # Write rules for a class
 
     def write_body_for_class(self, sbml_class):
+        if 'texname' in sbml_class:
+            classname = sbml_class['texname']
+        else:
+            classname = sbml_class['name']
         # section heading
         self.write_comment_line('---------------------------------------------'
                                 '---------------------------------------------')
@@ -42,16 +46,35 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
         self.write_comment_line('TO DO: explain {}'.format(sbml_class['name']))
         self.skip_line()
 
-        if 'texname' in sbml_class:
-            classname = sbml_class['texname']
-        else:
-            classname = sbml_class['name']
+        if len(sbml_class['attribs']) == 0:
+            self.write_line('The \\{1} object derives from the '
+                            '\class{0}{3}{2} class and thus inherits any '
+                            'attributes and elements that are present on '
+                            'this class.'.format(self.start_b,
+                                                 classname,
+                                                 self.end_b,
+                                                 sbml_class['baseClass']))
+            return
+
+        self.write_line('The \\{1} object derives from the '
+                        '\class{0}{3}{2} class and thus inherits any '
+                        'attributes and elements that are present on '
+                        'this class.'
+                        .format(self.start_b, classname, self.end_b,
+                                sbml_class['baseClass']))
 
         for i in range(0, len(sbml_class['attribs'])):
             att = sbml_class['attribs'][i]
             self.write_child_element(att, classname)
 
+        written = False
         for i in range(0, len(sbml_class['attribs'])):
+            if not written:
+                self.write_line('In addition the  \\{} object has the '
+                                'following attributes.'
+                                .format(classname))
+                self.skip_line()
+                written = True
             att = sbml_class['attribs'][i]
             self.write_attibute_paragraph(att, classname)
 
@@ -103,7 +126,6 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
                                               else 'exactly one',
                                 strFunctions.wrap_type(attrib['type'],
                                                        child_name)))
-        self.skip_line()
 
     ########################################################################
 
