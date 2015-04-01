@@ -340,7 +340,7 @@ def writeAttributeFunctions(attrs, output, element, elementDict):
   for i in range(0, len(attrs)):
     writeUnsetFunction(attrs[i], output, element)
   for i in range(0, len(attrs)):
-    if attrs[i]['type'] == 'lo_element':
+    if attrs[i]['type'] == 'lo_element' or attrs[i]['type'] == 'inline_lo_element':
       writeListOfSubFunctions(attrs[i], output, element, elementDict)
   if elementDict.has_key('abstract'): 
     if elementDict['abstract']:

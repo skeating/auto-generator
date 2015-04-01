@@ -101,7 +101,7 @@ def parseAttribute(attrib):
       else:
         attTypeCode = '{0}*'.format(strFunctions.cap(attrib['name']))
     num = False
-  elif attrib['type'] == 'lo_element':
+  elif attrib['type'] == 'lo_element' or attrib['type'] == 'inline_lo_element':
     attType = 'lo_element'
     attTypeCode = attrib['element']
     if attName.endswith('x'):
@@ -178,7 +178,7 @@ def parseAttributeForC(attrib):
       #attTypeCode = 'element-not-done'
       attTypeCode = '{0}*'.format(strFunctions.cap(attrib['name']))
     num = False
-  elif attrib['type'] == 'lo_element':
+  elif attrib['type'] == 'lo_element' or attrib['type'] == 'inline_lo_element':
     attType = 'lo_element'
     attTypeCode = attrib['element']
     num = False
@@ -748,7 +748,7 @@ def writeReadAttribute(output, attrib, element, pkg, baseClass = '', extendedEle
     # output.write('                   getPackageVersion(), sbmlLevel, sbmlVersion, "", getLine(), getColumn());\n')
     # output.write('    }\n')
     # output.write('  }\n')
-  elif attrib['type'] == 'element' or attrib['type'] == 'lo_element' or attrib['type'] == 'array':
+  elif attrib['type'] == 'element' or attrib['type'] == 'lo_element' or attrib['type'] == 'array' or attrib['type'] == 'inline_lo_element':
     return
   else:
     attType = 'FIX ME'

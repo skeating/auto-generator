@@ -55,7 +55,7 @@ def writeAtt(atttype, name, output, constType, pkg, attrib):
     output.write('  , m{0} ("")\n'.format(strFunctions.cap(name)))
   elif atttype == 'element':
     output.write('  , m{0} (NULL)\n'.format(strFunctions.cap(name)))
-  elif atttype == 'lo_element':
+  elif atttype == 'lo_element' or atttype == 'inline_lo_element':
     if name.endswith('x'):
       output.write('  , m{0}es ('.format(strFunctions.cap((name))))
     else:
@@ -530,18 +530,18 @@ def writeUnsetCode(attrib, output, element):
 # for each attribute write a set/get/isset/unset
 def writeAttributeCode(attrs, output, element, pkgName, elementDict):
   for i in range(0, len(attrs)):
-    if attrs[i]['type'] != 'lo_element':
+    if attrs[i]['type'] != 'lo_element' and attrs[i]['type'] != 'inline_lo_element':
       writeGetCode(attrs[i], output, element)
   for i in range(0, len(attrs)):
-    if attrs[i]['type'] != 'lo_element':
+    if attrs[i]['type'] != 'lo_element' and attrs[i]['type'] != 'inline_lo_element':
       writeIsSetCode(attrs[i], output, element)
   for i in range(0, len(attrs)):
-    if attrs[i]['type'] != 'lo_element':
+    if attrs[i]['type'] != 'lo_element' and attrs[i]['type'] != 'inline_lo_element':
       writeSetCode(attrs[i], output, element)
   for i in range(0, len(attrs)):
     writeUnsetCode(attrs[i], output, element)
   for i in range(0, len(attrs)):
-    if attrs[i]['type'] == 'lo_element':
+    if attrs[i]['type'] == 'lo_element' or attrs[i]['type'] == 'inline_lo_element':
       writeListOfSubFunctions(attrs[i], output, element, pkgName)
   if elementDict.has_key('abstract'): 
     if elementDict['abstract']:
