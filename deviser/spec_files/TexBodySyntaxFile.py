@@ -83,7 +83,7 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
     def write_attibute_paragraph(self, attrib, name):
         att_name = attrib['texname']
         if attrib['type'] == 'lo_element' \
-                or attrib['type'] == 'inline-lo-element':
+                or attrib['type'] == 'inline_lo_element':
             return
         elif attrib['type'] == 'element' and attrib['element'] != 'RelAbsVector':
             return
