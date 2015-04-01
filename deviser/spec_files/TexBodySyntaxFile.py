@@ -14,6 +14,7 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
         self.fullname = object_desc['fullname']
         self.sbml_classes = object_desc['sbmlElements']
         self.offset = object_desc['offset']
+        self.enums = object_desc['enums']
 
         self.start_b = '{'
         self.end_b = '}'
@@ -79,7 +80,6 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
             self.write_attibute_paragraph(att, classname)
 
     # Write rules for an attribute
-
     def write_attibute_paragraph(self, attrib, name):
         att_name = attrib['texname']
         if attrib['type'] == 'lo_element' \
@@ -128,11 +128,82 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
                                                        child_name)))
 
     ########################################################################
+    # Write namespace section
+    def write_namespace_section(self):
+        self.write_line('\\subsection{Namespace URI and other declarations '
+                        'necessary for using this package}')
+        self.write_line('\\label{xml-namespace}')
+        self.skip_line()
 
+        self.write_to_do('Paragraph needed')
+
+    # Write data types section
+    def write_primitive_data_types(self):
+        self.write_line('\\subsection{Primitive data types}')
+        self.write_line('\\label{primitive-types}')
+        self.skip_line()
+        self.write_line('Section~3.1 of the SBML Level~3 specification '
+                        'defines a number of primitive data types and also '
+                        'uses a number of XML Schema 1.0 data types '
+                        '\\citep{0}biron:2000{1}.  We assume and use some of '
+                        'them in the rest of this specification, specifically '
+                        '\\primtype{0}boolean{1}, \\primtype{0}ID{1}, '
+                        '\\primtype{0}SId{1}, \\primtype{0}SIdRef{1}, and '
+                        '\\primtype{0}string{1}. The \\{2}Package defines '
+                        'other primitive types; these are described below.'
+                        .format(self.start_b, self.end_b, self.fullname))
+        self.skip_line()
+        self.write_to_do('check all necessary types from core are listed')
+        for i in range(0, len(self.enums)):
+            self.write_enum_type(self.enums[i])
+
+    # write sub section for an enum type
+    def write_enum_type(self, enum):
+        self.write_line('\\subsubsection{0}Type \\fixttspace'
+                        '\\primtypeNC{0}{1}{2}{2}'
+                        .format(self.start_b, enum['name'], self.end_b))
+        self.skip_line()
+        self.write_line('The \\primtype{}{}{} is an emueration of values used '
+                        'to TO DO.'.format(self.start_b, enum['name'],
+                                             self.end_b))
+        self.write_line('The possible values are {}.'
+                        .format(self.list_values(enum)))
+        self.skip_line()
+        self.write_to_do('Explain use of {}'.format(enum['name']))
+
+    def list_values(self, enum):
+        num_values = len(enum['values'])
+        listed = '\\const{}{}{}'.format(self.start_b, enum['values'][0]['value'],
+                                        self.end_b)
+        for i in range(1, num_values-1):
+            enum_value = ', \\const{}{}{}'.format(self.start_b,
+                                                  enum['values'][i]['value'],
+                                                  self.end_b)
+            listed += enum_value
+        listed += ' and \\const{}{}{}'.format(self.start_b,
+                                              enum['values'][num_values-1]['value'],
+                                              self.end_b)
+        return listed
+    #######################################################################
     # Write file
 
     def write_file(self):
         BaseFile.BaseFile.write_file(self)
+
+        self.write_line('\\section{Package syntax and semantics}')
+        self.skip_line()
+        self.write_line('In this section, we define the syntax and '
+                        'semantics of the \\{}Package for '
+                        '\\sbmlthreecore. We expound on the various data '
+                        'types and constructs defined in this package, '
+                        'then in {}, we provide complete '
+                        'examples of using the constructs in example '
+                        'SBML models.'.format(self.fullname,
+                                              strFunctions.wrap_section('examples', False)))
+        self.skip_line()
+
+        self.write_namespace_section()
+        self.write_primitive_data_types()
         for i in range(0, len(self.sbml_classes)):
             self.write_body_for_class(self.sbml_classes[i])
 

@@ -43,3 +43,8 @@ class BaseTexFile(BaseFile.BaseFile):
                     texname = strFunctions.replace_digits(name)
                     texname = strFunctions.replace_underscore(texname)
                     attribs[j]['texname'] = texname
+
+    # function to write a to do into text
+    def write_to_do(self, text):
+        self.write_line('\\TODO{}{}{}'.format(self.start_b, text, self.end_b))
+        self.skip_line()

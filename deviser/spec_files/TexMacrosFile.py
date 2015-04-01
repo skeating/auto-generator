@@ -66,6 +66,9 @@ class TexMacrosFile(BaseTexFile.BaseTexFile):
     def write_file(self):
         BaseFile.BaseFile.write_file(self)
         self.write_comment_line('\\newcommand{\\fixttspace}{\\hspace*{1pt}}')
+        self.write_line('\\newcommand{0}\\const{1}[1]{0}\\texttt{0} #1{1}{1}'
+                        .format(self.start_b, self.end_b))
+        self.skip_line()
         self.write_line('\\newcommand{\\sbmlthreecore}{SBML Level~3 '
                         'Version~1 Core\\xspace}')
         self.write_line('\\newcommand{0}\\{1}{2}{0}\\textsf{0}{1}'
@@ -77,6 +80,9 @@ class TexMacrosFile(BaseTexFile.BaseTexFile):
                                 strFunctions.upper_first(self.package),
                                 self.end_b))
         self.skip_line()
+        self.write_line('\\newcommand{0}\\TODO{1}[1]{0}\\colorbox{0}blue{1}'
+                        '{0}\\textcolor{0}white{1}{0}TODO: #1{1}{1}{1}'
+                        .format(self.start_b, self.end_b))
         for i in range(0, len(self.sbml_classes)):
             self.write_macro_for_class(self.sbml_classes[i])
             self.write_macro_for_listof(self.sbml_classes[i])
