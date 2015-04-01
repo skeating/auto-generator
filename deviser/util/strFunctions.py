@@ -71,8 +71,6 @@ def get_indefinite(name):
 def wrap_token(name, pkg=''):
     """ returns the name wrapped as a token
        e.g. \token{'id'} or \token{'comp:\-id'} """
-    # check for underscores in the name
-    name = re.sub('_', '\_', name)
     if pkg == '':
         return '\\token{' + name + '}'
     else:
@@ -91,6 +89,8 @@ def wrap_type(name, element, hack=False):
             return wrap_token(element)
     elif name == 'lo_element':
         return wrap_token(element)
+    elif name == 'inline_lo_element':
+        return 'TO DO: add type'
     else:
         return 'of type \\primtype{' + name + '}'
 
@@ -113,6 +113,8 @@ def wrap_enum(name):
 def get_element_name(attribute):
     if attribute['type'] == 'lo_element':
         return '\{}'.format(list_of_name(attribute['element']))
+    elif attribute['type'] == 'inline_lo_element':
+        return '\{}'.format(cap_list_of_name(attribute['texname']))
     elif attribute['type'] == 'element':
         if attribute['element'] == 'ASTNode*':
             return 'MathML math'
@@ -125,4 +127,8 @@ def replace_digits(name):
     name = re.sub('1', 'One', name)
     name = re.sub('2', 'Two', name)
     name = re.sub('3', 'Three', name)
+    return name
+
+def replace_underscore(name):
+    name = re.sub('_', '\_', name)
     return name

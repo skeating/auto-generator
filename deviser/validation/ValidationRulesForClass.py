@@ -111,6 +111,9 @@ class ValidationRulesForClass():
             return
         elif att_type == 'SIdRef':
             ref_name = strFunctions.upper_first(attribute['name'])
+            # hack for render
+            if ref_name == 'StartHead' or ref_name == 'EndHead':
+                ref_name = 'LineEnding'
             text = 'The value of the attribute {} of {} {} object must be ' \
                    'the identifier of an existing \{} object defined in the ' \
                    'enclosing \Model object.'\
@@ -154,7 +157,8 @@ class ValidationRulesForClass():
                         strFunctions.wrap_token(attribute['element']))
         else:
             text = 'FIX ME: Encountered an unknown attribute type {} in ' \
-                   'write_attribute_type_rule'.format(att_type)
+                   'ValidationRulesForClass:write_attribute_type_rule'\
+                .format(att_type)
 
         ref = 'SBML Level~3 Specification for {} Version~1, {}.'\
             .format(self.fullname, strFunctions.wrap_section(self.name))
@@ -370,7 +374,8 @@ class ValidationRulesForClass():
                     self.reqd_elem.append(attributes[i])
                 else:
                     self.opt_elem.append(attributes[i])
-            elif attributes[i]['type'] == 'lo_element':
+            elif attributes[i]['type'] == 'lo_element' \
+                    or attributes[i]['type'] == 'inline_lo_element':
                 if attributes[i]['reqd'] is True:
                     self.reqd_child_lo_elem.append(attributes[i])
                     self.reqd_elem.append(attributes[i])
@@ -428,7 +433,7 @@ class ValidationRulesForClass():
             elements = '{}'.format(strFunctions.get_element_name(
                 self.opt_child_lo_elem[0]))
 
-        text = 'The {0} sub{1} on {2} {3} object are optional, but if ' \
+        text = 'The {0} sub{1} on {2} {3} object is optional, but if ' \
                'present, {4} container {1} must not be empty.'\
             .format(elements, obj, self.indef, self.formatted_name, pred)
         ref = 'SBML Level~3 Specification for {} Version~1, {}.'\

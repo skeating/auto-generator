@@ -42,25 +42,32 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
         self.write_comment_line('TO DO: explain {}'.format(sbml_class['name']))
         self.skip_line()
 
-        for i in range(0, len(sbml_class['attribs'])):
-            att = sbml_class['attribs'][i]
-            self.write_child_element(att, sbml_class['name'])
+        if 'texname' in sbml_class:
+            classname = sbml_class['texname']
+        else:
+            classname = sbml_class['name']
 
         for i in range(0, len(sbml_class['attribs'])):
             att = sbml_class['attribs'][i]
-            self.write_attibute_paragraph(att, sbml_class['name'])
+            self.write_child_element(att, classname)
+
+        for i in range(0, len(sbml_class['attribs'])):
+            att = sbml_class['attribs'][i]
+            self.write_attibute_paragraph(att, classname)
 
     # Write rules for an attribute
 
     def write_attibute_paragraph(self, attrib, name):
-        if attrib['type'] == 'lo_element':
+        att_name = attrib['texname']
+        if attrib['type'] == 'lo_element' \
+                or attrib['type'] == 'inline-lo-element':
             return
         elif attrib['type'] == 'element' and attrib['element'] != 'RelAbsVector':
             return
         else:
             self.write_line('\paragraph{0}The \\fixttspace\\token'
                         '{0}{1}{2} attribute{2}'.format(self.start_b,
-                                                        attrib['name'],
+                                                        att_name,
                                                         self.end_b))
             self.skip_line()
             self.write_line('{} \{} has {} attribute {} {}.'
@@ -69,7 +76,7 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
                                     name,
                                     'a required' if attrib['reqd'] is True
                                                  else 'an optional',
-                                    strFunctions.wrap_token(attrib['name']),
+                                    strFunctions.wrap_token(att_name),
                                     strFunctions.wrap_type(attrib['type'],
                                                            attrib['element'],
                                                            True)))
@@ -80,6 +87,8 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
             child_name = attrib['element']
         elif attrib['type'] == 'lo_element':
             child_name = strFunctions.cap_list_of_name(attrib['name'])
+        elif attrib['type'] == 'inline_lo_element':
+            child_name = 'TO DO: add name'
         else:
             return
 

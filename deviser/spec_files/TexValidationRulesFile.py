@@ -88,6 +88,8 @@ class TexValidationRulesFile(BaseTexFile.BaseTexFile):
         self.write_rule(rule)
         self.skip_line()
 
+    #  Write identifier rules
+
     # Write rules for a class
     def write_rules_for_class(self, name, texname, rules):
         # section heading
