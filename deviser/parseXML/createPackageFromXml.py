@@ -36,7 +36,7 @@ def find_lo_element(elements, name):
     if elements is None or name is None:
         return None
     for element in elements:
-        if 'hasListOf' in element and element['hasListOf'] is True:
+        if 'isListOf' in element and element['isListOf'] is True:
             match = strFunctions.list_of_name(element['name'])
             if 'listOfName' in element:
                 match = element['listOfName']
@@ -178,7 +178,8 @@ def parse_deviser_xml(filename):
 
         elements.append(dict({'name': element_name,
                               'typecode': type_code,
-                              'isListOf': has_list_of}))
+                              'isListOf': has_list_of,
+                              'listOfName': xml_lo_element_name if xml_lo_element_name is not None else ''}))
         sbml_elements.append(element)
 
     for node in dom.getElementsByTagName('plugin'):
