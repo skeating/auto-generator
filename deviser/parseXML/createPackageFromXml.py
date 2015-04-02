@@ -2,6 +2,7 @@
 
 from xml.dom.minidom import *
 import os.path
+import strFunctions
 
 
 def to_bool(v):
@@ -30,6 +31,19 @@ def find_element(elements, name):
         if element['name'] == name:
             return element
     return None
+
+def find_lo_element(elements, name):
+    if elements is None or name is None:
+        return None
+    for element in elements:
+        if 'hasListOf' in element and element['hasListOf'] is True:
+            match = strFunctions.list_of_name(element['name'])
+            if 'listOfName' in element:
+                match = element['listOfName']
+            if match == name:
+                return element
+    return None
+
 
 
 def parse_deviser_xml(filename):
@@ -170,6 +184,7 @@ def parse_deviser_xml(filename):
     for node in dom.getElementsByTagName('plugin'):
 
         plug_elements = []
+        plug_lo_elements = []
         ext_point = get_value(node, 'extensionPoint')
         add_decls = get_value(node, 'additionalDecls')
         add_defs = get_value(node, 'additionalDefs')
@@ -179,6 +194,12 @@ def parse_deviser_xml(filename):
             temp = find_element(elements, get_value(reference, 'name'))
             if temp is not None:
                 plug_elements.append(temp)
+
+        # look for references to ListOf elements
+        for reference in node.getElementsByTagName('reference'):
+            temp = find_lo_element(elements, get_value(reference, 'name'))
+            if temp is not None:
+                plug_lo_elements.append(temp)
 
         attributes = []
 
@@ -204,7 +225,8 @@ def parse_deviser_xml(filename):
 
         plugin_dict = dict({'sbase': ext_point,
                             'extension': plug_elements,
-                            'attribs': attributes})
+                            'attribs': attributes,
+                            'lo_extension': plug_lo_elements})
 
         if add_decls is not None:
             if os.path.exists(os.path.dirname(filename) + '/' + add_decls):
