@@ -37,8 +37,7 @@ class BaseTexFile(BaseFile.BaseFile):
                     self.prim_class.append(classes[i])
 
     # function to record attribute names with no digits or underscores
-    @staticmethod
-    def sort_attribute_names(classes):
+    def sort_attribute_names(self, classes):
         if classes is not None:
             for i in range(0, len(classes)):
                 attribs = classes[i]['attribs']
@@ -47,11 +46,12 @@ class BaseTexFile(BaseFile.BaseFile):
                     texname = strFunctions.replace_underscore(name)
                     attribs[j]['texname'] = texname
             for i in range(0, len(classes)):
-                lo_attribs = classes[i]['lo_attribs']
-                for j in range(0, len(lo_attribs)):
-                    name = lo_attribs[j]['name']
-                    texname = strFunctions.replace_underscore(name)
-                    lo_attribs[j]['texname'] = texname
+                if 'lo_attribs' in classes[i]:
+                    lo_attribs = classes[i]['lo_attribs']
+                    for j in range(0, len(lo_attribs)):
+                        name = lo_attribs[j]['name']
+                        texname = strFunctions.replace_underscore(name)
+                        lo_attribs[j]['texname'] = texname
 
     # function to write a to do into text
     def write_to_do(self, text):

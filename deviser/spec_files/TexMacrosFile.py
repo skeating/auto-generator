@@ -49,7 +49,7 @@ class TexMacrosFile(BaseTexFile.BaseTexFile):
                             '{0}{3}{2}{2}'
                             .format(self.start_b, lo_name, self.end_b,
                                     strFunctions.make_class(lo_name)))
-            #hack for render
+            # hack for render
             if sbml_class['name'] == 'GradientBase':
                 self.write_line('\\newcommand{0}\\{4}{2}{0}\\defRef{0}{1}{2}'
                                 '{0}{3}{2}{2}'
@@ -72,13 +72,19 @@ class TexMacrosFile(BaseTexFile.BaseTexFile):
                                 'primitive-types',
                                 enum['name']))
 
+    # Write commands for each plugin
+    def write_macro_for_plugin(self, plugin):
+        self.write_line('\\newcommand{0}\\{1}{2}{0}\\defRef{0}{4}{2}'
+                        '{0}{3}{2}{2}'
+                        .format(self.start_b, plugin['sbase'],
+                                self.end_b,
+                                strFunctions.make_class(plugin['sbase']),
+                                plugin['sbase']))
 
-    #########################################################################
-    # Write file
-
-    def write_file(self):
-        BaseFile.BaseFile.write_file(self)
+    # Write general commands
+    def write_general_commands(self):
         self.write_comment_line('\\newcommand{\\fixttspace}{\\hspace*{1pt}}')
+
         self.write_line('\\newcommand{0}\\const{1}[1]{0}\\texttt{0} #1{1}{1}'
                         .format(self.start_b, self.end_b))
         self.skip_line()
@@ -97,6 +103,13 @@ class TexMacrosFile(BaseTexFile.BaseTexFile):
                         '{0}\\textcolor{0}white{1}{0}TODO: #1{1}{1}{1}'
                         .format(self.start_b, self.end_b))
         self.skip_line()
+
+    #########################################################################
+    # Write file
+
+    def write_file(self):
+        BaseFile.BaseFile.write_file(self)
+        self.write_general_commands()
         self.skip_line()
         self.write_comment_line('commands for classes')
         for i in range(0, len(self.sbml_classes)):
@@ -113,6 +126,10 @@ class TexMacrosFile(BaseTexFile.BaseTexFile):
             self.write_macro_for_enum(self.enums[i])
         for i in range(0, len(self.prim_class)):
             self.write_macro_for_enum(self.prim_class[i])
+        self.skip_line()
+        self.write_comment_line('commands for plugins')
+        for i in range(0, len(self.plugins)):
+            self.write_macro_for_plugin(self.plugins[i])
 
     # override
     def add_file_header(self):

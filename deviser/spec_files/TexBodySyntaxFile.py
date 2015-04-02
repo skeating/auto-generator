@@ -30,14 +30,46 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
     # Write rules for an extended class
 
     def write_body_for_extended_class(self, plugin):
+        extended_object = plugin['sbase']
+        ex_objects = []
+        for i in range(0, len(plugin['extension'])):
+            name = plugin['extension'][i]['name']
+            indef = strFunctions.get_indefinite(name)
+            ex_objects.append('{} \\{} object'.format(indef, name))
+        for i in range(0, len(plugin['lo_extension'])):
+            name = plugin['lo_extension'][i]['listOfName']
+            ex_objects.append('a \\{} object'.format(name))
+        if len(plugin['attribs']) > 0:
+            ex_objects.append('the following attributes.')
         # section heading
         self.write_comment_line('---------------------------------------------'
-                                '---------------------------------------------')
+                                '------------')
         self.write_line('\subsection{0}The extended \class{0}{1}{2} class{2}'
                         .format(self.start_b, plugin['sbase'], self.end_b))
+        self.write_line('\\label{}{}{}'
+                        .format(self.start_b,
+                                strFunctions.make_class(plugin['sbase']),
+                                self.end_b))
         self.skip_line()
-        self.write_comment_line('TO DO: finish code for extended {}'.format(plugin['sbase']))
+        self.write_to_do('explain where {} comes from'.format(extended_object))
+
+        self.write_line('The \\{}Package extends the \\class{}{}{} object '
+                        'with the addition of '
+                        .format(self.fullname, self.start_b,
+                                extended_object, self.end_b))
+        num_additions = len(ex_objects)
+        if num_additions > 1:
+            self.write_line('{}'.format(ex_objects[0]))
+            for i in range(1, num_additions-1):
+                self.write_line(', {}'.format(ex_objects[i]))
+            self.write_line(' and {}.'.format(ex_objects[num_additions-1]))
+        else:
+            self.write_line('{}.'.format(ex_objects[0]))
         self.skip_line()
+
+        for i in range(0, len(plugin['attribs'])):
+            self.write_attibute_paragraph(plugin['attribs'][i],
+                                          extended_object)
 
     ########################################################################
     # Write rules for a class
@@ -49,7 +81,7 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
             classname = sbml_class['name']
         # section heading
         self.write_comment_line('---------------------------------------------'
-                                '---------------------------------------------')
+                                '------------')
         self.write_line('\subsection{0}The \class{0}{1}{2} class{2}'
                         .format(self.start_b, sbml_class['name'], self.end_b))
         self.write_line('\label{}{}-class{}'
@@ -102,20 +134,20 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
         if attrib['type'] == 'lo_element' \
                 or attrib['type'] == 'inline_lo_element':
             return
-        elif attrib['type'] == 'element' and attrib['element'] != 'RelAbsVector':
+        elif attrib['type'] == 'element' \
+                and attrib['element'] != 'RelAbsVector':
             return
         else:
-            self.write_line('\paragraph{0}The \\fixttspace\\token'
-                        '{0}{1}{2} attribute{2}'.format(self.start_b,
-                                                        att_name,
-                                                        self.end_b))
+            self.write_line('\paragraph{0}The \\fixttspace\\token{0}{1}{2} '
+                            'attribute{2}'.format(self.start_b, att_name,
+                                                  self.end_b))
             self.skip_line()
             self.write_line('{} \{} has {} attribute {} {}.'
                             .format(strFunctions.get_indefinite(name).
                                     capitalize(),
                                     name,
                                     'a required' if attrib['reqd'] is True
-                                                 else 'an optional',
+                                    else 'an optional',
                                     strFunctions.wrap_token(att_name),
                                     strFunctions.wrap_type(attrib['type'],
                                                            attrib['element'],
@@ -140,7 +172,7 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
                         .format(strFunctions.get_indefinite(name).
                                 capitalize(), name,
                                 'at most one' if attrib['reqd'] is True
-                                              else 'exactly one',
+                                else 'exactly one',
                                 strFunctions.wrap_type(attrib['type'],
                                                        child_name)))
 
@@ -177,8 +209,7 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
         for i in range(0, len(self.prim_class)):
             self.write_prim_class(self.prim_class[i])
 
-
-    # write sub section for an primitive class type
+    # write sub section for a primitive class type
     def write_prim_class(self, prim_class):
         self.write_line('\\subsubsection{0}Type \\fixttspace'
                         '\\primtypeNC{0}{1}{2}{2}'
@@ -204,7 +235,7 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
         self.skip_line()
         self.write_line('The \\primtype{}{}{} is an emueration of values used '
                         'to TO DO.'.format(self.start_b, enum['name'],
-                                             self.end_b))
+                                           self.end_b))
         self.write_line('The possible values are {}.'
                         .format(self.list_values(enum)))
         self.skip_line()
@@ -212,16 +243,17 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
 
     def list_values(self, enum):
         num_values = len(enum['values'])
-        listed = '\\const{}{}{}'.format(self.start_b, enum['values'][0]['value'],
+        listed = '\\const{}{}{}'.format(self.start_b,
+                                        enum['values'][0]['value'],
                                         self.end_b)
         for i in range(1, num_values-1):
             enum_value = ', \\const{}{}{}'.format(self.start_b,
                                                   enum['values'][i]['value'],
                                                   self.end_b)
             listed += enum_value
-        listed += ' and \\const{}{}{}'.format(self.start_b,
-                                              enum['values'][num_values-1]['value'],
-                                              self.end_b)
+        listed += ' and \\const{}{}{}'\
+            .format(self.start_b, enum['values'][num_values-1]['value'],
+                    self.end_b)
         return listed
     #######################################################################
     # Write file
@@ -238,15 +270,17 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
                         'then in {}, we provide complete '
                         'examples of using the constructs in example '
                         'SBML models.'.format(self.fullname,
-                                              strFunctions.wrap_section('examples', False)))
+                                              strFunctions.wrap_section(
+                                                  'examples', False)))
         self.skip_line()
 
         self.write_namespace_section()
         self.write_primitive_data_types()
+        self.sort_attribute_names(self.plugins)
         for i in range(0, len(self.plugins)):
             self.write_body_for_extended_class(self.plugins[i])
         for i in range(0, len(self.sbml_classes)):
-            #hack for render
+            # hack for render
             if self.sbml_classes[i]['name'] != 'RelAbsVector':
                 self.write_body_for_class(self.sbml_classes[i])
 

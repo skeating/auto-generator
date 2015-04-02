@@ -1,14 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<package name="">
+<package name="test" fullname="AAA">
   <elements>
-    <element name="Parameter" typeCode="SBML_PARAMETER" hasListOf="true" hasChildren="false" hasMath="false" childrenOverwriteElementName="false" baseClass="SBase" abstract="false">
+    <element name="Parameter" typeCode="SBML_PARAMETER" hasListOf="true" hasChildren="false" hasMath="false" childrenOverwriteElementName="false" listOfName="ListOfBBB" baseClass="SBase" abstract="false">
       <attributes>
         <attribute name="id" required="true" type="string" abstract="false" />
-        <attribute name="name" required="false" type="string" abstract="false" />
-        <attribute name="value" required="false" type="double" abstract="false" />
-        <attribute name="constant" required="true" type="boolean" abstract="false" />
-        <attribute name="units" required="false" type="string" abstract="false" />
-      </attributes>
+       </attributes>
     </element>
   </elements>
+    <plugins>
+    <plugin extensionPoint="Layout">
+      <references>
+        <reference name="ListOfBBB" />
+        <reference name="ListOfBBB" />
+        <reference name="ListOfBBB" />
+        <reference name="ListOfBBB" />
+      </references>
+         <attributes>
+        <attribute name="objectRole" required="false" type="SIdRef" abstract="false" />
+      </attributes>
+</plugin>
+
+    </plugins>
 </package>
