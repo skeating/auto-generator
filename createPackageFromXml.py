@@ -50,6 +50,8 @@ def parseDeviserXML(filename):
   packageName = getValue( dom.documentElement, 'name')
   number = toInt(getValue( dom.documentElement, 'number'))
   offset = toInt(getValue( dom.documentElement, 'offset'))
+  version = toInt(getValue( dom.documentElement, 'version'))
+  required = getValue( dom.documentElement, 'required') == 'true'
 
   concrete_dict = dict({})
 
@@ -153,6 +155,8 @@ def parseDeviserXML(filename):
     extPoint = getValue( node, 'extensionPoint')
     addDecls = getValue(node, 'additionalDecls')
     addDefs = getValue(node, 'additionalDefs')
+    package = getValue(node, 'package')
+    typecode = getValue(node, 'typecode')
 
     # read references to elements
     for reference in node.getElementsByTagName('reference'):
@@ -184,7 +188,7 @@ def parseDeviserXML(filename):
 
         attributes.append(attribute_dict)
 
-    plugin_dict = dict({'sbase': extPoint, 'extension': plugElements, 'attribs':attributes})
+    plugin_dict = dict({'sbase': extPoint, 'extension': plugElements, 'attribs':attributes, 'package': package, 'typecode': typecode})
 
     if addDecls != None:
       if os.path.exists( os.path.dirname(filename) + '/' + addDecls):
@@ -214,7 +218,9 @@ def parseDeviserXML(filename):
                'number': number, 
                'sbmlElements': sbmlElements, 
                'enums': enums, 
-               'offset': offset
+               'offset': offset,
+               'version' : version,
+               'required' : required
                })
 
   # link elements
