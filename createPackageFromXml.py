@@ -192,7 +192,12 @@ def parseDeviserXML(filename):
 
         attributes.append(attribute_dict)
 
-    plugin_dict = dict({'sbase': extPoint, 'extension': plugElements, 'attribs':attributes, 'package': package, 'typecode': typecode})
+    plugin_dict = dict({'sbase': extPoint, 'extension': plugElements, 'attribs':attributes})
+
+    if package != None:
+      plugin_dict['package'] = package
+    if package != typecode:
+      plugin_dict['typecode'] = typecode
 
     if addDecls != None:
       if os.path.exists( os.path.dirname(filename) + '/' + addDecls):

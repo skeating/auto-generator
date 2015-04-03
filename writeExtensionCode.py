@@ -142,7 +142,7 @@ def writeIncludes(fileOut, element, pkg, plugins):
   list = []
   for i in range (0, len(plugins)):
     plug = plugins[i]
-    if plug.has_key('package') and list.count(plug['package']) == 0:
+    if plug.has_key('package') and list.count(plug['package']) == 0 and plug['package'] != None:
         list.append(plug['package'])
     fileOut.write('#include <sbml/packages/{0}/extension/{1}{2}Plugin.h>\n'.format(pkg.lower(), pkg, plug['sbase']))
   fileOut.write('#include <sbml/packages/{0}/extension/{1}SBMLDocumentPlugin.h>\n'.format(pkg.lower(), pkg))
