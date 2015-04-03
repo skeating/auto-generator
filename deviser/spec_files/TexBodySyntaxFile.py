@@ -75,6 +75,7 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
     # Write rules for a class
 
     def write_body_for_class(self, sbml_class):
+        base_class = self.look_up_base_class(sbml_class['baseClass'])
         if 'texname' in sbml_class:
             classname = sbml_class['texname']
         else:
@@ -92,21 +93,17 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
         self.skip_line()
 
         if len(sbml_class['attribs']) == 0:
-            self.write_line('The \\{1} object derives from the '
-                            '\class{0}{3}{2} class and thus inherits any '
+            self.write_line('The \\{} object derives from the '
+                            '\\{} class and thus inherits any '
                             'attributes and elements that are present on '
-                            'this class.'.format(self.start_b,
-                                                 classname,
-                                                 self.end_b,
-                                                 sbml_class['baseClass']))
+                            'this class.'.format(classname, base_class))
             return
 
-        self.write_line('The \\{1} object derives from the '
-                        '\class{0}{3}{2} class and thus inherits any '
+        self.write_line('The \\{} object derives from the '
+                        '\\{} class and thus inherits any '
                         'attributes and elements that are present on '
                         'this class.'
-                        .format(self.start_b, classname, self.end_b,
-                                sbml_class['baseClass']))
+                        .format(classname, base_class))
 
         for i in range(0, len(sbml_class['attribs'])):
             att = sbml_class['attribs'][i]
@@ -156,25 +153,26 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
 
     def write_child_element(self, attrib, name):
         if attrib['type'] == 'element':
-            child_name = attrib['element']
+            if self.derives_from_other_ns(attrib['element']):
+                child_name = '\\class{' + attrib['element'] + '}'
+            else:
+                child_name = '\\' + attrib['element']
         elif attrib['type'] == 'lo_element':
-            child_name = strFunctions.cap_list_of_name(attrib['name'])
+            child_name = '\\' + strFunctions.cap_list_of_name(attrib['name'])
         elif attrib['type'] == 'inline_lo_element':
-            child_name = 'TO DO: add name'
+            child_name = '\\' + strFunctions.cap_list_of_name(attrib['name'])
         else:
             return
 
         # hack for render
-        if child_name == 'RelAbsVector':
+        if child_name == '\\RelAbsVector':
             return
 
         self.write_line('{} \{} contains {} {} element.'
                         .format(strFunctions.get_indefinite(name).
                                 capitalize(), name,
                                 'at most one' if attrib['reqd'] is True
-                                else 'exactly one',
-                                strFunctions.wrap_type(attrib['type'],
-                                                       child_name)))
+                                else 'exactly one', child_name))
 
     ########################################################################
     # Write namespace section
@@ -255,6 +253,26 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
             .format(self.start_b, enum['values'][num_values-1]['value'],
                     self.end_b)
         return listed
+
+    #######################################################################
+    # Helper functions
+
+    # function to return the texname of a base class
+    def look_up_base_class(self, base):
+        for item in self.sbml_classes:
+            if item['name'] == base:
+                if 'texname' in item:
+                    return item['texname']
+                else:
+                    return item['name']
+        return 'SBase' # default
+
+    # function to determine if teh element belongs to this package
+    def derives_from_other_ns(self, name):
+        for item in self.sbml_classes:
+            if item['name'] == name:
+                return False
+        return True
     #######################################################################
     # Write file
 

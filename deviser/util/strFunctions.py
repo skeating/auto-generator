@@ -112,7 +112,7 @@ def wrap_enum(name):
 
 def get_element_name(attribute):
     if attribute['type'] == 'lo_element':
-        return '\{}'.format(list_of_name(attribute['element']))
+        return '\{}'.format(cap_list_of_name(attribute['texname']))
     elif attribute['type'] == 'inline_lo_element':
         return '\{}'.format(cap_list_of_name(attribute['texname']))
     elif attribute['type'] == 'element':
