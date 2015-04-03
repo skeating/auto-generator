@@ -9,6 +9,7 @@ import sys
 import fileHeaders
 import generalFunctions
 import writeBindingsFiles
+import strFunctions
 
 def writeClass(fileOut, nameOfClass, pkg, elements):
   writeRequiredMethods(fileOut, nameOfClass, pkg, elements)
@@ -137,11 +138,19 @@ def writeIncludes(fileOut, element, pkg, plugins):
   fileOut.write('#include <sbml/extension/SBMLDocumentPlugin.h>\n')
   fileOut.write('\n\n');
   fileOut.write('#include <sbml/packages/{0}/extension/{1}.h>\n'.format(pkg.lower(), element))
+
+  list = []
   for i in range (0, len(plugins)):
     plug = plugins[i]
+    if plug.has_key('package') and list.count(plug['package']) == 0:
+        list.append(plug['package'])
     fileOut.write('#include <sbml/packages/{0}/extension/{1}{2}Plugin.h>\n'.format(pkg.lower(), pkg, plug['sbase']))
   fileOut.write('#include <sbml/packages/{0}/extension/{1}SBMLDocumentPlugin.h>\n'.format(pkg.lower(), pkg))
   fileOut.write('#include <sbml/packages/{0}/validator/{1}SBMLErrorTable.h>\n'.format(pkg.lower(), pkg))
+
+  for item in list:
+    fileOut.write('#include <sbml/packages/{0}/extension/{1}Extension.h>\n'.format(item.lower(), strFunctions.cap(item)))
+
   fileOut.write('\n\n');
   fileOut.write('#ifdef __cplusplus\n')
   fileOut.write('\n\n');
@@ -195,7 +204,13 @@ def writeInitFunction(fileOut, pkg, nameOfClass, plugins):
     if plug == 'SBase':
       fileOut.write('  SBaseExtensionPoint {0}ExtPoint("all", SBML_GENERIC_{1});\n'.format(plug.lower(), plug.upper()))
     else:
-      fileOut.write('  SBaseExtensionPoint {0}ExtPoint("core", SBML_{1});\n'.format(plug.lower(), writeBindingsFiles.createSBase(plug.upper())))
+      typecode = 'SBML{0}'.format(writeBindingsFiles.createSBase(plug.upper()));
+      package = 'core'
+      if plug_ext.has_key('package'): 
+        package = plug_ext['package'].lower()
+      if plug_ext.has_key('typecode'):
+        typecode = plug_ext['typecode']
+      fileOut.write('  SBaseExtensionPoint {0}ExtPoint("{1}", {2});\n'.format(plug.lower(), package, typecode))
   fileOut.write('\n')
   fileOut.write('  SBasePluginCreator<{0}SBMLDocumentPlugin, {0}Extension> sbmldocPluginCreator(sbmldocExtPoint, packageURIs);\n'.format(pkg))
   for i in range (0, len(plugins)):
