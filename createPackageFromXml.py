@@ -53,6 +53,10 @@ def parseDeviserXML(filename):
   version = toInt(getValue( dom.documentElement, 'version'))
   required = getValue( dom.documentElement, 'required') == 'true'
 
+  addPkgDecls = getValue(dom.documentElement, 'additionalDecls')
+  addPkgDefs = getValue(dom.documentElement, 'additionalDefs')
+
+
   concrete_dict = dict({})
 
   # read concrete versions of abstract classes and fill dictionary
@@ -222,6 +226,17 @@ def parseDeviserXML(filename):
                'version' : version,
                'required' : required
                })
+
+  if addPkgDecls != None:
+    if os.path.exists( os.path.dirname(filename) + '/' + addPkgDecls):
+      addPkgDecls = os.path.dirname(filename) + '/' + addPkgDecls
+    package['addDecls'] = addPkgDecls
+
+  if addPkgDefs != None:
+    if os.path.exists( os.path.dirname(filename) + '/' + addPkgDefs):
+      addPkgDefs = os.path.dirname(filename) + '/' + addPkgDefs
+    package['addDefs'] = addPkgDefs
+
 
   # link elements
   for elem in package['elements']:

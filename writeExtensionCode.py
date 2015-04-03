@@ -451,6 +451,10 @@ def createCode(package):
   writeTypeDefns(code, nameOfClass, nameOfPackage, package['elements'], package['number'], package['enums']) 
   writeInitFunction(code, nameOfPackage, nameOfClass, plugins)
   writeErrorFunction(code, nameOfPackage, nameOfClass, offset)
+
+  if package.has_key('addDefs'):
+    code.write(open(package['addDefs'], 'r').read())
+
   writeIncludeEnds(code, nameOfClass)
 
   
