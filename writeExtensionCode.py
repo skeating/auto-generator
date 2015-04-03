@@ -204,7 +204,7 @@ def writeInitFunction(fileOut, pkg, nameOfClass, plugins):
     if plug == 'SBase':
       fileOut.write('  SBaseExtensionPoint {0}ExtPoint("all", SBML_GENERIC_{1});\n'.format(plug.lower(), plug.upper()))
     else:
-      typecode = 'SBML{0}'.format(writeBindingsFiles.createSBase(plug.upper()));
+      typecode = 'SBML_{0}'.format(writeBindingsFiles.createSBase(plug.upper()));
       package = 'core'
       if plug_ext.has_key('package'): 
         package = plug_ext['package'].lower()
