@@ -289,7 +289,7 @@ def writeWriteElementsCPPCode(outFile, element, attributes, hasChildren=False, h
         outFile.write('  {\n    ')
         outFile.write('m{0}->write(stream);'.format(strFunctions.cap(attributes[i]['name'])))
         outFile.write('\n  }\n')		
-      elif attributes[i]['type'] == 'lo_element':
+      elif attributes[i]['type'] == 'lo_element' or attributes[i]['type'] == 'inline_lo_element':
         outFile.write('  if (getNum{0}() > 0)\n'.format(strFunctions.capp(attributes[i]['name'])))
         outFile.write('  {\n')
         outFile.write('    m{0}.write(stream);\n'.format(strFunctions.capp(attributes[i]['name'])))
@@ -353,9 +353,9 @@ def writeSetDocCPPCode(outFile, element,attribs, baseClass='SBase'):
   outFile.write('{\n')
   outFile.write('  {0}::setSBMLDocument(d);\n'.format(baseClass))
   for i in range (0, len(attribs)):
-    if attribs[i]['type'] == 'lo_element' or ( attribs[i]['type'] == 'element' and attribs[i]['name'] != 'math'):
+    if attribs[i]['type'] == 'lo_element' or attribs[i]['type'] == 'inline_lo_element' or ( attribs[i]['type'] == 'element' and attribs[i]['name'] != 'math'):
       if attribs[i]['reqd'] == True:
-        if attribs[i]['type'] == 'lo_element':
+        if attribs[i]['type'] == 'lo_element' or attribs[i]['type'] == 'inline_lo_element':
           outFile.write('  m{0}.setSBMLDocument(d);\n'.format(strFunctions.capp(attribs[i]['name'])))
         else:
           outFile.write('  if ( m{0} != NULL)\n'.format(strFunctions.cap(attribs[i]['name'])))
@@ -396,7 +396,7 @@ def writeEnablePkgCPPCode(outFile, element, attribs, baseClass):
   outFile.write('{\n')
   outFile.write('  {0}::enablePackageInternal(pkgURI, pkgPrefix, flag);\n'.format(baseClass))
   for i in range (0, len(attribs)):
-    if attribs[i]['type'] == 'lo_element':
+    if attribs[i]['type'] == 'lo_element' or  attribs[i]['type'] == 'inline_lo_element':
       if attribs[i]['name'].endswith('s'):
         outFile.write('  m{0}.enablePackageInternal(pkgURI, pkgPrefix, flag);\n'.format(strFunctions.cap(attribs[i]['name'])))
       else:
@@ -430,7 +430,7 @@ def writeAddExpectedCPPCode(outFile, element, attribs, baseClass='SBase'):
   outFile.write('  {0}::addExpectedAttributes(attributes);\n\n'.format(baseClass))
   for i in range (0, len(attribs)):
     attType = attribs[i]['type'];
-    if attType != 'element' and attType != 'lo_element' and attType != 'array':
+    if attType != 'element' and attType != 'lo_element' and attType != 'inline_lo_element' and attType != 'array':
       if attribs[i].has_key('attName'): 
         outFile.write('  attributes.add("{0}");\n'.format(attribs[i]['attName']))
       else: 
@@ -817,7 +817,7 @@ def writeCreateObjectCPPCode(outFile, element, attribs, pkg, isListOf, hasChildr
         outFile.write('  {\n')	
         outFile.write('    object = &m{0};\n'.format(strFunctions.capp(current['name'])))	
         outFile.write('  }\n\n')
-      elif current['type'] == 'lo_element':
+      elif current['type'] == 'lo_element' or current['type']== 'inline_lo_element':
         if first == True:
         	outFile.write('  if')
         	first = False
@@ -858,15 +858,15 @@ def writeConnectCPPCode(outFile, element, attribs, hasChildren=False, hasMath=Fa
   outFile.write('{\n')
   outFile.write('  {0}::connectToChild();\n\n'.format(baseClass))
   for i in range (0, len(attribs)):
-    if attribs[i]['type'] == 'lo_element' or ( attribs[i]['type'] == 'element' and attribs[i]['name'] != 'math'):
+    if attribs[i]['type'] == 'lo_element' or attribs[i]['type'] == 'inline_lo_element' or ( attribs[i]['type'] == 'element' and attribs[i]['name'] != 'math'):
       if attribs[i]['reqd'] == True:
-        if attribs[i]['type'] == 'lo_element':
+        if attribs[i]['type'] == 'lo_element' or attribs[i]['type'] == 'inline_lo_element':
           outFile.write('  m{0}.connectToParent(this);\n'.format(strFunctions.capp(attribs[i]['name'])))
         else:
           outFile.write('  if (m{0} != NULL)\n'.format(strFunctions.cap(attribs[i]['name'])))
           outFile.write('    m{0}->connectToParent(this);\n'.format(strFunctions.cap(attribs[i]['name'])))
       else:
-        if attribs[i]['type'] == 'lo_element':
+        if attribs[i]['type'] == 'lo_element'  or attribs[i]['type'] == 'inline_lo_element':
           outFile.write('  m{0}.connectToParent(this);\n'.format(strFunctions.capp(attribs[i]['name'])))
         else:
           outFile.write('  if (m{0} != NULL)\n'.format(strFunctions.cap(attribs[i]['name'])))
@@ -972,7 +972,7 @@ def writeWriteAttributesCPPCode(outFile, element, attribs, baseClass='SBase'):
   outFile.write('{\n')
   outFile.write('  {0}::writeAttributes(stream);\n\n'.format(baseClass))
   for i in range (0, len(attribs)):
-    if attribs[i]['type'] != 'element' and attribs[i]['type'] != 'XMLNode*' and attribs[i]['type'] != 'lo_element' and attribs[i]['type'] != 'std::vector<double>' and attribs[i]['type'] != 'array':
+    if attribs[i]['type'] != 'element' and attribs[i]['type'] != 'XMLNode*' and attribs[i]['type'] != 'lo_element' and attribs[i]['type'] != 'inline_lo_element' and attribs[i]['type'] != 'std::vector<double>' and attribs[i]['type'] != 'array':
       outFile.write('  if (isSet{0}() == true)\n'.format(strFunctions.cap(attribs[i]['name'])))
       if attribs[i]['type'] == 'enum': 
         outFile.write('    stream.writeAttribute("{0}", getPrefix(), {1}_toString(m{2}));\n\n'.format(attribs[i]['name'], attribs[i]['element'], strFunctions.cap(attribs[i]['name'])))	 
@@ -1000,7 +1000,7 @@ def writeGetElementNameCPPCode(outFile, element, isListOf=False, dict=None):
   outFile.write(' */\n')
   outFile.write('const std::string&\n{0}::getElementName () const\n'.format(element))
   outFile.write('{\n')
-  if dict != None:
+  if dict != None and isListOf == False:
     if dict.has_key('childrenOverwriteElementName') and dict['childrenOverwriteElementName']:
       outFile.write('  return mElementName;\n}\n\n\n')
 
@@ -1073,7 +1073,7 @@ def writeHasReqdElementsHeader(outFile, element, attribs):
   outFile.write('   * @note The required elements for a {0} object are:\n'.format(element))
   for i in range (0, len(attribs)):
     att = parseAttribute(attribs[i])
-    if (att[2] == 'element' or att[2] == 'lo_element') and att[5] == True:
+    if (att[2] == 'element' or att[2] == 'lo_element' or att[2] == 'inline_lo_element') and att[5] == True:
       outFile.write('   * @li "{0}"\n'.format(att[0]))
   outFile.write('   *\n')
   outFile.write('   * @return a boolean value indicating whether all the required\n')
@@ -1212,7 +1212,7 @@ def writeGetAllElements(output):
 def countMembers(attribs):
   count = 0
   for attr in attribs:
-    if attr['type'] == 'element' or attr['type'] == 'lo_element': 
+    if attr['type'] == 'element' or attr['type'] == 'lo_element'or attr['type'] == 'inline_lo_element': 
       count = count + 1
   return count
 
@@ -1228,7 +1228,7 @@ def writeGetAllElementsCode(output, element, attrib):
     for i in range(0, len(attrib)):
       if attrib[i]['type'] == 'element':
         output.write('  ADD_FILTERED_POINTER(ret, sublist, m{0}, filter);\n'.format(strFunctions.cap(attrib[i]['name'])))
-      elif attrib[i]['type'] == 'lo_element':
+      elif attrib[i]['type'] == 'lo_element' or attrib[i]['type'] == 'inline_lo_element':
         output.write('  ADD_FILTERED_LIST(ret, sublist, m{0}, filter);\n'.format(strFunctions.capp(attrib[i]['name'])))
     output.write('\n  ADD_FILTERED_FROM_PLUGIN(ret, sublist, filter);\n\n')
   output.write('  return ret;\n}\n\n\n')
@@ -1247,7 +1247,7 @@ def writeGetAllElementsCodePlug(output, element, members, attribs):
       else:
         output.write('  ADD_FILTERED_POINTER(ret, sublist, m{0}, filter);\n'.format(strFunctions.cap(members[i]['name'])))
     for i in range(0, len(attribs)):
-      if attribs[i]['type'] == 'lo_element':
+      if attribs[i]['type'] == 'lo_element' or attribs[i]['type'] == 'inline_lo_element':
         output.write('  ADD_FILTERED_LIST(ret, sublist, m{0}, filter);\n'.format(strFunctions.capp(attribs[i]['name'])))
       elif attribs[i]['type'] == 'element':
         output.write('  ADD_FILTERED_POINTER(ret, sublist, m{0}, filter);\n'.format(strFunctions.cap(attribs[i]['name'])))

@@ -76,7 +76,7 @@ def writeAtt(attrib, output):
     else:
       output.write('  {0}*      m{1};\n'.format(attrib['element'], capAttName))
       return
-  elif attType == 'lo_element':
+  elif attType == 'lo_element' or attType == 'inline_lo_element':
     if attrib.has_key('element'):
       output.write('  {0}   m{1};\n'.format(generalFunctions.writeListOf(attrib['element']), strFunctions.capp(attrib['name'])))
     else:
@@ -111,7 +111,7 @@ def writeGetFunction(attrib, output, element):
   attType = att[2]
   attTypeCode = att[3]
   num = att[4]
-  if attrib['type'] == 'lo_element':
+  if attrib['type'] == 'lo_element' or attrib['type'] == 'inline_lo_element':
     return
   elif attrib['type'] == 'array':
     output.write('  /**\n');
@@ -192,7 +192,7 @@ def writeIsSetFunction(attrib, output, element):
   attType = att[2]
   attTypeCode = att[3]
   num = att[4]
-  if attrib['type'] == 'lo_element':
+  if attrib['type'] == 'lo_element' or attrib['type'] == 'inline_lo_element':
     return
   elif attrib['type'] == 'element':
     output.write('  /**\n')
@@ -225,7 +225,7 @@ def writeSetFunction(attrib, output, element):
   else:
     attTypeCode = att[3]
   num = att[4]
-  if attrib['type'] == 'lo_element':
+  if attrib['type'] == 'lo_element' or attrib['type'] == 'inline_lo_element':
     return
   elif attrib['type'] == 'array':
     output.write('  /**\n')
@@ -299,7 +299,7 @@ def writeSetFunction(attrib, output, element):
 def writeUnsetFunction(attrib, output, element):
   attName = attrib['name']
   capAttName = strFunctions.cap(attName)
-  if attrib['type'] == 'lo_element':
+  if attrib['type'] == 'lo_element' or attrib['type'] == 'inline_lo_element':
     return
   elif attrib['type'] == 'element':
     output.write('  /**\n')
@@ -485,7 +485,7 @@ def writeIncludes(fileOut, element, pkg, attribs, elementDict):
 
   for i in range (0, len(attribs)):
     current = attribs[i]
-    if (current['type'] == 'element' or current['type'] == 'lo_element') and current['name'] != 'math':
+    if (current['type'] == 'element' or current['type'] == 'lo_element' or current['type'] == 'inline_lo_element') and current['name'] != 'math':
       if current['type'] != 'element':
         fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkg.lower(), strFunctions.cap(attribs[i]['element'])))
       else: 

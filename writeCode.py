@@ -90,7 +90,7 @@ def writeCopyAttributes(attrs, output, tabs, name):
     if atttype == 'array':
       output.write('{0}m{1}  = NULL;\n'.format(tabs, attName, name))
       output.write('{0}set{1}({2}.m{1}, {2}.m{1}Length);\n'.format(tabs, attName, name))
-    elif atttype != 'lo_element':
+    elif atttype != 'lo_element' and  atttype != 'inline_lo_element':
       if atttype != 'element':
         output.write('{0}m{1}  = {2}.m{1};\n'.format(tabs, attName, name))
       else:
@@ -229,7 +229,7 @@ def writeGetCode(attrib, output, element):
   capAttName = att[1]
   attType = att[2]
   attTypeCode = att[3]
-  if attType == 'lo_element':
+  if attType == 'lo_element' or attType == 'inline_lo_element':
     return
 
   if attrib['type'] == 'array':
@@ -325,7 +325,7 @@ def writeIsSetCode(attrib, output, element):
   attType = att[2]
   attTypeCode = att[3]
   num = att[4]
-  if attType == 'lo_element':
+  if attType == 'lo_element' or attType == 'inline_lo_element':
     return
   output.write('/*\n')
   output.write(' * Returns true/false if {0} is set.\n'.format(attName))
@@ -358,7 +358,7 @@ def writeSetCode(attrib, output, element):
   else:
     attTypeCode = att[3]
   num = att[4]
-  if attType == 'lo_element':
+  if attType == 'lo_element' or attType == 'inline_lo_element':
     return
   if attrib['type'] == 'array':
     output.write('/*\n')
@@ -485,7 +485,7 @@ def writeUnsetCode(attrib, output, element):
   attType = att[2]
   attTypeCode = att[3]
   num = att[4]
-  if attType == 'lo_element':
+  if attType == 'lo_element' or attType == 'inline_lo_element':
     return
   output.write('/*\n')
   output.write(' * Unsets {0} and returns value indicating success.\n'.format(attName))
