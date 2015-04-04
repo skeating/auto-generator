@@ -213,7 +213,7 @@ def parseDeviserXML(filename):
           lo_attr = dict({
                                  'type': 'lo_element', 
                                  'reqd' : True, 
-                                 'name' : reference, 
+                                 'name' : temp['name'], 
                                  'element':temp['name'], 
                                  'abstract':False
                                  })
