@@ -4,6 +4,7 @@ from xml.dom import *
 from xml.dom.minidom import *
 import weakref;
 import os.path;
+import strFunctions
 
 def toBool(v):
   if (v == None): 
@@ -21,6 +22,16 @@ def getValue(node, name):
   if temp == None: 
     return None
   return temp.nodeValue
+
+
+def findLoElement(elements, name):
+  if elements == None or name == None: 
+    return None
+  for element in elements:
+    currentLoName = 'ListOf{0}'.format(strFunctions.capp(element['name']))
+    if currentLoName == name:
+      return element
+  return None
 
 def findElement(elements, name):
   if elements == None or name == None: 
@@ -162,11 +173,6 @@ def parseDeviserXML(filename):
     package = getValue(node, 'package')
     typecode = getValue(node, 'typecode')
 
-    # read references to elements
-    for reference in node.getElementsByTagName('reference'):
-      temp = findElement(elements, getValue( reference, 'name'))
-      if temp != None:
-        plugElements.append(temp)
 
     attributes = []
     
@@ -191,6 +197,28 @@ def parseDeviserXML(filename):
           attribute_dict['concrete'] = concrete_dict[attrElement]
 
         attributes.append(attribute_dict)
+
+    # read references to elements
+    for reference in node.getElementsByTagName('reference'):
+      reference = getValue( reference, 'name')
+      temp = findElement(elements, reference)
+      if temp != None:
+        plugElements.append(temp)
+      else: 
+        # uh oh ... we did not find the object, lets have another 
+        # look, maybe it was a listOf class
+        temp = findLoElement(elements, reference)
+        if temp != None:
+          # now just add it to the attributes
+          lo_attr = dict({
+                                 'type': 'lo_element', 
+                                 'reqd' : True, 
+                                 'name' : reference, 
+                                 'element':temp['name'], 
+                                 'abstract':False
+                                 })
+          attributes.append(lo_attr)
+
 
     plugin_dict = dict({'sbase': extPoint, 'extension': plugElements, 'attribs':attributes})
 
