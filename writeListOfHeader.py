@@ -247,7 +247,12 @@ def writeClass(header, nameOfElement, typeOfElement, nameOfPackage, elementDict)
     header.write('\t\tint code = item->getTypeCode();\n')
     header.write('\t\treturn code == getItemTypeCode() ')
     for elem in generalFunctions.getConcretes(elementDict['root'], elementDict['concrete']):
-      header.write('|| code == SBML_{0}_{1} '.format(nameOfPackage.upper(),elem['element'].upper()))
+      typecode = 'SBML_{0}_{1}'.format(nameOfPackage.upper(),elem['element'].upper())
+      if elem.has_key('root'):
+        concrete = generalFunctions.getElement(elem['root'], elem['element'])
+        if (concrete != None):
+           typecode = concrete['typecode']
+      header.write('|| code == {0} '.format(typecode))
     header.write(';\n')
     header.write('\t}\n\n\n');
 

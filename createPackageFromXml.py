@@ -4,6 +4,7 @@ from xml.dom import *
 from xml.dom.minidom import *
 import weakref;
 import os.path;
+import strFunctions
 
 def toBool(v):
   if (v == None): 
@@ -21,6 +22,16 @@ def getValue(node, name):
   if temp == None: 
     return None
   return temp.nodeValue
+
+
+def findLoElement(elements, name):
+  if elements == None or name == None: 
+    return None
+  for element in elements:
+    currentLoName = 'ListOf{0}'.format(strFunctions.capp(element['name']))
+    if currentLoName == name:
+      return element
+  return None
 
 def findElement(elements, name):
   if elements == None or name == None: 
@@ -50,6 +61,12 @@ def parseDeviserXML(filename):
   packageName = getValue( dom.documentElement, 'name')
   number = toInt(getValue( dom.documentElement, 'number'))
   offset = toInt(getValue( dom.documentElement, 'offset'))
+  version = toInt(getValue( dom.documentElement, 'version'))
+  required = getValue( dom.documentElement, 'required') == 'true'
+
+  addPkgDecls = getValue(dom.documentElement, 'additionalDecls')
+  addPkgDefs = getValue(dom.documentElement, 'additionalDefs')
+
 
   concrete_dict = dict({})
 
@@ -153,12 +170,9 @@ def parseDeviserXML(filename):
     extPoint = getValue( node, 'extensionPoint')
     addDecls = getValue(node, 'additionalDecls')
     addDefs = getValue(node, 'additionalDefs')
+    package = getValue(node, 'package')
+    typecode = getValue(node, 'typecode')
 
-    # read references to elements
-    for reference in node.getElementsByTagName('reference'):
-      temp = findElement(elements, getValue( reference, 'name'))
-      if temp != None:
-        plugElements.append(temp)
 
     attributes = []
     
@@ -184,7 +198,34 @@ def parseDeviserXML(filename):
 
         attributes.append(attribute_dict)
 
+    # read references to elements
+    for reference in node.getElementsByTagName('reference'):
+      reference = getValue( reference, 'name')
+      temp = findElement(elements, reference)
+      if temp != None:
+        plugElements.append(temp)
+      else: 
+        # uh oh ... we did not find the object, lets have another 
+        # look, maybe it was a listOf class
+        temp = findLoElement(elements, reference)
+        if temp != None:
+          # now just add it to the attributes
+          lo_attr = dict({
+                                 'type': 'lo_element', 
+                                 'reqd' : True, 
+                                 'name' : temp['name'], 
+                                 'element':temp['name'], 
+                                 'abstract':False
+                                 })
+          attributes.append(lo_attr)
+
+
     plugin_dict = dict({'sbase': extPoint, 'extension': plugElements, 'attribs':attributes})
+
+    if package != None:
+      plugin_dict['package'] = package
+    if package != typecode:
+      plugin_dict['typecode'] = typecode
 
     if addDecls != None:
       if os.path.exists( os.path.dirname(filename) + '/' + addDecls):
@@ -214,8 +255,21 @@ def parseDeviserXML(filename):
                'number': number, 
                'sbmlElements': sbmlElements, 
                'enums': enums, 
-               'offset': offset
+               'offset': offset,
+               'version' : version,
+               'required' : required
                })
+
+  if addPkgDecls != None:
+    if os.path.exists( os.path.dirname(filename) + '/' + addPkgDecls):
+      addPkgDecls = os.path.dirname(filename) + '/' + addPkgDecls
+    package['addDecls'] = addPkgDecls
+
+  if addPkgDefs != None:
+    if os.path.exists( os.path.dirname(filename) + '/' + addPkgDefs):
+      addPkgDefs = os.path.dirname(filename) + '/' + addPkgDefs
+    package['addDefs'] = addPkgDefs
+
 
   # link elements
   for elem in package['elements']:

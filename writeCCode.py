@@ -56,19 +56,19 @@ def writeConstructors(element, package, output):
 
 def writeAttributeFunctions(attrs, output, element):
   for i in range(0, len(attrs)):
-    if attrs[i]['type'] != 'lo_element':
+    if attrs[i]['type'] != 'lo_element' and attrs[i]['type'] != 'inline_lo_element':
       writeGetFunction(attrs[i], output, element)
   for i in range(0, len(attrs)):
-    if attrs[i]['type'] != 'lo_element':
+    if attrs[i]['type'] != 'lo_element' and attrs[i]['type'] != 'inline_lo_element':
       writeIsSetFunction(attrs[i], output, element)
   for i in range(0, len(attrs)):
-    if attrs[i]['type'] != 'lo_element':
+    if attrs[i]['type'] != 'lo_element' and attrs[i]['type'] != 'inline_lo_element':
       writeSetFunction(attrs[i], output, element)
   for i in range(0, len(attrs)):
-    if attrs[i]['type'] != 'lo_element':
+    if attrs[i]['type'] != 'lo_element' and attrs[i]['type'] != 'inline_lo_element':
       writeUnsetFunction(attrs[i], output, element)
   for i in range(0, len(attrs)):
-    if attrs[i]['type'] == 'lo_element':
+    if attrs[i]['type'] == 'lo_element' or attrs[i]['type'] == 'inline_lo_element':
       writeListOfSubElements(attrs[i], output, element)
 
 def writeListOfSubElements(attrib, output, element):
@@ -149,14 +149,14 @@ def writeGetFunction(attrib, output, element):
   else:
     attTypeCode = att[3]
   num = att[4]
-  if attrib['type'] == 'lo_element':
+  if attrib['type'] == 'lo_element' or attrib['type'] == 'inline_lo_element':
     return
   if attrib['type'] == 'array':
     return
   varname = strFunctions.objAbbrev(element)
   if attrib['type'] == 'std::vector<double>':
     return
-  elif attrib['type'] != 'element' and attrib['type'] != 'lo_element' and attrib['type'] != 'XMLNode*':
+  elif attrib['type'] != 'element' and attrib['type'] != 'lo_element' and attrib['type'] != 'inline_lo_element' and attrib['type'] != 'XMLNode*':
     output.write('LIBSBML_EXTERN\n')
     output.write('{0}\n'.format(attTypeCode))
     output.write('{0}_get{1}'.format(element, capAttName))
@@ -239,7 +239,7 @@ def writeIsSetFunction(attrib, output, element):
   attType = att[2]
   attTypeCode = att[3]
   num = att[4]
-  if attrib['type'] == 'lo_element':
+  if attrib['type'] == 'lo_element' or attrib['type'] == 'inline_lo_element':
     return
   varname = strFunctions.objAbbrev(element)
   output.write('LIBSBML_EXTERN\n')
@@ -258,12 +258,12 @@ def writeSetFunction(attrib, output, element):
   attType = att[2]
   attTypeCode = att[3]
   num = att[4]
-  if attrib['type'] == 'lo_element':
+  if attrib['type'] == 'lo_element' or attrib['type'] == 'inline_lo_element':
     return
   if attrib['type'] == 'array':
     return
   varname = strFunctions.objAbbrev(element)
-  if attrib['type'] != 'element' and attrib['type'] != 'lo_element':
+  if attrib['type'] != 'element' and attrib['type'] != 'lo_element' and attrib['type'] != 'inline_lo_element':
       output.write('LIBSBML_EXTERN\n')
       output.write('int\n')
       output.write('{0}_set{1}'.format(element, capAttName))
@@ -308,7 +308,7 @@ def writeUnsetFunction(attrib, output, element):
   attType = att[2]
   attTypeCode = att[3]
   num = att[4]
-  if attrib['type'] == 'lo_element' or attrib['type'] == 'element':
+  if attrib['type'] == 'lo_element' or attrib['type'] == 'inline_lo_element' or attrib['type'] == 'element':
     return
   varname = strFunctions.objAbbrev(element)
   output.write('LIBSBML_EXTERN\n')

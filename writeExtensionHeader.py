@@ -9,7 +9,7 @@ import sys
 import fileHeaders
 import generalFunctions
 
-def writeClassDefn(fileOut, nameOfClass, pkg):
+def writeClassDefn(fileOut, nameOfClass, pkg, pkgDict = None):
   fileOut.write('class LIBSBML_EXTERN {0} : public SBMLExtension\n'.format(nameOfClass))
   fileOut.write('{\npublic:\n\n')
   writeRequiredMethods(fileOut)
@@ -17,9 +17,11 @@ def writeClassDefn(fileOut, nameOfClass, pkg):
   writeGetFunctions(fileOut, pkg)
   writeInitFunction(fileOut, pkg)
   writeErrorFunction(fileOut, pkg)
-  writeClassEnd(fileOut)
+  writeClassEnd(fileOut,pkgDict)
 
-def writeClassEnd(fileOut):
+def writeClassEnd(fileOut, pkg = None):
+  if pkg != None and pkg.has_key('addDecls'):
+    fileOut.write(open(pkg['addDecls'], 'r').read())
   fileOut.write('};\n\n\n')
  
 def writeConstructors(fileOut, nameOfClass):
@@ -286,7 +288,7 @@ def createHeader(package):
   fileHeaders.addFilename(code, codeName, nameOfClass)
   fileHeaders.addLicence(code)
   writeIncludes(code, nameOfClass, nameOfPackage)
-  writeClassDefn(code, nameOfClass, nameOfPackage)
+  writeClassDefn(code, nameOfClass, nameOfPackage, package)
   writeTypeDefns(code, nameOfClass, nameOfPackage, package['elements'], package['number'], package['enums']) 
   writeIncludeEnds(code, nameOfClass)
 

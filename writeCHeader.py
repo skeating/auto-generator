@@ -65,7 +65,7 @@ def writeAttributeFunctions(attrs, output, element, dict):
   for i in range(0, len(attrs)):
     writeUnsetFunction(attrs[i], output, element)
   for i in range(0, len(attrs)):
-    if attrs[i]['type'] == 'lo_element':
+    if attrs[i]['type'] == 'lo_element' or  attrs[i]['type'] == 'inline_lo_element':
       writeListOfSubElements(attrs[i], output, element)
 
 def writeListOfSubElements(attrib, output, element):
@@ -124,7 +124,8 @@ def writeGetFunction(attrib, output, element):
   else:
     attTypeCode = att[3]
   num = att[4]
-  if attrib['type'] != 'element' and attrib['type'] != 'lo_element' and attrib['type'] != 'XMLNode*':
+  type = attrib['type']
+  if type != 'element' and type != 'lo_element' and type != 'XMLNode*' and type != 'inline_lo_element':
     output.write('/**\n')
     output.write(' * Returns the value of the \"{0}\" attribute of the given {1}_t\n'.format(attName, element))
     output.write(' * structure.\n *\n')
@@ -136,12 +137,12 @@ def writeGetFunction(attrib, output, element):
     output.write('{0}\n'.format(attTypeCode))
     output.write('{0}_get{1}'.format(element, capAttName))
     output.write('(const {0}_t * {1});\n\n\n'.format(element, strFunctions.objAbbrev(element)))
-  elif attrib['type'] == 'XMLNode*':
+  elif type == 'XMLNode*':
     output.write('LIBSBML_EXTERN\n')
     output.write('XMLNode_t*\n')
     output.write('{0}_get{1}'.format(element, capAttName))
     output.write('({0}_t * {1});\n\n\n'.format(element, strFunctions.objAbbrev(element)))    
-  elif attrib['type'] == 'element':
+  elif type == 'element':
     if attrib['name'] == 'Math' or attrib['name'] == 'math':
       output.write('/**\n')
       output.write(' * Gets the mathematical expression of this {0}_t structure as an\n'.format(element))
@@ -180,7 +181,7 @@ def writeIsSetFunction(attrib, output, element):
   attType = att[2]
   attTypeCode = att[3]
   num = att[4]
-  if attrib['type'] != 'lo_element':
+  if attrib['type'] != 'lo_element' and attrib['type'] != 'inline_lo_element':
     output.write('/**\n')
     output.write(' * Predicate returning @c 1 if the given {0}_t structure\'s \"{1}\"\n'.format(element, attName))
     output.write(' * is set.\n *\n')
@@ -203,7 +204,7 @@ def writeSetFunction(attrib, output, element):
   attType = att[2]
   attTypeCode = att[3]
   num = att[4]
-  if attrib['type'] != 'element' and attrib['type'] != 'lo_element' and attrib['type'] != 'XMLNode*':
+  if attrib['type'] != 'element' and attrib['type'] != 'lo_element' and attrib['type'] != 'XMLNode*' and attrib['type'] != 'inline_lo_element':
     output.write('/**\n')
     output.write(' * Sets the \"{0}\" attribute of the given {1}_t structure.\n *\n'.format(attName, element))
     if (attType == 'string'):
@@ -269,7 +270,7 @@ def writeUnsetFunction(attrib, output, element):
   attType = att[2]
   attTypeCode = att[3]
   num = att[4]
-  if attrib['type'] == 'element' or attrib['type'] == 'lo_element':
+  if attrib['type'] == 'element' or attrib['type'] == 'lo_element' or attrib['type'] == 'inline_lo_element':
     return
   output.write('/**\n')
   output.write(' * Unsets the value of the \"{0}\" attribute of the given \n'.format(attName))

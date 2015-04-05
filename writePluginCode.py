@@ -40,7 +40,7 @@ def writeOtherFunctions(fileOut, nameOfClass, members, attribs):
       fileOut.write('  }\n')
   for i in range (0, len(attribs)):
     mem = attribs[i]
-    if mem['type'] == 'lo_element':
+    if mem['type'] == 'lo_element' or mem['type'] == 'inline_lo_element':
         #fileOut.write('  if (getNum{0}s() > 0)\n'.format(strFunctions.cap(mem['name'])))
         fileOut.write('  {\n')
         fileOut.write('    m{0}s.setSBMLDocument(d);\n'.format(strFunctions.cap(mem['name'])))
@@ -72,7 +72,7 @@ def writeOtherFunctions(fileOut, nameOfClass, members, attribs):
       fileOut.write('  }\n')
   for i in range (0, len(attribs)):
     mem = attribs[i]
-    if mem['type'] == 'lo_element':
+    if mem['type'] == 'lo_element' or mem['type'] == 'inline_lo_element':
         fileOut.write('  if (getNum{0}s() > 0)\n'.format(strFunctions.cap(mem['name'])))
         fileOut.write('  {\n')
         fileOut.write('    m{0}s.connectToParent(sbase);\n'.format(strFunctions.cap(mem['name'])))
@@ -104,12 +104,12 @@ def writeOtherFunctions(fileOut, nameOfClass, members, attribs):
       fileOut.write('  }\n')
   for i in range (0, len(attribs)):
     mem = attribs[i]
-    if mem['type'] == 'lo_element':
+    if mem['type'] == 'lo_element' or mem['type'] == 'inline_lo_element':
         fileOut.write('  if (getNum{0}s() > 0)\n'.format(strFunctions.cap(mem['name'])))
         fileOut.write('  {\n')
         fileOut.write('    m{0}s.enablePackageInternal(pkgURI, pkgPrefix, flag);\n'.format(strFunctions.cap(mem['name'])))
         fileOut.write('  }\n')
-    elif mem['type'] == 'lo_element':
+    elif mem['type'] == 'lo_element'  or mem['type'] == 'inline_lo_element':
       fileOut.write('  if (isSet{0}() == true)\n'.format(strFunctions.cap(mem['name'])))
       fileOut.write('  {\n')
       fileOut.write('    m{0}->enablePackageInternal(pkgURI, pkgPrefix, flag);\n'.format(strFunctions.cap(mem['name'])))
@@ -133,7 +133,7 @@ def writeOtherFunctions(fileOut, nameOfClass, members, attribs):
       fileOut.write('  }\n\n')
   for i in range (0, len(attribs)):
     mem = attribs[i]
-    if mem['type'] == 'lo_element':
+    if mem['type'] == 'lo_element'  or mem['type'] == 'inline_lo_element':
       fileOut.write('  for(unsigned int i = 0; i < getNum{0}s(); i++)\n'.format(strFunctions.cap(mem['name'])))
       fileOut.write('  {\n')
       fileOut.write('    get{0}(i)->accept(v);\n'.format(strFunctions.cap(mem['name'])))
@@ -508,7 +508,7 @@ def writeRequiredMethods(fileOut, nameOfClass, members, pkg, attribs, plugin = N
       ifCount = ifCount + 1  
     for i in range (0, len(attribs)):
       mem = attribs[i]
-      if mem['type'] == 'lo_element':
+      if mem['type'] == 'lo_element' or mem['type'] == 'inline_lo_element':
         writeCreateLOObject(fileOut, mem, ifCount)
         ifCount = ifCount + 1
       elif mem['type'] == 'element':
@@ -541,7 +541,7 @@ def writeRequiredMethods(fileOut, nameOfClass, members, pkg, attribs, plugin = N
 
   for i in range (0, len(attribs)):
     mem = attribs[i]
-    if mem['type'] == 'lo_element':
+    if mem['type'] == 'lo_element' or mem['type'] == 'inline_lo_element':
       fileOut.write('  if (getNum{0}() > 0) \n'.format(strFunctions.capp(mem['name'])))
       fileOut.write('  { \n')
       fileOut.write('    m{0}s.write(stream);\n'.format(strFunctions.cap(mem['name'])))
