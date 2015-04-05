@@ -289,10 +289,15 @@ def writeWriteElementsCPPCode(outFile, element, attributes, hasChildren=False, h
         outFile.write('  {\n    ')
         outFile.write('m{0}->write(stream);'.format(strFunctions.cap(attributes[i]['name'])))
         outFile.write('\n  }\n')		
-      elif attributes[i]['type'] == 'lo_element' or attributes[i]['type'] == 'inline_lo_element':
+      elif attributes[i]['type'] == 'lo_element':
         outFile.write('  if (getNum{0}() > 0)\n'.format(strFunctions.capp(attributes[i]['name'])))
         outFile.write('  {\n')
         outFile.write('    m{0}.write(stream);\n'.format(strFunctions.capp(attributes[i]['name'])))
+        outFile.write('  }\n\n')
+      elif attributes[i]['type'] == 'inline_lo_element':
+        outFile.write('  if (getNum{0}() > 0)\n'.format(strFunctions.capp(attributes[i]['name'])))
+        outFile.write('  {\n')
+        outFile.write('    m{0}.writeElements(stream);\n'.format(strFunctions.capp(attributes[i]['name'])))
         outFile.write('  }\n\n')
   if containsType(attributes, 'XMLNode*'):
     node = getByType(attributes, 'XMLNode*')
@@ -817,7 +822,9 @@ def writeCreateObjectCPPCode(outFile, element, attribs, pkg, isListOf, hasChildr
         outFile.write('  {\n')	
         outFile.write('    object = &m{0};\n'.format(strFunctions.capp(current['name'])))	
         outFile.write('  }\n\n')
-      elif current['type'] == 'lo_element' or current['type']== 'inline_lo_element':
+      elif current['type']== 'inline_lo_element':
+        outFile.write('  object = m{0}.createObject(stream);\n'.format(strFunctions.capp(current['name'])))
+      elif current['type'] == 'lo_element':
         if first == True:
         	outFile.write('  if')
         	first = False

@@ -187,7 +187,20 @@ def writeProtectedFunctions(output, element, package):
   generalFunctions.writeInternalEnd(output)
    
   
-   
+# utility function that goes to the dictionary, and finds usages of the class as inline_lo_element
+def getInlineListOfClasses(elementDict, name):
+  result = []
+  if elementDict != None and elementDict.has_key('root'):
+    root = elementDict['root']
+    if root != None: 
+      if root.has_key('sbmlElements'):
+        for el in root['sbmlElements']:
+          for attr in el['attribs']:
+            if attr['type'] == 'inline_lo_element' and attr['element'] == name:
+              result.append(el['name'])
+  return result
+          
+
 
 #write class
 def writeClass(header, nameOfElement, typeOfElement, nameOfPackage, elementDict):
@@ -256,6 +269,9 @@ def writeClass(header, nameOfElement, typeOfElement, nameOfPackage, elementDict)
     header.write(';\n')
     header.write('\t}\n\n\n');
 
+  friends = getInlineListOfClasses(elementDict, typeOfElement)
+  for friend in friends:
+    header.write('\tfriend class {0};\n'.format(friend))
 
   header.write('\n};\n\n')
  
