@@ -27,6 +27,7 @@ def abbrev_name(element):
 
 
 def list_of_name(name):
+    return 'ListOf' + plural(name)
     if name.endswith('s'):
         listof = 'ListOf' + name
     elif name.endswith('x'):
@@ -38,17 +39,13 @@ def list_of_name(name):
 
 def cap_list_of_name(name):
     name = upper_first(name)
-    if name.endswith('s'):
-        listof = 'ListOf' + name
-    elif name.endswith('x'):
-        listof = 'ListOf' + name + 'es'
-    else:
-        listof = 'ListOf' + name + 's'
-    return listof
+    return list_of_name(name)
 
 
 def plural(name):
     if name.endswith('s'):
+        returned_word = name
+    elif name.endswith('nformation'):
         returned_word = name
     elif name.endswith('x'):
         returned_word = name[0:len(name)-1] + 'es'

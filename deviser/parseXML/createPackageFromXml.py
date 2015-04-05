@@ -38,7 +38,7 @@ def find_lo_element(elements, name):
     for element in elements:
         if 'isListOf' in element and element['isListOf'] is True:
             match = strFunctions.list_of_name(element['name'])
-            if 'listOfName' in element:
+            if 'listOfName' in element and element['listOfName'] != '':
                 match = element['listOfName']
             if match == name:
                 return element
