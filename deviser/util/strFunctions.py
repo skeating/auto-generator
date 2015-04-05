@@ -108,17 +108,25 @@ def wrap_enum(name):
 
 
 def get_element_name(attribute):
-    if attribute['type'] == 'lo_element':
-        return '\{}'.format(cap_list_of_name(attribute['texname']))
-    elif attribute['type'] == 'inline_lo_element':
-        return '\{}'.format(cap_list_of_name(attribute['texname']))
-    elif attribute['type'] == 'element':
-        if attribute['element'] == 'ASTNode*':
-            return 'MathML math'
+    if 'type' in attribute:
+        if attribute['type'] == 'lo_element':
+            return '\{}'.format(cap_list_of_name(attribute['texname']))
+        elif attribute['type'] == 'inline_lo_element':
+            return '\{}'.format(cap_list_of_name(attribute['texname']))
+        elif attribute['type'] == 'element':
+            if attribute['element'] == 'ASTNode*':
+                return 'MathML math'
+            else:
+                return attribute['element']
         else:
-            return attribute['element']
+            return 'FIX_ME'
+    elif 'isListOf' in attribute:
+        if attribute['isListOf']:
+            return '\{}'.format(cap_list_of_name(attribute['name']))
+        else:
+            return '\{}'.format(upper_first(attribute['name']))
     else:
-        return 'FIX_ME'
+        return 'FIX ME'
 
 def replace_digits(name):
     name = re.sub('1', 'One', name)

@@ -1,14 +1,15 @@
 #!/usr/bin/python
 
 import strFunctions
+import BaseTexFile
 
 
-class ValidationRulesForClass():
-    """Class for creating the validation rules for an object"""
+class ValidationRulesForPlugin():
+    """Class for creating the validation rules for an plugin object"""
 
     def __init__(self, object_desc, spec_name, number, package):
         # members from object
-        self.name = object_desc['name']
+        self.name = object_desc['sbase']
         self.fullname = spec_name
         self.number = number
         self.package = package.lower()
@@ -18,8 +19,8 @@ class ValidationRulesForClass():
         self.start_b = '{'
         self.end_b = '}'
 
-        self.formatted_name = '\{}'.format(object_desc['name'])
-        self.indef = strFunctions.get_indefinite(object_desc['name'])
+        self.formatted_name = '\{}'.format(object_desc['sbase'])
+        self.indef = strFunctions.get_indefinite(object_desc['sbase'])
         self.indef_u = strFunctions.upper_first(self.indef)
 
         self.reqd_att = []
@@ -30,6 +31,8 @@ class ValidationRulesForClass():
         self.opt_child_lo_elem = []
 
         self.parse_attributes(self, object_desc['attribs'])
+        self.parse_extensions(self, object_desc['extension'],
+                              object_desc['lo_extension'])
         self.rules = []
 
     ########################################################################
@@ -38,12 +41,6 @@ class ValidationRulesForClass():
 
     def determine_rules(self):
         # write rules increasing the number
-        self.number += 1
-        self.rules.append(self.write_core_attribute_rule(self))
-
-        self.number += 1
-        self.rules.append(self.write_core_subobject_rule(self))
-
         self.number += 1
         rule = self.write_package_attribute_rule(self)
         self.add_rule(rule)
@@ -85,6 +82,10 @@ class ValidationRulesForClass():
             rule = \
                 self.write_core_attribute_rule(self, self.opt_child_lo_elem[i])
             self.add_rule(rule)
+#             lo_name = strFunctions.list_of_name(self.opt_child_lo_elem[i]['name'])
+#             lo_class = self.get_class(lo_name)
+#             for j in range (0, len(lo_class['attribs'])):
+#                 self.write_package_attribute_rule(lo_class['attribs'][j])
 
         for i in range(0, len(self.reqd_child_lo_elem)):
             self.number += 1
@@ -205,11 +206,17 @@ class ValidationRulesForClass():
             ref = 'SBML Level~3 Version~1 Core, Section~3.2.'
             sev = 'ERROR'
         else:
-            loname = strFunctions.get_element_name(lo_child)
+            if 'type' in lo_child:
+                loname = strFunctions.get_element_name(lo_child)
+                element = lo_child['element']
+            else:
+                # we are in a plugin so have different fields
+                loname = strFunctions.cap_list_of_name(lo_child['name'])
+                element = lo_child['name']
             text = 'Apart from the general notes and annotations subobjects ' \
                    'permitted on all SBML objects, a {} container object ' \
                    'may only contain \{} objects.'\
-                .format(loname, lo_child['element'])
+                .format(loname, element)
             ref = 'SBML Level~3 Specification for {} Version~1, {}.'\
                 .format(self.fullname, strFunctions.wrap_section(self.name))
             sev = 'ERROR'
@@ -389,6 +396,44 @@ class ValidationRulesForClass():
                     self.reqd_att.append(attributes[i])
                 else:
                     self.opt_att.append(attributes[i])
+
+    # divide attributes into elements/attributes required and optional
+    @staticmethod
+    def parse_extensions(self, extensions, lo_extensions):
+        if len(extensions) == 0 and len(lo_extensions) == 0:
+            return
+        for i in range(0, len(extensions)):
+            extension = extensions[i]
+            if extension['isListOf']:
+                self.opt_child_lo_elem.append(extension)
+                self.opt_elem.append(extension)
+            else:
+                self.opt_elem.append(extension)
+        for i in range(0, len(lo_extensions)):
+            extension = lo_extensions[i]
+            if extension['isListOf']:
+                self.opt_child_lo_elem.append(extension)
+                self.opt_elem.append(extension)
+            else:
+                self.opt_elem.append(extension)
+                    # if attributes[i]['type'] == 'element':
+            #     if attributes[i]['reqd'] is True:
+            #         self.reqd_elem.append(attributes[i])
+            #     else:
+            #         self.opt_elem.append(attributes[i])
+            # elif attributes[i]['type'] == 'lo_element' \
+            #         or attributes[i]['type'] == 'inline_lo_element':
+            #     if attributes[i]['reqd'] is True:
+            #         self.reqd_child_lo_elem.append(attributes[i])
+            #         self.reqd_elem.append(attributes[i])
+            #     else:
+            #         self.opt_elem.append(attributes[i])
+            #         self.opt_child_lo_elem.append(attributes[i])
+            # else:
+            #     if attributes[i]['reqd'] is True:
+            #         self.reqd_att.append(attributes[i])
+            #     else:
+            #         self.opt_att.append(attributes[i])
 
     ########################################################################
 

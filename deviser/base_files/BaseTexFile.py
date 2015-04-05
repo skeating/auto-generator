@@ -14,6 +14,8 @@ class BaseTexFile(BaseFile.BaseFile):
         self.comment = '%'
         self.line_length = 72
 
+        self.sbml_classes = classes
+
         self.prim_class = []
 
         # expand the information for the classes

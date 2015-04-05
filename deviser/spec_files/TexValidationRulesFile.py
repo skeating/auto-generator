@@ -5,6 +5,7 @@ import os
 import BaseTexFile
 import BaseFile
 import ValidationRulesForClass
+import ValidationRulesForPlugin
 import strFunctions
 
 
@@ -89,7 +90,77 @@ class TexValidationRulesFile(BaseTexFile.BaseTexFile):
         self.write_rule(rule)
         self.skip_line()
 
+    # Write general rules
+    def write_extended_sbml_rules(self):
+        self.write_line('\subsubsection*{Rules for the extended \\class{SBML} class}')
+        self.skip_line()
+        text = 'In all SBML documents using the \\{}Package, the ' \
+               '\\class{}SBML{} object must have the {} attribute.'\
+            .format(strFunctions.upper_first(self.package), self.start_b,
+                    self.end_b,
+                    strFunctions.wrap_token('required', self.package))
+        ref = 'SBML Level~3 Version~1 Core, Section~4.1.2.'
+        rule = {'severity': 'ERROR', 'number': 20101 + self.offset,
+                'text': text, 'reference': ref}
+        self.write_rule(rule)
+        self.skip_line()
+        text = 'The value of attribute {0} on the \\class{1}SBML{2} object ' \
+               'must be of data type \\primtype{1}boolean{2}.' \
+            .format(strFunctions.wrap_token('required', self.package),
+                    self.start_b, self.end_b)
+        ref = 'SBML Level~3 Version~1 Core, Section~4.1.2.'
+        rule = {'severity': 'ERROR', 'number': 20102 + self.offset,
+                    'text': text, 'reference': ref}
+        self.write_rule(rule)
+        self.skip_line()
+        text = 'The value of attribute {0} on the \\class{1}SBML{2} object ' \
+               'must be set to \\val{1}{3}{2}.' \
+            .format(strFunctions.wrap_token('required', self.package),
+                    self.start_b, self.end_b, 'false')
+        ref = 'SBML Level~3 Package specification for {}, Version~1 {}.'\
+            .format(self.fullname,
+                    strFunctions.wrap_section('xml-namespace', False))
+        rule = {'severity': 'ERROR', 'number': 20103 + self.offset,
+                'text': text, 'reference': ref}
+        self.write_rule(rule)
+        self.skip_line()
+
     #  Write identifier rules
+    def write_identifier_rules(self):
+        self.write_line(
+            '\subsubsection*{General rules about identifiers}')
+        self.skip_line()
+        text = '(Extends validation rule #10301 in the \\sbmlthreecore ' \
+               'specification. TO DO list scope of ids)'
+        ref = 'SBML Level~3 Package specification for {}, Version~1 {}.'\
+            .format(self.fullname,
+                    strFunctions.wrap_section('primitive-types', False))
+        rule = {'severity': 'ERROR', 'number': 10301 + self.offset,
+                'text': text, 'reference': ref}
+        self.write_rule(rule)
+        self.skip_line()
+        text = 'The value of a {0} must conform to the syntax of ' \
+               'the \\class{1}SBML{2} data type \\primtype{1}SId{2}'\
+            .format(strFunctions.wrap_token('id', self.package),
+                self.start_b, self.end_b)
+        ref = 'SBML Level~3 Package specification for {}, Version~1 {}.' \
+            .format(self.fullname,
+                    strFunctions.wrap_section('primitive-types', False))
+        rule = {'severity': 'ERROR', 'number': 10302 + self.offset,
+                'text': text, 'reference': ref}
+        self.write_rule(rule)
+        self.skip_line()
+
+    # Write rules for a class
+    def write_rules_for_plugin(self, name, rules):
+        # section heading
+        self.write_line('\subsubsection*{Rules for extended \class{'
+                        + '{}'.format(name) + '} object}')
+        self.skip_line()
+
+        for i in range(0, len(rules)):
+            self.write_rule(rules[i])
+            self.skip_line()
 
     # Write rules for a class
     def write_rules_for_class(self, name, texname, rules):
@@ -146,10 +217,16 @@ class TexValidationRulesFile(BaseTexFile.BaseTexFile):
         self.skip_line()
         self.write_introduction()
         self.write_general_rules()
-        self.write_to_do('validation of identifiers')
-        self.write_to_do('validation of extended elements')
-        self.skip_line(2)
-        number = self.offset+20300
+        self.write_identifier_rules()
+        self.write_to_do('ANY LIST OF ELEMENTS THAT HAVE ATTRIBUTES')
+        self.write_extended_sbml_rules()
+        number = self.offset + 20200
+        for i in range(0, len(self.plugins)):
+            rules = ValidationRulesForPlugin.ValidationRulesForPlugin(self.plugins[i], self.fullname, number, self.package)
+            rules.determine_rules()
+            self.write_rules_for_plugin(self.plugins[i]['sbase'], rules.rules)
+            self.skip_line()
+            number += 100
         for i in range(0, len(self.sbml_classes)):
             rules = ValidationRulesForClass\
                 .ValidationRulesForClass(self.sbml_classes[i],
