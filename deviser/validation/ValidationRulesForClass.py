@@ -76,7 +76,8 @@ class ValidationRulesForClass():
         for i in range(0, len(self.reqd_child_lo_elem)):
             self.number += 1
             rule = \
-                self.write_core_subobject_rule(self, self.reqd_child_lo_elem[i])
+                self.write_core_subobject_rule(self,
+                                               self.reqd_child_lo_elem[i])
             self.add_rule(rule)
 
         for i in range(0, len(self.opt_child_lo_elem)):
@@ -88,7 +89,8 @@ class ValidationRulesForClass():
         for i in range(0, len(self.reqd_child_lo_elem)):
             self.number += 1
             rule = \
-                self.write_core_attribute_rule(self, self.reqd_child_lo_elem[i])
+                self.write_core_attribute_rule(self,
+                                               self.reqd_child_lo_elem[i])
             self.add_rule(rule)
 
     def add_rule(self, rule):
