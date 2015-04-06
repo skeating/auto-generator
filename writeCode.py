@@ -351,6 +351,7 @@ def writeIsSetCode(attrib, output, element):
 def writeSetCode(attrib, output, element):
   att = generalFunctions.parseAttribute(attrib)
   attName = att[0]
+  cleanName = strFunctions.cleanStr(attName)
   capAttName = att[1]
   attType = att[2]
   if attType == 'string':
@@ -393,72 +394,72 @@ def writeSetCode(attrib, output, element):
   output.write(' * Sets {0} and returns value indicating success.\n'.format(attName))
   output.write(' */\n')
   output.write('int\n')
-  output.write('{0}::set{1}({2} {3})\n'.format(element, capAttName, attTypeCode, attName))
+  output.write('{0}::set{1}({2} {3})\n'.format(element, capAttName, attTypeCode, cleanName))
   output.write('{\n')
   if attType == 'string':
     if attName == 'id':
       output.write('  return SyntaxChecker::checkAndSetSId({0}, m{1});\n'.format(attName, capAttName))
     else:
-      output.write('  if (&({0}) == NULL)\n'.format(attName))
+      output.write('  if (&({0}) == NULL)\n'.format(cleanName))
       output.write('  {\n    return LIBSBML_INVALID_ATTRIBUTE_VALUE;\n  }\n')
       if attrib['type'] == 'SIdRef':
-        output.write('  else if (!(SyntaxChecker::isValidInternalSId({0})))\n'.format(attName))
+        output.write('  else if (!(SyntaxChecker::isValidInternalSId({0})))\n'.format(cleanName))
         output.write('  {\n    return LIBSBML_INVALID_ATTRIBUTE_VALUE;\n  }\n')
       output.write('  else\n  {\n')
-      output.write('    m{0} = {1};\n'.format(capAttName, attName))
+      output.write('    m{0} = {1};\n'.format(capAttName, cleanName))
       output.write('    return LIBSBML_OPERATION_SUCCESS;\n  }\n')
   elif num == True:
-    output.write('  m{0} = {1};\n'.format(capAttName, attName))
+    output.write('  m{0} = {1};\n'.format(capAttName, cleanName))
     output.write('  mIsSet{0} = true;\n'.format(capAttName))
     output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
   elif attrib['type'] == 'enum':
-    output.write('  m{0} = {1};\n'.format(capAttName, attName))
+    output.write('  m{0} = {1};\n'.format(capAttName, cleanName))
     output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
   elif attrib['type'] == 'array':
-    output.write('  m{0} = {1};\n'.format(capAttName, attName))
+    output.write('  m{0} = {1};\n'.format(capAttName, cleanName))
     output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
   elif attType == 'boolean':
-    output.write('  m{0} = {1};\n'.format(capAttName, attName))
+    output.write('  m{0} = {1};\n'.format(capAttName, cleanName))
     output.write('  mIsSet{0} = true;\n'.format(capAttName))
     output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
   elif attType == 'XMLNode*':
-      output.write('  if (m{0} == {1})\n'.format(capAttName, attName))
+      output.write('  if (m{0} == {1})\n'.format(capAttName, cleanName))
       output.write('  {\n    return LIBSBML_OPERATION_SUCCESS;\n  }\n')
-      output.write('  else if ({0} == NULL)\n'.format(attName))
+      output.write('  else if ({0} == NULL)\n'.format(cleanName))
       output.write('  {\n')
       output.write('    delete m{0};\n'.format(capAttName))
       output.write('    m{0} = NULL;\n'.format(capAttName))
       output.write('    return LIBSBML_OPERATION_SUCCESS;\n  }\n')
       output.write('  delete m{0};\n'.format(capAttName))
-      output.write('  m{0} = ({1} != NULL) ?\n'.format(capAttName, attName))
-      output.write('    {0}->clone() : NULL;\n'.format(attName))
+      output.write('  m{0} = ({1} != NULL) ?\n'.format(capAttName, cleanName))
+      output.write('    {0}->clone() : NULL;\n'.format(cleanName))
       output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
   elif attType == 'element':
-    output.write('  if (m{0} == {1})\n'.format(capAttName, attName))
+    output.write('  if (m{0} == {1})\n'.format(capAttName, cleanName))
     output.write('  {\n    return LIBSBML_OPERATION_SUCCESS;\n  }\n')
-    output.write('  else if ({0} == NULL)\n'.format(attName))
+    output.write('  else if ({0} == NULL)\n'.format(cleanName))
     output.write('  {\n')
     output.write('    delete m{0};\n'.format(capAttName))
     output.write('    m{0} = NULL;\n'.format(capAttName))
     output.write('    return LIBSBML_OPERATION_SUCCESS;\n  }\n')
     if attTypeCode == 'const ASTNode*':
-      output.write('  else if (!({0}->isWellFormedASTNode()))\n'.format(attName))
+      output.write('  else if (!({0}->isWellFormedASTNode()))\n'.format(cleanName))
       output.write('  {\n    return LIBSBML_INVALID_OBJECT;\n  }\n')
     output.write('  else\n  {\n')
     output.write('    delete m{0};\n'.format(capAttName))
-    output.write('    m{0} = ({1} != NULL) ?\n'.format(capAttName, attName))
+    output.write('    m{0} = ({1} != NULL) ?\n'.format(capAttName, cleanName))
     if attTypeCode == 'const ASTNode*':
-      output.write('      {0}->deepCopy() : NULL;\n'.format(attName))
+      output.write('      {0}->deepCopy() : NULL;\n'.format(cleanName))
     else:
-      output.write('      static_cast<{0}>({1}->clone()) : NULL;\n'.format(attTypeCode, attName))
+      output.write('      static_cast<{0}>({1}->clone()) : NULL;\n'.format(attTypeCode, cleanName))
     output.write('    if (m{0} != NULL)\n'.format(capAttName))
     output.write('    {\n')
     if attTypeCode == 'const ASTNode*':
-      output.write('      m{0}->setParentSBMLObject(this);\n'.format(capAttName, attName))
+      output.write('      m{0}->setParentSBMLObject(this);\n'.format(capAttName, cleanName))
     else:
       if generalFunctions.overridesElementName(attrib):
-        output.write('      m{0}->setElementName("{1}");\n'.format(capAttName, attName))
-      output.write('      m{0}->connectToParent(this);\n'.format(capAttName, attName))
+        output.write('      m{0}->setElementName("{1}");\n'.format(capAttName, cleanName))
+      output.write('      m{0}->connectToParent(this);\n'.format(capAttName, cleanName))
     output.write('    }\n')
     output.write('    return LIBSBML_OPERATION_SUCCESS;\n  }\n')
   output.write('}\n\n\n')
@@ -468,10 +469,10 @@ def writeSetCode(attrib, output, element):
     output.write(' * Sets {0} and returns value indicating success.\n'.format(attName))
     output.write(' */\n')
     output.write('int\n')
-    output.write('{0}::set{1}(const std::string& {2})\n'.format(element, capAttName, attName))
+    output.write('{0}::set{1}(const std::string& {2})\n'.format(element, capAttName, cleanName))
     output.write('{\n')
-    output.write('  {0}_t parsed = {0}_parse({1}.c_str());\n'.format(attrib['element'], attName))
-    output.write('  if (parsed == {0}_UNKNOWN) return LIBSBML_INVALID_ATTRIBUTE_VALUE;\n'.format(attrib['element'].upper(), attName))
+    output.write('  {0}_t parsed = {0}_parse({1}.c_str());\n'.format(attrib['element'], cleanName))
+    output.write('  if (parsed == {0}_UNKNOWN) return LIBSBML_INVALID_ATTRIBUTE_VALUE;\n'.format(attrib['element'].upper(), cleanName))
     output.write('  m{0} = parsed;\n'.format(capAttName))
     output.write('  return LIBSBML_OPERATION_SUCCESS;\n')
     output.write('}\n\n\n')
@@ -725,6 +726,8 @@ def createCode(element):
 
   if element != None and element.has_key('baseClass'):
     baseClass = element['baseClass']
+    if baseClass == None: 
+      baseClass = 'SBase'
 
   codeName = nameOfElement + '.cpp'
   code = open(codeName, 'w')

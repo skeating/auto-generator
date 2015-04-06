@@ -86,6 +86,12 @@ def parseDeviserXML(filename):
     
     elementName = getValue( node, 'name')
     baseClass = getValue( node, 'baseClass')
+
+    # currently all deviser generated classes have to derive from SBase or its
+    # derived classes
+    if baseClass == None:
+      baseClass = 'SBase'
+
     typeCode = getValue( node, 'typeCode')
     hasMath = toBool( getValue( node, 'hasMath'))
     hasChildren = toBool( getValue( node, 'hasChildren'))

@@ -249,7 +249,7 @@ def writeSetFunction(attrib, output, element):
     output.write('   * Sets the \"{0}\"'.format(attName))
     output.write(' element of this {0}.\n'.format(element))
     output.write('   *\n')
-    output.write('   * @param {0}; {1} to be set.\n'.format(attName, attTypeCode))
+    output.write('   * @param {0}; {1} to be set.\n'.format(strFunctions.cleanStr(attName), attTypeCode))
     output.write('   *\n')
     output.write('   * @return integer value indicating success/failure of the\n')
     output.write('   * function.  @if clike The value is drawn from the\n')
@@ -259,13 +259,13 @@ def writeSetFunction(attrib, output, element):
     output.write('   * @li LIBSBML_INVALID_ATTRIBUTE_VALUE\n')
     output.write('   */\n')
     output.write('  virtual int set{0}('.format(capAttName))
-    output.write('{0} {1});\n\n\n'.format(attTypeCode, attName))
+    output.write('{0} {1});\n\n\n'.format(attTypeCode, strFunctions.cleanStr(attName)))
   else:
     output.write('  /**\n')
     output.write('   * Sets the value of the \"{0}\"'.format(attName))
     output.write(' attribute of this {0}.\n'.format(element))
     output.write('   *\n')
-    output.write('   * @param {0}; {1} value of the "{0}" attribute to be set\n'.format(attName, attTypeCode))
+    output.write('   * @param {0}; {1} value of the "{2}" attribute to be set\n'.format(strFunctions.cleanStr(attName), attTypeCode, attName))
     output.write('   *\n')
     output.write('   * @return integer value indicating success/failure of the\n')
     output.write('   * function.  @if clike The value is drawn from the\n')
@@ -275,14 +275,14 @@ def writeSetFunction(attrib, output, element):
     output.write('   * @li LIBSBML_INVALID_ATTRIBUTE_VALUE\n')
     output.write('   */\n')
     output.write('  virtual int set{0}('.format(capAttName))
-    output.write('{0} {1});\n\n\n'.format(attTypeCode, attName))
+    output.write('{0} {1});\n\n\n'.format(attTypeCode, strFunctions.cleanStr(attName)))
 
     if attrib['type'] == 'enum':
       output.write('  /**\n')
-      output.write('   * Sets the value of the \"{0}\"'.format(attName))
+      output.write('   * Sets the value of the \"{0}\"'.format(strFunctions.cleanStr(attName)))
       output.write(' attribute of this {0}.\n'.format(element))
       output.write('   *\n')
-      output.write('   * @param {0}; string value of the "{0}" attribute to be set\n'.format(attName))
+      output.write('   * @param {0}; string value of the "{1}" attribute to be set\n'.format(strFunctions.cleanStr(attName), attName))
       output.write('   *\n')
       output.write('   * @return integer value indicating success/failure of the\n')
       output.write('   * function.  @if clike The value is drawn from the\n')
@@ -292,7 +292,7 @@ def writeSetFunction(attrib, output, element):
       output.write('   * @li LIBSBML_INVALID_ATTRIBUTE_VALUE\n')
       output.write('   */\n')
       output.write('  virtual int set{0}('.format(capAttName))
-      output.write('const std::string& {0});\n\n\n'.format(attName))
+      output.write('const std::string& {0});\n\n\n'.format(strFunctions.cleanStr(attName)))
 
      
   
@@ -427,7 +427,7 @@ def writeClass(attributes, header, nameOfElement, nameOfPackage, hasChildren, ha
   header.write('class LIBSBML_EXTERN {0} :'.format(nameOfElement))
   baseClass = 'SBase'
   childrenOverwrite = elementDict.has_key('childrenOverwriteElementName') and elementDict['childrenOverwriteElementName']
-  if elementDict.has_key('baseClass'):
+  if elementDict.has_key('baseClass') and elementDict['baseClass'] != None:
     baseClass = elementDict['baseClass']
   header.write(' public {0}\n{1}\n\n'.format(baseClass, '{'))
   writeAttributes(attributes, header)
@@ -462,7 +462,7 @@ def writeClass(attributes, header, nameOfElement, nameOfPackage, hasChildren, ha
 # write the include files
 def writeIncludes(fileOut, element, pkg, attribs, elementDict):
   baseClass = 'SBase'
-  if elementDict.has_key('baseClass'):
+  if elementDict.has_key('baseClass') and elementDict['baseClass'] != None:
     baseClass = elementDict['baseClass']
   fileOut.write('\n\n');
   fileOut.write('#ifndef {0}_H__\n'.format(element))

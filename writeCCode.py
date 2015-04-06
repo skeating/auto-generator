@@ -254,6 +254,7 @@ def writeIsSetFunction(attrib, output, element):
 def writeSetFunction(attrib, output, element):
   att = generalFunctions.parseAttributeForC(attrib)
   attName = att[0]
+  cleanName = strFunctions.cleanStr(attName)
   capAttName = att[1]
   attType = att[2]
   attTypeCode = att[3]
@@ -268,15 +269,15 @@ def writeSetFunction(attrib, output, element):
       output.write('int\n')
       output.write('{0}_set{1}'.format(element, capAttName))
       output.write('({0}_t * {1},'.format(element, varname))
-      output.write(' {0} {1})\n'.format(attTypeCode, attName))
+      output.write(' {0} {1})\n'.format(attTypeCode, cleanName))
       output.write('{\n')
       output.write('  if ({0} != NULL)\n'.format(varname))
       if num or attrib['type'] == 'enum':
-        output.write('    return {1}->set{2}({0});\n'.format(attName, varname, capAttName))
+        output.write('    return {1}->set{2}({0});\n'.format(cleanName, varname, capAttName))
       elif attrib['type'] == 'array':
-        output.write('    return ({0} == NULL) ? {1}->unset{2}() : {1}->set{2}({0});\n'.format(attName, varname, capAttName))
+        output.write('    return ({0} == NULL) ? {1}->unset{2}() : {1}->set{2}({0});\n'.format(cleanName, varname, capAttName))
       else:
-        output.write('    return ({0} == NULL) ? {1}->set{2}("") : {1}->set{2}({0});\n'.format(attName, varname, capAttName))
+        output.write('    return ({0} == NULL) ? {1}->set{2}("") : {1}->set{2}({0});\n'.format(cleanName, varname, capAttName))
       output.write('  else\n')
       output.write('    return LIBSBML_INVALID_OBJECT;\n')
 #      output.write('  return ({0} != NULL) ? {0}->set{1}({2}) : LIBSBML_INVALID_OBJECT;\n'.format(varname, capAttName, attName))
@@ -287,18 +288,18 @@ def writeSetFunction(attrib, output, element):
       output.write('int\n')
       output.write('{0}_set{1}'.format(element, capAttName))
       output.write('({0}_t * {1},'.format(element, varname))
-      output.write(' const {0} {1})\n'.format('ASTNode_t*', attName))
+      output.write(' const {0} {1})\n'.format('ASTNode_t*', cleanName))
       output.write('{\n')
-      output.write('\treturn ({0} != NULL) ? {0}->set{1}({2}) : LIBSBML_INVALID_OBJECT;\n'.format(varname, capAttName, attName))
+      output.write('\treturn ({0} != NULL) ? {0}->set{1}({2}) : LIBSBML_INVALID_OBJECT;\n'.format(varname, capAttName, cleanName))
       output.write('}\n\n\n')
     else:
       output.write('LIBSBML_EXTERN\n')
       output.write('int\n')
       output.write('{0}_set{1}'.format(element, capAttName))
       output.write('({0}_t * {1},'.format(element, varname))
-      output.write(' {0}_t* {1})\n'.format(attrib['element'], attName))
+      output.write(' {0}_t* {1})\n'.format(attrib['element'], cleanName))
       output.write('{\n')
-      output.write('\treturn ({0} != NULL) ? {0}->set{1}({2}) : LIBSBML_INVALID_OBJECT;\n'.format(varname, capAttName, attName))
+      output.write('\treturn ({0} != NULL) ? {0}->set{1}({2}) : LIBSBML_INVALID_OBJECT;\n'.format(varname, capAttName, cleanName))
       output.write('}\n\n\n')
     
 def writeUnsetFunction(attrib, output, element):
