@@ -10,8 +10,8 @@ import fileHeaders
 import generalFunctions
 import strFunctions
 
-def writeConstructors(element, type, package, output):
-  element = generalFunctions.writeListOf(type)
+def writeConstructors(element, type, package, output,elementDict):
+  element = generalFunctions.getListOfClassName(elementDict,type)
   indent = strFunctions.getIndent(element)
   output.write('  /**\n   * ' )
   output.write('Creates a new {0}'.format(element))
@@ -56,8 +56,8 @@ def writeConstructors(element, type, package, output):
   output.write('  virtual {0}* clone () const;\n\n\n '.format(element))
   return
 
-def writeGetFunctions(output, element, type, subelement=False, topelement=""):
-  listOf = generalFunctions.writeListOf(type)
+def writeGetFunctions(output, element, type, subelement=False, topelement="", elementDict = None):
+  listOf = generalFunctions.getListOfClassName(elementDict, type)
   output.write('  /**\n')
   output.write('   * Get a {0} from the {1}.\n'.format(element, listOf))
   output.write('   *\n')
@@ -129,8 +129,8 @@ def writeGetFunctions(output, element, type, subelement=False, topelement=""):
     output.write('   */\n')
     output.write('  virtual const {0}* get(const std::string& sid) const;\n\n\n'.format(type))
      
-def writeRemoveFunctions(output, element, type, subelement=False, topelement=""):
-  listOf = generalFunctions.writeListOf(type)
+def writeRemoveFunctions(output, element, type, subelement=False, topelement="", elementDict = None):
+  listOf = generalFunctions.getListOfClassName(elementDict, type)
   output.write('  /**\n')
   if subelement == True:
     output.write('   * Removes the nth {0} from the {1} within this {2}.\n'.format(element, listOf, topelement))
@@ -171,8 +171,8 @@ def writeRemoveFunctions(output, element, type, subelement=False, topelement="")
     output.write('\tvirtual {0}* remove(const std::string& sid);\n\n\n'.format(type))
      
   
-def writeProtectedFunctions(output, element, package):
-  listOf = generalFunctions.writeListOf(element)
+def writeProtectedFunctions(output, element, package, elementDict = None):
+  listOf = generalFunctions.getListOfClassName(elementDict, elementDict['name'])
   generalFunctions.writeInternalStart(output)
   output.write('  /**\n')
   output.write('   * Creates a new {0} in this {1}\n'.format(element, listOf))
@@ -204,13 +204,15 @@ def getInlineListOfClasses(elementDict, name):
 
 #write class
 def writeClass(header, nameOfElement, typeOfElement, nameOfPackage, elementDict):
-  header.write('class LIBSBML_EXTERN {0} :'.format(generalFunctions.writeListOf(typeOfElement)))
+  listOf = generalFunctions.getListOfClassName(elementDict, typeOfElement)
+
+  header.write('class LIBSBML_EXTERN {0} :'.format(listOf))
   header.write(' public ListOf\n{0}\n\n'.format('{'))
   header.write('public:\n\n')
-  writeConstructors(nameOfElement, typeOfElement, nameOfPackage, header)
-  writeGetFunctions(header, nameOfElement, typeOfElement)
+  writeConstructors(nameOfElement, typeOfElement, nameOfPackage, header,elementDict)
+  writeGetFunctions(header, nameOfElement, typeOfElement, False, "", elementDict)
   header.write('\t/**\n')
-  header.write('\t * Adds a copy the given \"{0}\" to this {1}.\n'.format(nameOfElement, generalFunctions.writeListOf(typeOfElement)))
+  header.write('\t * Adds a copy the given \"{0}\" to this {1}.\n'.format(nameOfElement, listOf))
   header.write('\t *\n')
   header.write('\t * @param {0}; the {1} object to add\n'.format(strFunctions.objAbbrev(nameOfElement), nameOfElement))
   header.write('\t *\n')
@@ -223,15 +225,15 @@ def writeClass(header, nameOfElement, typeOfElement, nameOfPackage, elementDict)
   header.write('\t */\n')
   header.write('\tint add{0}(const {1}* {2});\n\n\n'.format(nameOfElement, typeOfElement, strFunctions.objAbbrev(nameOfElement)))
   header.write('\t/**\n')
-  header.write('\t * Get the number of {0} objects in this {1}.\n'.format(nameOfElement, generalFunctions.writeListOf(typeOfElement)))
+  header.write('\t * Get the number of {0} objects in this {1}.\n'.format(nameOfElement, listOf))
   header.write('\t *\n')
-  header.write('\t * @return the number of {0} objects in this {1}\n'.format(nameOfElement, generalFunctions.writeListOf(typeOfElement)))
+  header.write('\t * @return the number of {0} objects in this {1}\n'.format(nameOfElement, listOf))
   header.write('\t */\n')
   header.write('\tunsigned int getNum{0}() const;\n\n\n'.format(strFunctions.capp(nameOfElement)))
   if elementDict.has_key('abstract') == False or (elementDict.has_key('abstract') and elementDict['abstract'] == False):
     header.write('\t/**\n')
     header.write('\t * Creates a new {0} object, adds it to the\n'.format(nameOfElement))
-    header.write('\t * {0} and returns the {1} object created. \n'.format(generalFunctions.writeListOf(typeOfElement), nameOfElement))
+    header.write('\t * {0} and returns the {1} object created. \n'.format(listOf, nameOfElement))
     header.write('\t *\n')
     header.write('\t * @return a new {0} object instance\n'.format(nameOfElement))
     header.write('\t *\n')
@@ -242,7 +244,7 @@ def writeClass(header, nameOfElement, typeOfElement, nameOfPackage, elementDict)
     for elem in generalFunctions.getConcretes(elementDict['root'], elementDict['concrete']):
       header.write('\t/**\n')
       header.write('\t * Creates a new {0} object, adds it to the\n'.format(nameOfElement))
-      header.write('\t * {0} and returns the {1} object created. \n'.format(generalFunctions.writeListOf(typeOfElement), nameOfElement))
+      header.write('\t * {0} and returns the {1} object created. \n'.format(listOf, nameOfElement))
       header.write('\t *\n')
       header.write('\t * @return a new {0} object instance\n'.format(nameOfElement))
       header.write('\t *\n')
@@ -250,10 +252,10 @@ def writeClass(header, nameOfElement, typeOfElement, nameOfPackage, elementDict)
       header.write('\t */\n')
       header.write('\t{0}* create{1}();\n\n\n'.format(elem['element'], strFunctions.cap(elem['name'])))
 
-  writeRemoveFunctions(header, nameOfElement, typeOfElement)
-  generalFunctions.writeCommonHeaders(header, typeOfElement, None, True)
+  writeRemoveFunctions(header, nameOfElement, typeOfElement, False, "", elementDict)
+  generalFunctions.writeCommonHeaders(header, typeOfElement, None, True, False, False, elementDict)
   header.write('protected:\n\n')
-  writeProtectedFunctions(header, nameOfElement, nameOfPackage)
+  writeProtectedFunctions(header, nameOfElement, nameOfPackage, elementDict)
 
   if elementDict.has_key('concrete'):
     header.write('\tvirtual bool isValidTypeForList(SBase * item) {\n')

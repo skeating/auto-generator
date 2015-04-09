@@ -100,6 +100,7 @@ def parseDeviserXML(filename):
     childrenOverwriteElementName = toBool(getValue(node, 'childrenOverwriteElementName'))
     xmlElementName = getValue(node, 'elementName')
     xmlLoElementName = getValue(node, 'listOfName')
+    xmlLoElementClassName = getValue(node, 'listOfClassName')
 
     addDecls = getValue(node, 'additionalDecls')
     addDefs = getValue(node, 'additionalDefs')
@@ -148,6 +149,9 @@ def parseDeviserXML(filename):
     
     if xmlLoElementName != None:
       element['lo_elementName'] = xmlLoElementName
+
+    if xmlLoElementClassName  != None:
+      element['lo_elementClassName'] = xmlLoElementClassName       
 
     if addDecls != None:
       if os.path.exists( os.path.dirname(filename) + '/' + addDecls):

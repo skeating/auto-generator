@@ -560,7 +560,7 @@ def writeAttributeCode(attrs, output, element, pkgName, elementDict):
 
 
 def writeListOfSubFunctions(attrib, output, element, pkgName):
-  lotype = generalFunctions.writeListOf(strFunctions.cap(attrib['element']))
+  lotype = generalFunctions.getListOfClassName(attrib, strFunctions.cap(attrib['element']))
   loname = generalFunctions.writeListOf(strFunctions.cap(attrib['name']))
   att = generalFunctions.parseAttribute(attrib)
   attName = att[0]
@@ -586,8 +586,8 @@ def writeListOfSubFunctions(attrib, output, element, pkgName):
   output.write('{\n')
   output.write('  return &m{0};\n'.format(strFunctions.capp(attName)))
   output.write('}\n\n\n')
-  writeListOfCode.writeRemoveFunctions(output, strFunctions.cap(attrib['name']), attrib['element'], True, element, capAttName)
-  writeListOfCode.writeGetFunctions(output, strFunctions.cap(attrib['name']), attrib['element'], True, element, capAttName)
+  writeListOfCode.writeRemoveFunctions(output, strFunctions.cap(attrib['name']), attrib['element'], True, element, capAttName, attrib)
+  writeListOfCode.writeGetFunctions(output, strFunctions.cap(attrib['name']), attrib['element'], True, element, capAttName, attrib)
   output.write('/*\n')
   output.write(' * Adds a copy the given \"{0}\" to this {1}.\n'.format(attrib['element'], element))
   output.write(' *\n')
@@ -743,7 +743,7 @@ def createCode(element):
   generalFunctions.writeCommonCPPCode(code, nameOfElement, sbmltypecode, attributes, False, hasChildren, hasMath, element,baseClass)
   generalFunctions.writeInternalCPPCode(code, nameOfElement, attributes, hasChildren, hasMath,baseClass, isListOf)
   generalFunctions.writeProtectedCPPCode(code, nameOfElement, attributes, False, hasChildren, hasMath, nameOfPackage,
-                                         isListOf, baseClass)
+                                         isListOf, baseClass, element)
   
   if generalFunctions.hasArray(element):
     

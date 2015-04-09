@@ -52,10 +52,12 @@ def objAbbrev(element):
   return abbrev.lower()
     
 def listOfName(name):
-  if (name.endswith('s')):
-    listOf = 'listOf' + name
+  if (name.endswith('nformation')):
+    return 'listOf' + name
+  elif (name.endswith('s')):
+    return 'listOf' + name
   elif (name.endswith('x')):
-    listOf = 'listOf' + name + 'es'
+    return 'listOf' + name + 'es'
   else:
     listOf = 'listOf' + name + 's'
   return listOf

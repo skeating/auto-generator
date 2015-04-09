@@ -69,7 +69,7 @@ def writeAttributeFunctions(attrs, output, element, dict):
       writeListOfSubElements(attrs[i], output, element)
 
 def writeListOfSubElements(attrib, output, element):
-  loname = generalFunctions.writeListOf(strFunctions.cap(attrib['element']))
+  loname = generalFunctions.getListOfClassName(attrib, strFunctions.cap(attrib['element']))
   output.write('LIBSBML_EXTERN\n')
   output.write('int\n')
   output.write('{0}_add{1}({0}_t * {2}, '.format(element, strFunctions.cap(attrib['name']), strFunctions.objAbbrev(element)))
@@ -320,16 +320,21 @@ def writeHasReqdElementsFunction(output, element):
   output.write('(const {0}_t * {1});\n\n\n'.format(element, strFunctions.objAbbrev(element)))
 
     
-def writeListOfHeaders(output, element, type):
+def writeListOfHeaders(output, element, type, elementDict = None):
   loelement = generalFunctions.writeListOf(element)
-  output.write('LIBSBML_EXTERN\n')
-  output.write('{0}_t *\n'.format(type))
-  output.write('{0}_getById'.format(loelement))
-  output.write('(ListOf_t * lo, const char * sid);\n\n\n')
-  output.write('LIBSBML_EXTERN\n')
-  output.write('{0}_t *\n'.format(type))
-  output.write('{0}_removeById'.format(loelement))
-  output.write('(ListOf_t * lo, const char * sid);\n\n\n')
+  loelementClass = generalFunctions.getListOfClassName(elementDict, type)
+
+  hasId = generalFunctions.hasIdAttribute (elementDict, element)  
+
+  if hasId:
+    output.write('LIBSBML_EXTERN\n')
+    output.write('{0}_t *\n'.format(type))
+    output.write('{0}_getById'.format(loelementClass))
+    output.write('(ListOf_t * lo, const char * sid);\n\n\n')
+    output.write('LIBSBML_EXTERN\n')
+    output.write('{0}_t *\n'.format(type))
+    output.write('{0}_removeById'.format(loelementClass))
+    output.write('(ListOf_t * lo, const char * sid);\n\n\n')
  
 # write the header file      
 def createHeader(element, header):
@@ -346,7 +351,7 @@ def createHeader(element, header):
   if element['hasChildren'] == True or element['hasMath'] == True:
     writeHasReqdElementsFunction(header, element['name'])
   if element['hasListOf'] == True:
-    writeListOfHeaders(header, name, type)
+    writeListOfHeaders(header, name, type, element)
  
 
   

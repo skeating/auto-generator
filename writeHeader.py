@@ -78,9 +78,9 @@ def writeAtt(attrib, output):
       return
   elif attType == 'lo_element' or attType == 'inline_lo_element':
     if attrib.has_key('element'):
-      output.write('  {0}   m{1};\n'.format(generalFunctions.writeListOf(attrib['element']), strFunctions.capp(attrib['name'])))
+      output.write('  {0}   m{1};\n'.format(generalFunctions.getListOfClassName(attrib,attrib['element']), strFunctions.capp(attrib['name'])))
     else:
-      output.write('  {0}   m{1};\n'.format(generalFunctions.writeListOf(capAttName), strFunctions.capp(attName)))
+      output.write('  {0}   m{1};\n'.format(generalFunctions.getListOfClassName(attrib,capAttName), strFunctions.capp(attName)))
   elif attTypeCode == 'XMLNode*':
     output.write('  {0}   m{1};\n'.format('XMLNode*', capAttName))
   elif num == True:
@@ -359,7 +359,7 @@ def writeAttributeFunctions(attrs, output, element, elementDict):
         output.write('  virtual bool is{0}() const;\n\n\n'.format(concrete['element']))
 
 def writeListOfSubFunctions(attrib, output, element, elementDict):
-  lotype = generalFunctions.writeListOf(strFunctions.cap(attrib['element']))
+  lotype = generalFunctions.getListOfClassName(attrib,strFunctions.cap(attrib['element']))
   loname = generalFunctions.writeListOf(strFunctions.cap(attrib['name']))
   output.write('  /**\n')
   output.write('   * Returns the  \"{0}\"'.format(lotype))
@@ -379,7 +379,7 @@ def writeListOfSubFunctions(attrib, output, element, elementDict):
   output.write('   */\n')
   output.write('  {0}*'.format(lotype))
   output.write(' get{0}();\n\n\n'.format(loname))
-  writeListOfHeader.writeGetFunctions(output, strFunctions.cap(attrib['name']), attrib['element'], True, element)
+  writeListOfHeader.writeGetFunctions(output, strFunctions.cap(attrib['name']), attrib['element'], True, element, attrib)
   output.write('  /**\n')
   output.write('   * Adds a copy the given \"{0}\" to this {1}.\n'.format(attrib['element'], element))
   output.write('   *\n')
@@ -420,7 +420,7 @@ def writeListOfSubFunctions(attrib, output, element, elementDict):
       output.write('   * @see add{0}(const {0}* {1})\n'.format(attrib['element'], strFunctions.objAbbrev(attrib['element'])))
       output.write('   */\n')
       output.write('  {0}* create{1}();\n\n\n'.format(elem['element'], strFunctions.cap(elem['name'])))
-  writeListOfHeader.writeRemoveFunctions(output, strFunctions.cap(attrib['name']), attrib['element'], True, element)
+  writeListOfHeader.writeRemoveFunctions(output, strFunctions.cap(attrib['name']), attrib['element'], True, element,attrib)
  
 #write class
 def writeClass(attributes, header, nameOfElement, nameOfPackage, hasChildren, hasMath, isListOf, elementDict):

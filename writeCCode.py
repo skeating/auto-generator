@@ -72,7 +72,7 @@ def writeAttributeFunctions(attrs, output, element):
       writeListOfSubElements(attrs[i], output, element)
 
 def writeListOfSubElements(attrib, output, element):
-  loname = generalFunctions.writeListOf(strFunctions.cap(attrib['element']))
+  loname = generalFunctions.getListOfClassName(attrib,strFunctions.cap(attrib['element']))
   output.write('LIBSBML_EXTERN\n')
   output.write('int\n')
   output.write('{0}_add{1}({0}_t * {2}, '.format(element, strFunctions.cap(attrib['name']), strFunctions.objAbbrev(element)))
@@ -341,32 +341,37 @@ def writeHasReqdElementsFunction(output, element):
   output.write('\treturn ({0} != NULL) ? static_cast<int>({0}->hasRequiredElements()) : 0;\n'.format(varname))
   output.write('}\n\n\n')
     
-def writeListOfCode(output, element):
+def writeListOfCode(output, element, elementDict = None):
   loelement = generalFunctions.writeListOf(element)
-  output.write('/*\n')
-  output.write(' *\n')
-  output.write(' */\n')
-  output.write('LIBSBML_EXTERN\n')
-  output.write('{0}_t *\n'.format(element))
-  output.write('{0}_getById'.format(loelement))
-  output.write('(ListOf_t * lo, const char * sid)\n')
-  output.write('{\n')
-  output.write('  if (lo == NULL)\n')
-  output.write('    return NULL;\n\n')
-  output.write('  return (sid != NULL) ? static_cast <{0} *>(lo)->get(sid) : NULL;\n'.format(loelement))
-  output.write('}\n\n\n')
-  output.write('/*\n')
-  output.write(' *\n')
-  output.write(' */\n')
-  output.write('LIBSBML_EXTERN\n')
-  output.write('{0}_t *\n'.format(element))
-  output.write('{0}_removeById'.format(loelement))
-  output.write('(ListOf_t * lo, const char * sid)\n')
-  output.write('{\n')
-  output.write('  if (lo == NULL)\n')
-  output.write('    return NULL;\n\n')
-  output.write('  return (sid != NULL) ? static_cast <{0} *>(lo)->remove(sid) : NULL;\n'.format(loelement))
-  output.write('}\n\n\n')
+  loelementClass = generalFunctions.getListOfClassName(elementDict, element)
+
+  hasId = generalFunctions.hasIdAttribute (elementDict, element)  
+
+  if hasId:
+    output.write('/*\n')
+    output.write(' *\n')
+    output.write(' */\n')
+    output.write('LIBSBML_EXTERN\n')
+    output.write('{0}_t *\n'.format(element))
+    output.write('{0}_getById'.format(loelementClass))
+    output.write('(ListOf_t * lo, const char * sid)\n')
+    output.write('{\n')
+    output.write('  if (lo == NULL)\n')
+    output.write('    return NULL;\n\n')
+    output.write('  return (sid != NULL) ? static_cast <{0} *>(lo)->get(sid) : NULL;\n'.format(loelementClass))
+    output.write('}\n\n\n')
+    output.write('/*\n')
+    output.write(' *\n')
+    output.write(' */\n')
+    output.write('LIBSBML_EXTERN\n')
+    output.write('{0}_t *\n'.format(element))
+    output.write('{0}_removeById'.format(loelement))
+    output.write('(ListOf_t * lo, const char * sid)\n')
+    output.write('{\n')
+    output.write('  if (lo == NULL)\n')
+    output.write('    return NULL;\n\n')
+    output.write('  return (sid != NULL) ? static_cast <{0} *>(lo)->remove(sid) : NULL;\n'.format(loelementClass))
+    output.write('}\n\n\n')
  
 # write the code file      
 def createCode(element, code):
@@ -377,7 +382,7 @@ def createCode(element, code):
   if element['hasChildren'] == True or element['hasMath'] == True:
     writeHasReqdElementsFunction(code, element['name'])
   if element['hasListOf'] == True:
-    writeListOfCode(code, element['name'])
+    writeListOfCode(code, element['name'], element)
 
   code.write('\n\n');
   code.write('LIBSBML_CPP_NAMESPACE_END\n')
