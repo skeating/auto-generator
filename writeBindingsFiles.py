@@ -120,9 +120,29 @@ def writeCSharp(fileOut, name, plugins, classes):
   fileOut.write('    SBase sb = sbp.getParentSBMLObject();\n\n')
   fileOut.write('    switch( sb.getTypeCode() )\n')
   fileOut.write('    {\n')
-  for i in range (0, len(plugins)):
-    fileOut.write('      case (int) libsbml.SBML_{0}:\n'.format(createSBase(plugins[i]['sbase'].upper())))
-    fileOut.write('        return new {0}{1}Plugin(cPtr, owner);\n\n'.format(strFunctions.cap(name), plugins[i]['sbase']))
+  listOfPlugins = []
+  for plugin in plugins:
+    typecode = 'SBML_{0}'.format(createSBase(plugin['sbase'].upper()))
+    if plugin.has_key('typecode') and plugin['typecode'] != None:
+      typecode = plugin['typecode']    
+
+    if typecode != 'SBML_LIST_OF':
+      fileOut.write('      case (int) libsbml.{0}:\n'.format(typecode))
+      fileOut.write('        return new {0}{1}Plugin(cPtr, owner);\n\n'.format(strFunctions.cap(name), plugin['sbase']))
+      
+    else:
+      listOfPlugins.append(plugin)
+
+  if len(listOfPlugins) > 0: 
+    fileOut.write('      case (int) libsbml.SBML_LIST_OF:\n')
+    fileOut.write('      {\n')
+    fileOut.write('        string name = sb.getElementName();\n')
+    for plugin in listOfPlugins:
+      fileOut.write('        if (name == "{0}")\n'.format(strFunctions.lowerFirst(plugin['sbase'])))
+      fileOut.write('          return new {0}{1}Plugin(cPtr, owner);\n\n'.format(strFunctions.cap(name), plugin['sbase']))
+    fileOut.write('        return new SBasePlugin(cPtr, owner);\n')
+    fileOut.write('      }\n')
+
   fileOut.write('      default:\n')
   fileOut.write('        return new SBasePlugin(cPtr, owner);\n')
   fileOut.write('    }\n')
@@ -207,9 +227,30 @@ def writeJava(fileOut, name, plugins, classes):
   fileOut.write('    SBase sb = sbp.getParentSBMLObject();\n\n')
   fileOut.write('    switch( sb.getTypeCode() )\n')
   fileOut.write('    {\n')
-  for i in range (0, len(plugins)):
-    fileOut.write('      case (int) libsbml.SBML_{0}:\n'.format(createSBase(plugins[i]['sbase'].upper())))
-    fileOut.write('        return new {0}{1}Plugin(cPtr, owner);\n\n'.format(strFunctions.cap(name), plugins[i]['sbase']))
+
+  listOfPlugins = []
+  for plugin in plugins:
+    typecode = 'SBML_{0}'.format(createSBase(plugin['sbase'].upper()))
+    if plugin.has_key('typecode') and plugin['typecode'] != None:
+      typecode = plugin['typecode']    
+
+    if typecode != 'SBML_LIST_OF':
+      fileOut.write('      case (int) libsbml.{0}:\n'.format(typecode))
+      fileOut.write('        return new {0}{1}Plugin(cPtr, owner);\n\n'.format(strFunctions.cap(name), plugin['sbase']))
+      
+    else:
+      listOfPlugins.append(plugin)
+
+  if len(listOfPlugins) > 0: 
+    fileOut.write('      case (int) libsbml.SBML_LIST_OF:\n')
+    fileOut.write('      {\n')
+    fileOut.write('        String name = sb.getElementName();\n')
+    for plugin in listOfPlugins:
+      fileOut.write('        if (name.equals("{0}"))\n'.format(strFunctions.lowerFirst(plugin['sbase'])))
+      fileOut.write('          return new {0}{1}Plugin(cPtr, owner);\n\n'.format(strFunctions.cap(name), plugin['sbase']))
+    fileOut.write('        return new SBasePlugin(cPtr, owner);\n')
+    fileOut.write('      }\n')
+
   fileOut.write('      default:\n')
   fileOut.write('        return new SBasePlugin(cPtr, owner);\n')
   fileOut.write('    }\n')
@@ -228,9 +269,9 @@ def writeJava(fileOut, name, plugins, classes):
       if classes[i].has_key('lo_elementName'):
         loName = classes[i]['lo_elementName']
       if (i==0):
-        fileOut.write('        if (name == "{0}")\n'.format(loName))
+        fileOut.write('        if (name.equals("{0}"))\n'.format(loName))
       else :
-        fileOut.write('        else if (name == "{0}")\n'.format(loName))
+        fileOut.write('        else if (name.equals("{0}"))\n'.format(loName))
       fileOut.write('        {\n')
       fileOut.write('          return new {0}(cPtr, owner);\n'.format(generalFunctions.getListOfClassName (classes[i], classes[i]['name'])))
       fileOut.write('        }\n')
