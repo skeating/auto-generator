@@ -5,6 +5,7 @@ from xml.dom.minidom import *
 import weakref;
 import os.path;
 import strFunctions
+import generalFunctions
 
 def toBool(v):
   if (v == None): 
@@ -28,7 +29,7 @@ def findLoElement(elements, name):
   if elements == None or name == None: 
     return None
   for element in elements:
-    currentLoName = 'ListOf{0}'.format(strFunctions.capp(element['name']))
+    currentLoName = generalFunctions.getListOfClassNameForElement(element);
     if currentLoName == name:
       return element
   return None
@@ -183,7 +184,6 @@ def parseDeviserXML(filename):
     package = getValue(node, 'package')
     typecode = getValue(node, 'typecode')
 
-
     attributes = []
     
     # read additional attributes
@@ -217,7 +217,7 @@ def parseDeviserXML(filename):
       else: 
         # uh oh ... we did not find the object, lets have another 
         # look, maybe it was a listOf class
-        temp = findLoElement(elements, reference)
+        temp = findLoElement(sbmlElements, reference)
         if temp != None:
           # now just add it to the attributes
           lo_attr = dict({

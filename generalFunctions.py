@@ -42,6 +42,21 @@ def getListOfClassName(elementDict, elementName):
     return element['lo_elementName']
   return writeListOf(elementName);
 
+def getListOfClassNameForElement(element):
+  if element.has_key('lo_elementClassName'):
+    return element['lo_elementClassName']
+  if element.has_key('lo_elementName'):
+    return element['lo_elementName']
+  return writeListOf(element['name']);
+
+def getListOfClassNameFromList(list, elementName):
+  if list == None:
+    return writeListOf(elementName)
+  element = getElementFromList(list, elementName)
+  if element == None:
+    return writeListOf(elementName);
+  return getListOfCallName(element)
+
 def guessPlural(element):
   if element.endswith('nformation'):
     return element
@@ -1334,10 +1349,44 @@ def writeRenameSIdCode(output, element, attributes, hasMath):
   output.write('}\n\n\n')
 
 def getElement(root, name):
-  for elem in root['sbmlElements']:
+  return getElementFromList(root['sbmlElements'], name)
+
+def getElementFromList(list, name):
+  for elem in list:
     if name == elem['name']:
       return elem
   return None
+
+def coreClasses():
+  result = []
+  result.append('SBase')
+  result.append('Compartment')
+  result.append('Constraint')
+  result.append('SBMLDocument')
+  result.append('Event')
+  result.append('EventAssignment')
+  result.append('FunctionDefinition')
+  result.append('InitialAssignment')
+  result.append('KineticLaw')
+  result.append('ListOf')
+  result.append('Model')
+  result.append('Parameter')
+  result.append('Reaction')
+  result.append('Rule')
+  result.append('Species')
+  result.append('SpeciesReference')
+  result.append('ModifierSpeciesReference')
+  result.append('UnitDefinition')
+  result.append('Unit')
+  result.append('AlgebraicRule')
+  result.append('AssignmentRule')
+  result.append('RateRule')
+  result.append('Trigger')
+  result.append('Delay')
+  result.append('LocalParameter')
+  result.append('Priority')
+  return result;
+
 
 def addConcreteToList(root, concrete, list):
   current = getElement(root, concrete['element'])

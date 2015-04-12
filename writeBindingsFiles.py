@@ -389,6 +389,29 @@ def writeSwigHeader(fileOut, name, plugins, classes):
   fileOut.write('\n')
   fileOut.write('#endif // USE_{0} \n\n'.format(name.upper()))
 
+
+def getClassByName (classes, name):
+  for clazz in classes:
+    if clazz['name'] == name:
+      return clazz
+  return None
+
+# utility function that includes the base class first, ensuring that 
+# swig knows about it 
+def writeBaseClassFirst(classes, clazz, pkgName, fileOut, written):
+  baseClass = 'SBase'
+  if clazz.has_key('baseClass'): 
+    baseClass = clazz['baseClass']
+  if written.count(baseClass) == 0:
+    written.append(baseClass)
+    if generalFunctions.coreClasses().count(baseClass) == 0:
+      base = getClassByName(classes, baseClass)
+      if base != None:
+        writeBaseClassFirst(classes, base, pkgName, fileOut, written)
+  fileOut.write('%include <sbml/packages/{0}/sbml/{1}.h>\n'.format(pkgName, clazz['name']))
+  written.append(clazz['name'])
+
+
 def writeSwig(fileOut, name, plugins, classes):
   capName = strFunctions.cap(name)
   fileOut.write('#ifdef USE_{0}\n\n'.format(name.upper()))
@@ -399,9 +422,11 @@ def writeSwig(fileOut, name, plugins, classes):
   fileOut.write('%include <sbml/packages/{0}/extension/{1}Extension.h>\n'.format(name, capName))
   for i in range (0, len(plugins)):
     fileOut.write('%include <sbml/packages/{0}/extension/{1}{2}Plugin.h>\n'.format(name, capName, plugins[i]['sbase']))
-  for i in range (0, len(classes)):
-    if classes[i]['typecode'] != 'HACK':
-      fileOut.write('%include <sbml/packages/{0}/sbml/{1}.h>\n'.format(name, classes[i]['name']))
+  written = []
+  for clazz in classes:
+    if clazz['typecode'] != 'HACK' and written.count(clazz['name']) == 0:
+      # write out baseclass first if present and not a core class
+      writeBaseClassFirst(classes, clazz, name, fileOut, written)
   fileOut.write('\n')
   fileOut.write('#endif /* USE_{0} */\n\n'.format(name.upper()))
 
