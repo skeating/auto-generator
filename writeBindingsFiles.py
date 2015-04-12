@@ -318,13 +318,24 @@ def writePlugins(fileOut, name, plugins):
   fileOut.write('if (pkgName == "{0}")\n'.format(name))
   fileOut.write('{\n')
   for i in range (0, len(plugins)):
+    plugin = plugins[i]
     if (i == 0):
       fileOut.write('  if ')
     else:
       fileOut.write('  else if ')
-    fileOut.write('(sb->getTypeCode() == SBML_{0})\n'.format(createSBase(plugins[i]['sbase'].upper())))
+    typecode = 'SBML_{0}'.format(createSBase(plugin['sbase'].upper()))
+    if plugin.has_key('typecode') and plugin['typecode'] != None:
+      typecode = plugin['typecode']
+    fileOut.write('(sb->getTypeCode() == {0})\n'.format(typecode))
     fileOut.write('  {\n')
-    fileOut.write('    return SWIGTYPE_p_{0}{1}Plugin;\n'.format(strFunctions.cap(name), plugins[i]['sbase']))
+    if typecode != 'SBML_LIST_OF':
+      fileOut.write('    return SWIGTYPE_p_{0}{1}Plugin;\n'.format(strFunctions.cap(name), plugin['sbase']))
+    else:
+
+      fileOut.write('    std::string name = sb->getElementName();\n')
+      fileOut.write('    if(name == "{0}")\n'.format(strFunctions.lowerFirst(plugin['sbase'])))
+      fileOut.write('      return SWIGTYPE_p_{0}{1}Plugin;\n'.format(strFunctions.cap(name), plugin['sbase']))
+    
     fileOut.write('  }\n')
   fileOut.write('}\n')
   fileOut.write('\n')
@@ -360,12 +371,21 @@ def writeSwigHeader(fileOut, name, plugins, classes):
   capName = strFunctions.cap(name)
   fileOut.write('#ifdef USE_{0}\n\n'.format(name.upper()))
   fileOut.write('#include <sbml/packages/{0}/extension/{1}Extension.h>\n'.format(name, capName))
-  for i in range (0, len(plugins)):
-    fileOut.write('#include <sbml/packages/{0}/extension/{1}{2}Plugin.h>\n'.format(name, capName, plugins[i]['sbase']))
+  alreadyIncluded = []
+  for plugin in plugins:
+    package = name
+    if plugin.has_key('package') and plugin['package'] != None:
+      package = plugin['package']
+    capPackageName = strFunctions.cap(package)
+    if package != name and alreadyIncluded.count(package) == 0:
+      alreadyIncluded.append(package)
+      fileOut.write('#include <sbml/packages/{0}/extension/{1}Extension.h>\n'.format(package, capPackageName))
+      fileOut.write('#include <sbml/packages/{0}/common/{1}ExtensionTypes.h>\n'.format(package, capPackageName))
+    fileOut.write('#include <sbml/packages/{0}/extension/{1}{2}Plugin.h>\n'.format(name, capName, plugin['sbase']))
   fileOut.write('#include <sbml/packages/{0}/common/{1}ExtensionTypes.h>\n'.format(name, capName))
-  for i in range (0, len(classes)):
-    if classes[i]['typecode'] != 'HACK':
-      fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(name, classes[i]['name']))
+  for clazz in classes:
+    if clazz['typecode'] != 'HACK':
+      fileOut.write('#include <sbml/packages/{0}/sbml/{1}.h>\n'.format(name, clazz['name']))
   fileOut.write('\n')
   fileOut.write('#endif // USE_{0} \n\n'.format(name.upper()))
 

@@ -258,6 +258,11 @@ def parseDeviserXML(filename):
 
     enums.append(dict({'name': enumName, 'values': values}))
 
+  mappings = []
+  for node in dom.getElementsByTagName('mapping'):
+    mappings .append(dict({'name': getValue( node, 'name'), 'package': getValue( node, 'package')}))
+
+
   package = dict({
                'name' : packageName, 
                'elements': elements, 
@@ -267,7 +272,8 @@ def parseDeviserXML(filename):
                'enums': enums, 
                'offset': offset,
                'version' : version,
-               'required' : required
+               'required' : required,
+               'mappings': mappings
                })
 
   if addPkgDecls != None:
