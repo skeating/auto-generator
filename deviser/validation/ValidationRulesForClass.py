@@ -108,7 +108,7 @@ class ValidationRulesForClass():
     @staticmethod
     def write_attribute_type_rule(self, attribute):
         att_type = attribute['type']
-        name = strFunctions.wrap_token(attribute['name'], self.package)
+        name = strFunctions.wrap_token(attribute['texname'], self.package)
         if att_type == 'SId':
             return
         elif att_type == 'SIdRef':
@@ -159,11 +159,11 @@ class ValidationRulesForClass():
                         strFunctions.wrap_token(attribute['element']))
         elif att_type == 'element' and attribute['element'] == 'RelAbsVector':
             text = 'The value of the attribute {0} of {1} {2} object must ' \
-                   'conform to the syntax of SBML data type \\RelAbsVector. ' \
-                   'That is it must be a string representing encoding ' \
-                   'optionally an absolute value followed by an option space ' \
-                   'and an optional relative value followed by a \\%.'.format(name, self.indef,
-                                           self.formatted_name)
+                   'conform to the syntax of SBML data type \\RelAbsVector ' \
+                   'i.e. a string encoding optionally an absolute number ' \
+                   'followed by an optional relative number followed ' \
+                   'by a \\% sign. Adding spaces between the ' \
+                   'coordinates is encouraged, but not required.'.format(name, self.indef, self.formatted_name)
         else:
             text = 'FIX ME: Encountered an unknown attribute type {} in ' \
                    'ValidationRulesForClass:write_attribute_type_rule'\
@@ -288,20 +288,20 @@ class ValidationRulesForClass():
             return ''
         elif num == 1:
             return 'the required attribute {}'\
-                .format(strFunctions.wrap_token(attributes[0]['name'],
+                .format(strFunctions.wrap_token(attributes[0]['texname'],
                                                 self.package))
         else:
             required_statement = 'the required attributes {}'\
-                .format(strFunctions.wrap_token(attributes[0]['name'],
+                .format(strFunctions.wrap_token(attributes[0]['texname'],
                                                 self.package))
             i = 1
             while i < num - 1:
                 required_statement += ', {}'\
-                    .format(strFunctions.wrap_token(attributes[i]['name'],
+                    .format(strFunctions.wrap_token(attributes[i]['texname'],
                                                     self.package))
                 i += 1
             required_statement += ' and {}'\
-                .format(strFunctions.wrap_token(attributes[i]['name'],
+                .format(strFunctions.wrap_token(attributes[i]['texname'],
                                                 self.package))
             return required_statement
 
@@ -313,20 +313,20 @@ class ValidationRulesForClass():
             return ''
         elif num == 1:
             return 'the optional attribute {}' \
-                .format(strFunctions.wrap_token(attributes[0]['name'],
+                .format(strFunctions.wrap_token(attributes[0]['texname'],
                                                 self.package))
         else:
             optional_statement = 'the optional attributes {}' \
-                .format(strFunctions.wrap_token(attributes[0]['name'],
+                .format(strFunctions.wrap_token(attributes[0]['texname'],
                                                 self.package))
             i = 1
             while i < num - 1:
                 optional_statement += ', {}' \
-                    .format(strFunctions.wrap_token(attributes[i]['name'],
+                    .format(strFunctions.wrap_token(attributes[i]['texname'],
                                                     self.package))
                 i += 1
             optional_statement += ' and {}' \
-                .format(strFunctions.wrap_token(attributes[i]['name'],
+                .format(strFunctions.wrap_token(attributes[i]['texname'],
                                                 self.package))
             return optional_statement
 
