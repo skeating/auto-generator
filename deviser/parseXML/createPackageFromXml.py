@@ -38,9 +38,9 @@ def find_lo_element(elements, name):
     for element in elements:
         if 'isListOf' in element and element['isListOf'] is True:
             match = strFunctions.list_of_name(element['name'])
-            if 'listOfName' in element and element['listOfName'] != '':
-                match = element['listOfName']
-            if match == name:
+            if 'listOfClassName' in element and element['listOfClassName'] != '':
+                match = element['listOfClassName']
+            if match.lower() == name.lower():
                 return element
     return None
 
@@ -95,6 +95,7 @@ def parse_deviser_xml(filename):
             get_value(node, 'childrenOverwriteElementName'))
         xml_element_name = get_value(node, 'elementName')
         xml_lo_element_name = get_value(node, 'listOfName')
+        xml_lo_class_name = get_value(node, 'listOfClassName')
 
         add_decls = get_value(node, 'additionalDecls')
         add_defs = get_value(node, 'additionalDefs')
@@ -163,6 +164,9 @@ def parse_deviser_xml(filename):
         if xml_lo_element_name is not None:
             element['lo_elementName'] = xml_lo_element_name
 
+        if xml_lo_class_name is not None:
+            element['lo_class_name'] = xml_lo_class_name
+
         if add_decls is not None:
             if os.path.exists(os.path.dirname(filename) + '/' + add_decls):
                 add_decls = os.path.dirname(filename) + '/' + add_decls
@@ -179,7 +183,8 @@ def parse_deviser_xml(filename):
         elements.append(dict({'name': element_name,
                               'typecode': type_code,
                               'isListOf': has_list_of,
-                              'listOfName': xml_lo_element_name if xml_lo_element_name is not None else ''}))
+                              'listOfName': xml_lo_element_name if xml_lo_element_name is not None else '',
+                              'listOfClassName': xml_lo_class_name if xml_lo_class_name is not None else ''}))
         sbml_elements.append(element)
 
     for node in dom.getElementsByTagName('plugin'):

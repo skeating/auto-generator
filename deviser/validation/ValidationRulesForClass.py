@@ -135,7 +135,7 @@ class ValidationRulesForClass():
                    'type {}.'\
                 .format(name, self.indef, self.formatted_name,
                         strFunctions.wrap_token('double'))
-        elif att_type == 'boolean':
+        elif att_type == 'boolean' or att_type == 'bool':
             text = 'The attribute {} on {} {} must have a value of data ' \
                    'type {}.'\
                 .format(name, self.indef, self.formatted_name,
@@ -157,6 +157,13 @@ class ValidationRulesForClass():
                    'be an array of values of type {}.'\
                 .format(name, self.indef, self.formatted_name,
                         strFunctions.wrap_token(attribute['element']))
+        elif att_type == 'element' and attribute['element'] == 'RelAbsVector':
+            text = 'The value of the attribute {0} of {1} {2} object must ' \
+                   'conform to the syntax of SBML data type \\RelAbsVector. ' \
+                   'That is it must be a string representing encoding ' \
+                   'optionally an absolute value followed by an option space ' \
+                   'and an optional relative value followed by a \\%.'.format(name, self.indef,
+                                           self.formatted_name)
         else:
             text = 'FIX ME: Encountered an unknown attribute type {} in ' \
                    'ValidationRulesForClass:write_attribute_type_rule'\
@@ -373,9 +380,17 @@ class ValidationRulesForClass():
         for i in range(0, len(attributes)):
             if attributes[i]['type'] == 'element':
                 if attributes[i]['reqd'] is True:
-                    self.reqd_elem.append(attributes[i])
+                    # hack for render
+                    if attributes[i]['element'] == 'RelAbsVector':
+                        self.reqd_att.append(attributes[i])
+                    else:
+                        self.reqd_elem.append(attributes[i])
                 else:
-                    self.opt_elem.append(attributes[i])
+                    # hack for render
+                    if attributes[i]['element'] == 'RelAbsVector':
+                        self.opt_att.append(attributes[i])
+                    else:
+                        self.opt_elem.append(attributes[i])
             elif attributes[i]['type'] == 'lo_element' \
                     or attributes[i]['type'] == 'inline_lo_element':
                 if attributes[i]['reqd'] is True:

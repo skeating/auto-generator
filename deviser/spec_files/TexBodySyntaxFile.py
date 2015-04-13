@@ -71,7 +71,7 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
             for i in range(1, num_additions-1):
                 self.write_line(', {}'.format(ex_objects[i]))
             self.write_line(' and {}.'.format(ex_objects[num_additions-1]))
-        else:
+        elif num_additions == 1:
             self.write_line('{}.'.format(ex_objects[0]))
         self.skip_line()
 

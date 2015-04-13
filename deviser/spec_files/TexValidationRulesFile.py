@@ -14,7 +14,7 @@ class TexValidationRulesFile(BaseTexFile.BaseTexFile):
 
     def __init__(self, object_desc):
         # members from object
-        self.package = object_desc['name']
+        self.package = object_desc['name'].lower()
         self.fullname = object_desc['fullname']
         self.sbml_classes = object_desc['sbmlElements']
         self.offset = object_desc['offset']
@@ -130,7 +130,7 @@ class TexValidationRulesFile(BaseTexFile.BaseTexFile):
         self.write_line(
             '\subsubsection*{General rules about identifiers}')
         self.skip_line()
-        text = '(Extends validation rule #10301 in the \\sbmlthreecore ' \
+        text = '(Extends validation rule \\#10301 in the \\sbmlthreecore ' \
                'specification. TO DO list scope of ids)'
         ref = 'SBML Level~3 Package specification for {}, Version~1 {}.'\
             .format(self.fullname,
@@ -228,6 +228,9 @@ class TexValidationRulesFile(BaseTexFile.BaseTexFile):
             self.skip_line()
             number += 100
         for i in range(0, len(self.sbml_classes)):
+            # hack for render
+            if self.sbml_classes[i]['name'] == 'RelAbsVector':
+                continue
             rules = ValidationRulesForClass\
                 .ValidationRulesForClass(self.sbml_classes[i],
                                          self.fullname, number, self.package)
