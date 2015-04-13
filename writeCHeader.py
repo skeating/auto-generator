@@ -69,7 +69,7 @@ def writeAttributeFunctions(attrs, output, element, dict):
       writeListOfSubElements(attrs[i], output, element)
 
 def writeListOfSubElements(attrib, output, element):
-  loname = generalFunctions.writeListOf(strFunctions.cap(attrib['element']))
+  loname = generalFunctions.getListOfClassName(attrib, strFunctions.cap(attrib['element']))
   output.write('LIBSBML_EXTERN\n')
   output.write('int\n')
   output.write('{0}_add{1}({0}_t * {2}, '.format(element, strFunctions.cap(attrib['name']), strFunctions.objAbbrev(element)))
@@ -211,7 +211,7 @@ def writeSetFunction(attrib, output, element):
       output.write(' * This function copies the string given in @p string.  If the string is\n')
       output.write(' * a null pointer, this function performs {0}_unset{1}() instead.\n *\n'.format(element, capAttName))
     output.write(' * @param {0} the {1}_t structure.\n *\n'.format(strFunctions.objAbbrev(element), element))
-    output.write(' * @param {0} the string to which the structures \"{0}\" attribute should be\n'.format(attName))
+    output.write(' * @param {0} the string to which the structures \"{1}\" attribute should be\n'.format(strFunctions.cleanStr(attName),attName))
     output.write(' * set.\n *\n')
     output.write(' * @return integer value indicating success/failure of the\n')
     output.write(' * function.  @if clike The value is drawn from the\n')
@@ -229,13 +229,13 @@ def writeSetFunction(attrib, output, element):
     output.write('int\n')
     output.write('{0}_set{1}'.format(element, capAttName))
     output.write('({0}_t * {1},'.format(element, strFunctions.objAbbrev(element)))
-    output.write(' {0} {1});\n\n\n'.format(attTypeCode, attName))
+    output.write(' {0} {1});\n\n\n'.format(attTypeCode, strFunctions.cleanStr(attName)))
   elif attrib['type'] == 'XMLNode*':
     output.write('LIBSBML_EXTERN\n')
     output.write('int\n')
     output.write('{0}_set{1}'.format(element, capAttName))
     output.write('({0}_t * {1},'.format(element, strFunctions.objAbbrev(element)))
-    output.write(' XMLNode_t* {0});\n\n\n'.format(attName))
+    output.write(' XMLNode_t* {0});\n\n\n'.format(strFunctions.cleanStr(attName)))
   elif attrib['type'] == 'element':
     if attrib['name'] == 'Math' or attrib['name'] == 'math':
       output.write('/**\n')
@@ -255,13 +255,13 @@ def writeSetFunction(attrib, output, element):
       output.write('int\n')
       output.write('{0}_setMath'.format(element))
       output.write('({0}_t * {1},'.format(element, strFunctions.objAbbrev(element)))
-      output.write(' const ASTNode_t* {0});\n\n\n'.format(attName))
+      output.write(' const ASTNode_t* {0});\n\n\n'.format(strFunctions.cleanStr(attName)))
     else:
       output.write('LIBSBML_EXTERN\n')
       output.write('int\n')
       output.write('{0}_set{1}'.format(element, capAttName))
       output.write('({0}_t * {1},'.format(element, strFunctions.objAbbrev(element)))
-      output.write(' {0}_t* {1});\n\n\n'.format(attrib['element'], attName))
+      output.write(' {0}_t* {1});\n\n\n'.format(attrib['element'], strFunctions.cleanStr(attName)))
     
 def writeUnsetFunction(attrib, output, element):
   att = generalFunctions.parseAttributeForC(attrib)
@@ -320,16 +320,21 @@ def writeHasReqdElementsFunction(output, element):
   output.write('(const {0}_t * {1});\n\n\n'.format(element, strFunctions.objAbbrev(element)))
 
     
-def writeListOfHeaders(output, element, type):
+def writeListOfHeaders(output, element, type, elementDict = None):
   loelement = generalFunctions.writeListOf(element)
-  output.write('LIBSBML_EXTERN\n')
-  output.write('{0}_t *\n'.format(type))
-  output.write('{0}_getById'.format(loelement))
-  output.write('(ListOf_t * lo, const char * sid);\n\n\n')
-  output.write('LIBSBML_EXTERN\n')
-  output.write('{0}_t *\n'.format(type))
-  output.write('{0}_removeById'.format(loelement))
-  output.write('(ListOf_t * lo, const char * sid);\n\n\n')
+  loelementClass = generalFunctions.getListOfClassName(elementDict, type)
+
+  hasId = generalFunctions.hasIdAttribute (elementDict, element)  
+
+  if hasId:
+    output.write('LIBSBML_EXTERN\n')
+    output.write('{0}_t *\n'.format(type))
+    output.write('{0}_getById'.format(loelementClass))
+    output.write('(ListOf_t * lo, const char * sid);\n\n\n')
+    output.write('LIBSBML_EXTERN\n')
+    output.write('{0}_t *\n'.format(type))
+    output.write('{0}_removeById'.format(loelementClass))
+    output.write('(ListOf_t * lo, const char * sid);\n\n\n')
  
 # write the header file      
 def createHeader(element, header):
@@ -346,7 +351,7 @@ def createHeader(element, header):
   if element['hasChildren'] == True or element['hasMath'] == True:
     writeHasReqdElementsFunction(header, element['name'])
   if element['hasListOf'] == True:
-    writeListOfHeaders(header, name, type)
+    writeListOfHeaders(header, name, type, element)
  
 
   

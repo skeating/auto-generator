@@ -7,14 +7,29 @@
 
 import sys
 
+def cleanStr(word):
+  final = ''
+  i = 0
+  while i < len(word): 
+    current = word[i]
+    if current == '-':
+      if i+1 < len(word) and word[i+1] != '-':
+        final = final + word[i+1].upper()
+        i = i+1
+    else:
+      final = final + word[i]
+    i = i+1
+  return final
+
 def capp(word, plural=True):
-  capWord = word[0].upper() + word[1:len(word)]
+  capWord = cap(word)
   if plural and word[len(word)-1] != 's':
     capWord = capWord + 's'
   return capWord
 
 def cap(word):
   capWord = word[0].upper() + word[1:len(word)]
+  capWord = cleanStr(capWord)
   return capWord
   
   
@@ -37,10 +52,12 @@ def objAbbrev(element):
   return abbrev.lower()
     
 def listOfName(name):
-  if (name.endswith('s')):
-    listOf = 'listOf' + name
+  if (name.endswith('nformation')):
+    return 'listOf' + name
+  elif (name.endswith('s')):
+    return 'listOf' + name
   elif (name.endswith('x')):
-    listOf = 'listOf' + name + 'es'
+    return 'listOf' + name + 'es'
   else:
     listOf = 'listOf' + name + 's'
   return listOf

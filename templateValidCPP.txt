@@ -231,18 +231,22 @@ $PKGNAMEValidator::validate (const SBMLDocument& d)
 
   const Model* m = d.getModel();
 
-  if (m != NULL)
-  {
-    $PKGNAMEValidatingVisitor vv(*this, *m);
-
-    const $PKGNAMEModelPlugin* plugin = 
-      static_cast <const $PKGNAMEModelPlugin *> (m->getPlugin("$LOWERPKGNAME"));
-      
-    if (plugin != NULL)
-    {
-      plugin->accept(vv);
-    }
-  }
+  // // uncomment the following lines, to have the validator run over the model
+  // // in case your package does not use a ModelPlugin, change to the appropriate
+  // // one
+  // 
+  // if (m != NULL)
+  // {
+  //   $PKGNAMEValidatingVisitor vv(*this, *m);
+  // 
+  //   const $PKGNAMEModelPlugin* plugin = 
+  //     static_cast <const $PKGNAMEModelPlugin *> (m->getPlugin("$LOWERPKGNAME"));
+  //     
+  //   if (plugin != NULL)
+  //   {
+  //     plugin->accept(vv);
+  //   }
+  // }
 
   /* ADD ANY OTHER OBJECTS THAT HAVE PLUGINS */
   

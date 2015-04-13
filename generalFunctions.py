@@ -30,12 +30,45 @@ def writeInternalStart(outFile):
 def writeInternalEnd(outFile):
   outFile.write('  /** @endcond doxygenLibsbmlInternal */\n\n\n')
 
-def writeListOf(element):
+def getListOfClassName(elementDict, elementName):
+  if elementDict == None or not elementDict.has_key('root'):
+    return writeListOf(elementName)
+  element = getElement(elementDict['root'], elementName)
+  if element == None:
+    return writeListOf(elementName);
+  if element.has_key('lo_elementClassName'):
+    return element['lo_elementClassName']
+  if element.has_key('lo_elementName'):
+    return element['lo_elementName']
+  return writeListOf(elementName);
+
+def getListOfClassNameForElement(element):
+  if element.has_key('lo_elementClassName'):
+    return element['lo_elementClassName']
+  if element.has_key('lo_elementName'):
+    return element['lo_elementName']
+  return writeListOf(element['name']);
+
+def getListOfClassNameFromList(list, elementName):
+  if list == None:
+    return writeListOf(elementName)
+  element = getElementFromList(list, elementName)
+  if element == None:
+    return writeListOf(elementName);
+  return getListOfCallName(element)
+
+def guessPlural(element):
+  if element.endswith('nformation'):
+    return element
   last = len(element)-1
   if element[last] == 'x':
     element = element + 'es'
   elif element[last] != 's':
     element = element + 's'
+  return element
+
+def writeListOf(element):
+  element = guessPlural(element)
   element = 'ListOf' + element
   return element
 
@@ -104,12 +137,8 @@ def parseAttribute(attrib):
   elif attrib['type'] == 'lo_element' or attrib['type'] == 'inline_lo_element':
     attType = 'lo_element'
     attTypeCode = attrib['element']
-    if attName.endswith('x'):
-      attName = attName + 'es'
-      capAttName = capAttName + 'es'
-    elif attName.endswith('s') == False:
-      attName = attName + 's'
-      capAttName = capAttName + 's'
+    attName = guessPlural(attName)
+    capAttName = guessPlural(capAttName)
     num = False
   elif attrib['type'] == 'XMLNode*':
     attType = 'XMLNode*'
@@ -881,7 +910,7 @@ def writeConnectCPPCode(outFile, element, attribs, hasChildren=False, hasMath=Fa
   outFile.write('}\n\n\n')
   writeInternalEnd(outFile)
 
-def writeReadAttributesCPPCode(outFile, element, attribs, pkg, isListOf, baseClass, plugin = None):
+def writeReadAttributesCPPCode(outFile, element, attribs, pkg, isListOf, baseClass, plugin = None, elementDict = None):
   writeInternalStart(outFile)
   outFile.write('/*\n')
   outFile.write(' * Read values from the given XMLAttributes set into their specific fields.\n')
@@ -894,10 +923,10 @@ def writeReadAttributesCPPCode(outFile, element, attribs, pkg, isListOf, baseCla
   outFile.write('  unsigned int numErrs;\n\n')
   if isListOf == True:
     outFile.write('  /* look to see whether an unknown attribute error was logged\n')
-    outFile.write('   * during the read of the {0} - which will have\n'.format(strFunctions.listOfName(element)))
+    outFile.write('   * during the read of the {0} - which will have\n'.format(getListOfClassName(elementDict,element)))
     outFile.write('   * happened immediately prior to this read\n  */\n\n')
     outFile.write('  if (getErrorLog() != NULL &&\n')
-    outFile.write('      static_cast<{0}*>(getParentSBMLObject())->size() < 2)\n'.format(strFunctions.cap(strFunctions.listOfName(element))))
+    outFile.write('      static_cast<{0}*>(getParentSBMLObject())->size() < 2)\n'.format(getListOfClassName(elementDict,element)))
     outFile.write('  {\n')
     outFile.write('    numErrs = getErrorLog()->getNumErrors();\n')
     outFile.write('    for (int n = numErrs-1; n >= 0; n--)\n')
@@ -990,9 +1019,9 @@ def writeWriteAttributesCPPCode(outFile, element, attribs, baseClass='SBase'):
   outFile.write('}\n\n\n')
   writeInternalEnd(outFile)
   
-def writeGetElementNameHeader(outFile, element, isListOf):
+def writeGetElementNameHeader(outFile, element, isListOf, elementDict = None):
   if isListOf == True:
-    element = writeListOf(element)
+    element = getListOfClassName(elementDict, element)
   outFile.write('  /**\n')
   outFile.write('   * Returns the XML element name of this object, which for {0}, is\n'.format(element))
   outFile.write('   * always @c "{0}".\n'.format(strFunctions.lowerFirst(element)))
@@ -1156,8 +1185,8 @@ def writeProtectedHeaders(outFile, attribs = None, hasChildren=False, hasMath=Fa
     writeReadOtherXMLHeader(outFile)
   writeWriteAttributesHeader(outFile)
   
-def writeCommonHeaders(outFile, element, attribs, isListOf, hasChildren=False, hasMath=False):
-  writeGetElementNameHeader(outFile, element, isListOf)
+def writeCommonHeaders(outFile, element, attribs, isListOf, hasChildren=False, hasMath=False, elementDict=None):
+  writeGetElementNameHeader(outFile, element, isListOf,elementDict)
   if isListOf == True:
     writeGetTypeCodeHeader(outFile, False)
   writeGetTypeCodeHeader(outFile, isListOf)
@@ -1183,7 +1212,7 @@ def writeCommonCPPCode(outFile, element, sbmltypecode, attribs, isListOf, hasChi
   if elementDict.has_key('element'):
     type = elementDict['element']
   if isListOf == True:
-    element = writeListOf(type)
+    element = getListOfClassName(elementDict, type)
   writeGetElementNameCPPCode(outFile, element, isListOf, elementDict)
   writeGetTypeCodeCPPCode(outFile, element, sbmltypecode, isListOf)
   if isListOf == False:
@@ -1199,11 +1228,11 @@ def writeInternalCPPCode(outFile, element, attributes, hasChildren, hasMath,base
     writeConnectCPPCode(outFile, element, attributes, hasChildren, hasMath, baseClass)
   writeEnablePkgCPPCode(outFile, element, attributes, baseClass)
 
-def writeProtectedCPPCode(outFile, element, attribs, False, hasChildren, hasMath, pkg, isListOf, baseClass):
+def writeProtectedCPPCode(outFile, element, attribs, False, hasChildren, hasMath, pkg, isListOf, baseClass, elementDict):
   if hasChildren == True or baseClass != 'SBase':
     writeCreateObjectCPPCode(outFile, element, attribs, pkg, isListOf, hasChildren, hasMath, baseClass)
   writeAddExpectedCPPCode(outFile, element, attribs, baseClass)
-  writeReadAttributesCPPCode(outFile, element, attribs, pkg, isListOf, baseClass)
+  writeReadAttributesCPPCode(outFile, element, attribs, pkg, isListOf, baseClass,None,elementDict)
   if hasMath == True or containsType(attribs, 'std::vector<double>') or containsType(attribs, 'XMLNode*'):
     writeReadOtherXMLCPPCode(outFile, element, hasMath, attribs, baseClass)
   writeWriteAttributesCPPCode(outFile, element, attribs, baseClass)
@@ -1260,6 +1289,23 @@ def writeGetAllElementsCodePlug(output, element, members, attribs):
         output.write('  ADD_FILTERED_POINTER(ret, sublist, m{0}, filter);\n'.format(strFunctions.cap(attribs[i]['name'])))
   output.write('\n  return ret;\n}\n\n\n')
 
+def hasId(attributes):
+  hasid = False;
+  for i in range (0, len(attributes)):
+    if attributes[i]['name'] == 'id':
+      hasid = True;
+  return hasid
+
+def hasIdAttribute (elementDict, element):
+  if elementDict == None or elementDict.has_key('root'):
+    return True
+
+  sbmlElement = generalFunctions.getElement(elementDict['root'], element)
+  if sbmlElement == None:
+    return True
+
+  return generalFunctions.hasId(sbmlElement['attribs'])
+
 def hasSIdRef(attributes):
   hasSidRefs = False;
   for i in range (0, len(attributes)):
@@ -1303,10 +1349,44 @@ def writeRenameSIdCode(output, element, attributes, hasMath):
   output.write('}\n\n\n')
 
 def getElement(root, name):
-  for elem in root['sbmlElements']:
+  return getElementFromList(root['sbmlElements'], name)
+
+def getElementFromList(list, name):
+  for elem in list:
     if name == elem['name']:
       return elem
   return None
+
+def coreClasses():
+  result = []
+  result.append('SBase')
+  result.append('Compartment')
+  result.append('Constraint')
+  result.append('SBMLDocument')
+  result.append('Event')
+  result.append('EventAssignment')
+  result.append('FunctionDefinition')
+  result.append('InitialAssignment')
+  result.append('KineticLaw')
+  result.append('ListOf')
+  result.append('Model')
+  result.append('Parameter')
+  result.append('Reaction')
+  result.append('Rule')
+  result.append('Species')
+  result.append('SpeciesReference')
+  result.append('ModifierSpeciesReference')
+  result.append('UnitDefinition')
+  result.append('Unit')
+  result.append('AlgebraicRule')
+  result.append('AssignmentRule')
+  result.append('RateRule')
+  result.append('Trigger')
+  result.append('Delay')
+  result.append('LocalParameter')
+  result.append('Priority')
+  return result;
+
 
 def addConcreteToList(root, concrete, list):
   current = getElement(root, concrete['element'])

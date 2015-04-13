@@ -10,8 +10,8 @@ import fileHeaders
 import generalFunctions
 import strFunctions
 
-def writeConstructors(element, package, output):
-  element = generalFunctions.writeListOf(element)
+def writeConstructors(element, package, output, elementDict=None):
+  element = generalFunctions.getListOfClassName(elementDict, element)
   indent = strFunctions.getIndent(element)
   output.write('/*\n' )
   output.write(' * Constructor \n')
@@ -41,8 +41,8 @@ def writeConstructors(element, package, output):
   output.write('  return new {0}(*this);\n'.format(element))
   output.write('}\n\n\n')
   
-def writeGetFunctions(output, element, type, subelement=False, topelement="", name=""):
-  listOf = generalFunctions.writeListOf(type)
+def writeGetFunctions(output, element, type, subelement=False, topelement="", name="", elementDict = None):
+  listOf = generalFunctions.getListOfClassName(elementDict, type)
   output.write('/*\n')
   if subelement == True:
     output.write(' * Return the nth {0} in the {1} within this {2}.\n'.format(element, listOf, topelement))
@@ -115,8 +115,8 @@ def writeGetFunctions(output, element, type, subelement=False, topelement="", na
     output.write('  return (result == mItems.end()) ? 0 : static_cast <{0}*> (*result);\n'.format(type))
     output.write('}\n\n\n')
      
-def writeRemoveFunctions(output, element, type, subelement=False, topelement="", name=""):
-  listOf = generalFunctions.writeListOf(type)
+def writeRemoveFunctions(output, element, type, subelement=False, topelement="", name="", elementDict = None):
+  listOf = generalFunctions.getListOfClassName(elementDict, type)
   output.write('/*\n')
   if subelement == True:
     output.write(' * Removes the nth {0} from the {1}.\n'.format(element, listOf))
@@ -158,7 +158,7 @@ def writeRemoveFunctions(output, element, type, subelement=False, topelement="",
      
   
 def writeProtectedFunctions(output, element, package, elementDict):
-  listOf = generalFunctions.writeListOf(element)
+  listOf = generalFunctions.getListOfClassName(elementDict, element)
   generalFunctions.writeInternalStart(output)
   output.write('/*\n')
   output.write(' * Creates a new {0} in this {1}\n'.format(element, listOf))
@@ -361,11 +361,11 @@ def createCode(element, code):
     name = strFunctions.cap(element['elementName']) 
   if element.has_key('element'):
     type = element['element']
-  listOf = generalFunctions.writeListOf(type)
-  writeConstructors(type, element['package'], code) 
-  writeGetFunctions(code, name, type)
+  listOf = generalFunctions.getListOfClassName(element, type)
+  writeConstructors(type, element['package'], code, element) 
+  writeGetFunctions(code, name, type, False,"","",element)
   writeListAccessFunctions(code, type, listOf, name, element, element['package'])
-  writeRemoveFunctions(code, name, type)
+  writeRemoveFunctions(code, name, type,False, "", "", element)
   generalFunctions.writeCommonCPPCode(code, type, element['typecode'],None,  True, False,False, element)
   writeProtectedFunctions(code,type, element['package'], element)
 

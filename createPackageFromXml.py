@@ -5,6 +5,7 @@ from xml.dom.minidom import *
 import weakref;
 import os.path;
 import strFunctions
+import generalFunctions
 
 def toBool(v):
   if (v == None): 
@@ -28,7 +29,7 @@ def findLoElement(elements, name):
   if elements == None or name == None: 
     return None
   for element in elements:
-    currentLoName = 'ListOf{0}'.format(strFunctions.capp(element['name']))
+    currentLoName = generalFunctions.getListOfClassNameForElement(element);
     if currentLoName == name:
       return element
   return None
@@ -86,6 +87,12 @@ def parseDeviserXML(filename):
     
     elementName = getValue( node, 'name')
     baseClass = getValue( node, 'baseClass')
+
+    # currently all deviser generated classes have to derive from SBase or its
+    # derived classes
+    if baseClass == None:
+      baseClass = 'SBase'
+
     typeCode = getValue( node, 'typeCode')
     hasMath = toBool( getValue( node, 'hasMath'))
     hasChildren = toBool( getValue( node, 'hasChildren'))
@@ -94,6 +101,7 @@ def parseDeviserXML(filename):
     childrenOverwriteElementName = toBool(getValue(node, 'childrenOverwriteElementName'))
     xmlElementName = getValue(node, 'elementName')
     xmlLoElementName = getValue(node, 'listOfName')
+    xmlLoElementClassName = getValue(node, 'listOfClassName')
 
     addDecls = getValue(node, 'additionalDecls')
     addDefs = getValue(node, 'additionalDefs')
@@ -143,6 +151,9 @@ def parseDeviserXML(filename):
     if xmlLoElementName != None:
       element['lo_elementName'] = xmlLoElementName
 
+    if xmlLoElementClassName  != None:
+      element['lo_elementClassName'] = xmlLoElementClassName       
+
     if addDecls != None:
       if os.path.exists( os.path.dirname(filename) + '/' + addDecls):
         addDecls = os.path.dirname(filename) + '/' + addDecls
@@ -172,7 +183,6 @@ def parseDeviserXML(filename):
     addDefs = getValue(node, 'additionalDefs')
     package = getValue(node, 'package')
     typecode = getValue(node, 'typecode')
-
 
     attributes = []
     
@@ -207,7 +217,7 @@ def parseDeviserXML(filename):
       else: 
         # uh oh ... we did not find the object, lets have another 
         # look, maybe it was a listOf class
-        temp = findLoElement(elements, reference)
+        temp = findLoElement(sbmlElements, reference)
         if temp != None:
           # now just add it to the attributes
           lo_attr = dict({
@@ -248,6 +258,11 @@ def parseDeviserXML(filename):
 
     enums.append(dict({'name': enumName, 'values': values}))
 
+  mappings = []
+  for node in dom.getElementsByTagName('mapping'):
+    mappings .append(dict({'name': getValue( node, 'name'), 'package': getValue( node, 'package')}))
+
+
   package = dict({
                'name' : packageName, 
                'elements': elements, 
@@ -257,7 +272,8 @@ def parseDeviserXML(filename):
                'enums': enums, 
                'offset': offset,
                'version' : version,
-               'required' : required
+               'required' : required,
+               'mappings': mappings
                })
 
   if addPkgDecls != None:
