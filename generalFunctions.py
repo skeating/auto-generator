@@ -120,9 +120,10 @@ def parseAttribute(attrib):
     attType = 'unsigned integer'
     attTypeCode = 'unsigned int'
     num = True
-  elif attrib['type'] == 'bool':
+  elif attrib['type'] == 'bool' or attrib['type'] == 'boolean' :
     attType = 'boolean'
     attTypeCode = 'bool'
+    attrib['type'] = 'bool'
     num = False
   elif attrib['type'] == 'element':
     attType = 'element'
@@ -199,9 +200,10 @@ def parseAttributeForC(attrib):
     attType = 'unsigned integer'
     attTypeCode = 'unsigned int'
     num = True
-  elif attrib['type'] == 'bool':
+  elif attrib['type'] == 'bool' or attrib['type'] == 'boolean' :
     attType = 'boolean'
     attTypeCode = 'int'
+    attrib['type'] = 'bool'
     num = True
   elif attrib['type'] == 'element':
     attType = 'element'
