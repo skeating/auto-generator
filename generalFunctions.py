@@ -152,6 +152,10 @@ def parseAttribute(attrib):
     attType = '{0}*'.format(attrib['element'])
     attTypeCode = '{0}*'.format(attrib['element'])
     num = False
+  elif attrib['type'] == 'std::vector<double>':
+    attType = 'std::vector<double>'
+    attTypeCode = 'std::vector<double>'
+    num = False
   else:
     attType = 'FIX ME'
     attTypeCode = 'FIX ME'
@@ -222,6 +226,10 @@ def parseAttributeForC(attrib):
   elif attrib['type'] == 'array':
     attType = '{0}*'.format(attrib['element'])
     attTypeCode = '{0}*'.format(attrib['element'])
+    num = False
+  elif attrib['type'] == 'std::vector<double>':
+    attType = 'std::vector<double>'
+    attTypeCode = 'std::vector<double>'
     num = False
   else:
     attType = 'FIX ME'
@@ -336,6 +344,19 @@ def writeWriteElementsCPPCode(outFile, element, attributes, hasChildren=False, h
     outFile.write('    stream << *m{0};\n'.format(strFunctions.cap(node['name'])))
     outFile.write('    stream.endElement("{0}");\n'.format(node['name']))
     outFile.write('\n  }\n')		
+  if containsType(attributes, 'std::vector<double>'):
+    vector = getByType(attributes, 'std::vector<double>')
+    outFile.write('\tif(has{0}())\n'.format(strFunctions.capp(vector['name'])))
+    outFile.write('\t{\n')
+    outFile.write('\t\tfor (std::vector<double>::const_iterator it = m{0}.begin(); it != m{0}.end(); ++it)\n'.format(strFunctions.capp(vector['name'])))
+    outFile.write('\t\t{\n')
+    outFile.write('\t\t\tstream.startElement("{0}");\n'.format(vector['name']))
+    outFile.write('\t\t\tstream.setAutoIndent(false);\n')
+    outFile.write('\t\t\tstream << " " << *it << " ";\n')
+    outFile.write('\t\t\tstream.endElement("{0}");\n'.format(vector['name']))
+    outFile.write('\t\t\tstream.setAutoIndent(true);\n')
+    outFile.write('\t\t}\n')
+    outFile.write('\t}\n')
   if hasMath == True:
     for i in range(0, len(attributes)):
       if attributes[i]['type'] == 'element' and attributes[i]['name'] == 'Math' or attributes[i]['name'] == 'math':
@@ -1261,11 +1282,11 @@ def writeGetAllElementsCode(output, element, attrib):
   numAttr = countMembers(attrib)
   if numAttr > 0: 
     output.write('  List* sublist = NULL;\n\n')
-    for i in range(0, len(attrib)):
-      if attrib[i]['type'] == 'element':
-        output.write('  ADD_FILTERED_POINTER(ret, sublist, m{0}, filter);\n'.format(strFunctions.cap(attrib[i]['name'])))
-      elif attrib[i]['type'] == 'lo_element' or attrib[i]['type'] == 'inline_lo_element':
-        output.write('  ADD_FILTERED_LIST(ret, sublist, m{0}, filter);\n'.format(strFunctions.capp(attrib[i]['name'])))
+    for attr in attrib:
+      if attr['type'] == 'element' and attr['name'] != 'math' :
+        output.write('  ADD_FILTERED_POINTER(ret, sublist, m{0}, filter);\n'.format(strFunctions.cap(attr['name'])))
+      elif attr['type'] == 'lo_element' or attr['type'] == 'inline_lo_element':
+        output.write('  ADD_FILTERED_LIST(ret, sublist, m{0}, filter);\n'.format(strFunctions.capp(attr['name'])))
     output.write('\n  ADD_FILTERED_FROM_PLUGIN(ret, sublist, filter);\n\n')
   output.write('  return ret;\n}\n\n\n')
 
@@ -1395,7 +1416,8 @@ def addConcreteToList(root, concrete, list):
       list.append(concrete)
     else:
       for c in current['concrete']:
-        addConcreteToList(root, c, list)
+        if c != concrete: 
+          addConcreteToList(root, c, list)
 
 def getConcretes(root, concretes):
   result = []
