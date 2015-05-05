@@ -378,6 +378,8 @@ class ValidationRulesForPlugin():
     @staticmethod
     def parse_attributes(self, attributes):
         for i in range(0, len(attributes)):
+            texname = strFunctions.replace_digits(attributes[i]['name'])
+            attributes[i]['texname'] = texname
             if attributes[i]['type'] == 'element':
                 if attributes[i]['reqd'] is True:
                     self.reqd_elem.append(attributes[i])
