@@ -420,10 +420,12 @@ class ValidationRulesForClass():
                 .format(enum)
         else:
             i = 0
+            num_values = len(this_enum['values'])
             values = '\"{}\"'.format(this_enum['values'][i]['value'])
-            for i in range(1, len(this_enum['values'])-1):
+            for i in range(1, num_values-1):
                 values += ', \"{}\"'.format(this_enum['values'][i]['value'])
-            values += ' or \"{}\"'.format(this_enum['values'][i+1]['value'])
+            if num_values > 1:
+                values += ' or \"{}\"'.format(this_enum['values'][i+1]['value'])
             return values
 
     #######################################################################
