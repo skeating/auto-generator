@@ -257,7 +257,7 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
     # write parts of file that can be copied from text
 
     def get_text(self, filename):
-        file_in = open(os.path.dirname(__file__) + '\\' + filename, 'r')
+        file_in = open(os.path.dirname(__file__) + '/' + filename, 'r')
         intro = file_in.read()
         file_in.close()
         pkg_name = '\\' + self.fullname + 'Package'
