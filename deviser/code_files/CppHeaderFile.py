@@ -85,15 +85,29 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         self.up_indent()
         self.write_constructors(class_name)
         self.write_attribute_functions(class_name, class_attributes)
+        if base_class == 'ListOf':
+            self.write_get_element_functions(class_name, [], is_list_of=True)
+            self.write_remove_element_functions(class_name, [], is_list_of=True)
         self.write_listofelement_functions(class_name, class_attributes)
         self.write_general_functions(class_name, class_attributes,
                                      base_class == 'ListOf')
         self.down_indent()
+        self.write_line('protected:')
+        self.skip_line()
+        self.up_indent()
+        self.write_protected_functions(base_class == 'ListOf')
+        self.down_indent()
         self.write_line('};\n')
 
-    def write_c_header(self):
-        self.write_constructors(self.name, False)
-        self.write_attribute_functions(self.name, self.attributes, False)
+    def write_c_header(self, is_cpp_api=False):
+        is_list_of = False
+        self.write_constructors(self.name, is_cpp_api)
+        self.write_attribute_functions(self.name, self.attributes,
+                                       is_cpp_api)
+        self.write_general_functions(self.name, self.attributes,
+                                     is_list_of, is_cpp_api)
+        self.write_get_element_functions(self.name, [], is_list_of, is_cpp_api)
+        self.write_remove_element_functions(self.name, [], is_list_of=True)
 
     ########################################################################
 
@@ -375,31 +389,6 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
             else:
                 self.write_unset_function(class_name, attribute, False,
                                           is_cpp_api)
-
-    # function to write the get/set/isSet/unset functions for elements
-    # def write_elements_functions(self, class_name, class_attributes,
-    # is_cpp_api=True):
-    #     num_attributes = len(class_attributes)
-    #     for i in range(0, num_attributes):
-    #         attribute = class_attributes[i]
-    #         if attribute['attType'] == 'element':
-    #             self.write_get_function(class_name, attribute, False,
-    #                                     is_cpp_api)
-    #     for i in range(0, num_attributes):
-    #         attribute = class_attributes[i]
-    #         if attribute['attType'] == 'element':
-    #             self.write_is_set_function(class_name, attribute, False,
-    #                                        is_cpp_api)
-    #     for i in range(0, num_attributes):
-    #         attribute = class_attributes[i]
-    #         if attribute['attType'] == 'element':
-    #             self.write_set_function(class_name, attribute, True,
-    #                                     is_cpp_api)
-    #     for i in range(0, num_attributes):
-    #         attribute = class_attributes[i]
-    #         if attribute['attType'] == 'element':
-    #             self.write_unset_function(class_name, attribute, False,
-    #                                       is_cpp_api)
 
     # function to write get function
     def write_get_function(self, class_name, attribute, is_attribute,
@@ -750,7 +739,8 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
                              .format(object_name, abbrev_object))
 
         self.write_function_header(is_cpp_api, function,
-                                   arguments, return_type, False)
+                                   arguments, return_type, is_const=False,
+                                   is_virtual=False)
         self.skip_line(2)
 
     ########################################################################
@@ -758,17 +748,21 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
     # Functions for writing general functions
 
     # main general function writing function
-    def write_general_functions(self, class_name, attributes, is_list_of):
-        if query.hasSIdRef(attributes):
-            self.write_rename_sidrefs_function(class_name)
-        self.write_get_element_name(class_name)
-        self.write_get_typecode(class_name, is_list_of)
-        if not is_list_of:
-            self.write_has_reqd_attributes(class_name, attributes)
-            self.write_write_elements(class_name)
-            self.write_accept_function(class_name)
-            self.write_set_document(class_name)
-            self.write_enable_pkg_internal(class_name)
+    def write_general_functions(self, class_name, attributes, is_list_of,
+                                is_cpp_api=True):
+        if is_cpp_api:
+            if query.hasSIdRef(attributes):
+                self.write_rename_sidrefs_function(class_name)
+            self.write_get_element_name(class_name)
+            self.write_get_typecode(class_name, is_list_of)
+            if not is_list_of:
+                self.write_has_reqd_attributes(class_name, attributes)
+                self.write_write_elements(class_name)
+                self.write_accept_function(class_name)
+                self.write_set_document(class_name)
+                self.write_enable_pkg_internal(class_name)
+        else:
+            self.write_has_reqd_attributes(class_name, attributes, is_cpp_api)
 
     def write_rename_sidrefs_function(self, class_name):
         # create doc string header
@@ -841,29 +835,52 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
                                    return_type, constant, virtual)
         self.skip_line(2)
 
-    def write_has_reqd_attributes(self, class_name, attributes):
+    def write_has_reqd_attributes(self, class_name, attributes, is_cpp=True):
+        abbrev_object = ''
+        if is_cpp is False:
+            object_name = class_name + '_t'
+            abbrev_object = strFunctions.abbrev_name(class_name)
+        else:
+            object_name = class_name
         # create doc string header
-        title_line = 'Predicate returning @c true if all the required ' \
-                     'attributes for this {} object have been set.' \
-            .format(class_name)
+        title_line = 'Predicate returning @c {} if all the required ' \
+                         'attributes for this {} object have been set.' \
+                .format('true' if is_cpp else 'true (non-zero)', object_name)
         params = []
-        return_lines = ['@return a boolean indicating whether all the '
-                        'required attributes for this object have been '
-                        'defined.']
+        if not is_cpp:
+            params.append('@param {0} the {1} structure.'
+                          .format(abbrev_object, object_name))
+
+        return_lines = []
+        return_lines.append('@return {0} to indicate that all the required attributes of this {1} have been '
+                            'set, otherwise {2} is returned.'
+                            .format(('@c true'
+                                     if is_cpp else '@c 1'),
+                                    object_name,
+                                    ('@c false' if is_cpp
+                                     else '@c 0')))
         additional = [' ', '@note The required attributes for the {} object'
-                           ' are:'.format(class_name)]
+                           ' are:'.format(object_name)]
         for i in range(0, len(attributes)):
             if attributes[i]['reqd']:
                 additional.append('@li \"{}\"'.format(attributes[i]['name']))
-        self.write_comment_header(title_line, params, return_lines, class_name,
+        self.write_comment_header(title_line, params, return_lines, object_name,
                                   additional)
         # create the function declaration
-        function = 'hasRequiredAttributes'
-        return_type = 'bool'
-        is_cpp = True
+        if is_cpp:
+            function = 'hasRequiredAttributes'
+            return_type = 'bool'
+        else:
+            function = '{0}_hasRequiredAttributes'.format(class_name)
+            return_type = 'int'
+
+        arguments = []
+        if not is_cpp:
+            arguments.append('const {0} * {1}'
+                             .format(object_name, abbrev_object))
         virtual = True
         constant = True
-        self.write_function_header(is_cpp, function, [],
+        self.write_function_header(is_cpp, function, arguments,
                                    return_type, constant, virtual)
         self.skip_line(2)
 
@@ -942,6 +959,113 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
 
     ########################################################################
 
+    # Protected functions
+
+    def write_protected_functions(self, is_list_of=False):
+        if not is_list_of:
+            self.write_add_expected_attributes()
+            self.write_read_attributes()
+            self.write_write_attributes()
+        else:
+            self.write_create_object()
+            self.write_create_write_xmlns()
+
+    def write_add_expected_attributes(self):
+        self.write_doxygen_start()
+        # create doc string header
+        title_line = 'Adds the expected attributes for this element'
+        self.write_comment_header(title_line, [], [], '')
+
+        # create the function declaration
+        function = 'addExpectedAttributes'
+        return_type = 'void'
+        arguments = ['ExpectedAttributes& attributes']
+        is_cpp = True
+        virtual = True
+        constant = False
+        self.write_function_header(is_cpp, function,
+                                   arguments, return_type, constant, virtual)
+        self.skip_line(2)
+        self.write_doxygen_end()
+
+    def write_read_attributes(self):
+        self.write_doxygen_start()
+        # create doc string header
+        title_line = 'Reads the expected attributes into the member ' \
+                     'data variables'
+        self.write_comment_header(title_line, [], [], '')
+
+        # create the function declaration
+        function = 'readAttributes'
+        return_type = 'void'
+        arguments = ['const XMLAttributes& attributes',
+                     'const ExpectedAttributes& expectedAttributes']
+        is_cpp = True
+        virtual = True
+        constant = False
+        self.write_function_header(is_cpp, function,
+                                   arguments, return_type, constant, virtual)
+        self.skip_line(2)
+        self.write_doxygen_end()
+
+    def write_write_attributes(self):
+        self.write_doxygen_start()
+        # create doc string header
+        title_line = 'Writes the attributes to the stream'
+        self.write_comment_header(title_line, [], [], '')
+
+        # create the function declaration
+        function = 'writeAttributes'
+        return_type = 'void'
+        arguments = ['XMLOutputStream& stream']
+        is_cpp = True
+        virtual = True
+        constant = True
+        self.write_function_header(is_cpp, function,
+                                   arguments, return_type, constant, virtual)
+        self.skip_line(2)
+        self.write_doxygen_end()
+
+    def write_create_object(self):
+        self.write_doxygen_start()
+        # create doc string header
+        title_line = 'Creates a new {} in this {}'.format(self.name,
+                                                          self.list_of_name)
+        self.write_comment_header(title_line, [], [], '')
+
+        # create the function declaration
+        function = 'createObject'
+        return_type = 'SBase*'
+        arguments = ['XMLInputStream& stream']
+        is_cpp = True
+        virtual = True
+        constant = False
+        self.write_function_header(is_cpp, function,
+                                   arguments, return_type, constant, virtual)
+        self.skip_line(2)
+        self.write_doxygen_end()
+
+    def write_create_write_xmlns(self):
+        self.write_doxygen_start()
+        # create doc string header
+        title_line = 'Writes the namespace for the {} package'\
+            .format(self.package)
+        self.write_comment_header(title_line, [], [], '')
+
+        # create the function declaration
+        function = 'writeXMLNS'
+        return_type = 'void'
+        arguments = ['XMLOutputStream& stream']
+        is_cpp = True
+        virtual = True
+        constant = True
+        self.write_function_header(is_cpp, function,
+                                   arguments, return_type, constant, virtual)
+        self.skip_line(2)
+        self.write_doxygen_end()
+
+    ########################################################################
+
     # Functions for writing function dealing with a child listOf element
 
     # main function to write the functions dealing with a child listOf element
@@ -979,95 +1103,204 @@ class CppHeaderFile(BaseCppFile.BaseCppFile):
         self.write_line('{0}* get{0}();'.format(attribute['attTypeCode']))
         self.skip_line(2)
 
-    # function to write the getElement functions
-    def write_get_element_functions(self, class_name, attribute):
-        name = attribute['name']
-        indef_name = strFunctions.get_indefinite(name)
-        cap_name = attribute['capAttName']
-        element_type = attribute['attTypeCode']
-        plural = strFunctions.upper_first(attribute['pluralName'])
+    # function to write the getElement/get functions from ListOf
+    def write_get_element_functions(self, class_name, attribute,
+                                    is_list_of=False, is_cpp_api=True):
+        # these may not used in all cases but declared to keep PEP8 happy
+        cap_name = ''
+        plural = ''
+        abbrev_ob = ''
+        if not is_list_of:
+            if is_cpp_api:
+                name = attribute['name']
+                indef_name = strFunctions.get_indefinite(name)
+                cap_name = attribute['capAttName']
+                plural = strFunctions.upper_first(attribute['pluralName'])
+                parent = class_name
+            else:
+                name = self.name + '_t'
+                indef_name = strFunctions.get_indefinite(name)
+                parent = strFunctions.list_of_name(self.name)
+                abbrev_ob = strFunctions.abbrev_name(self.name)
+        else:
+            name = self.name
+            indef_name = strFunctions.get_indefinite(name)
+            parent = class_name
 
-        # non const get by index
-        self.open_comment()
-        self.write_comment_line('Get {0} {1} from the {2}.'
-                                .format(indef_name, cap_name, element_type))
-        self.write_blank_comment_line()
-        self.write_comment_line('@param n an unsigned int representing the '
-                                'index number of the {0} to retrieve.'
-                                .format(cap_name))
-        self.write_blank_comment_line()
-        self.write_comment_line('@return the nth {0} in the {1} '
-                                'within this {2}.'
-                                .format(cap_name, element_type, class_name))
-        self.write_blank_comment_line()
-        self.write_comment_line('@see getNum{0}()'.format(plural))
-        self.close_comment()
-        self.write_line('{0}* get{0}(unsigned int n);'.format(cap_name))
-        self.skip_line(2)
+        if is_cpp_api:
+            # non const get by index
+            # create doc string header
+            title_line = 'Get {} {} from the {}.'.format(indef_name, name, parent)
+            params = ['@param n an unsigned int representing '
+                      'the index of the {} to retrieve.'.format(name)]
+            return_lines = ['@return the nth {} in this {}.'.format(name, parent)]
+            additional = ['@see size()'] if is_list_of \
+                else ['@see getNum{}'.format(plural)]
+            self.write_comment_header(title_line, params, return_lines, class_name,
+                                      additional)
+            # create the function declaration
+            function = 'get' if is_list_of else 'get{}'.format(cap_name)
+            arguments = ['unsigned int n']
+            return_type = '{}*'.format(name)
+            virtual = False
+            constant = False
+            self.write_function_header(is_cpp_api, function, arguments,
+                                       return_type, constant, virtual)
+            self.skip_line(2)
+
+            # const get by index
+            # create doc string header
+            self.write_comment_header(title_line, params, return_lines, class_name,
+                                      additional)
+            # create the function declaration
+            return_type = 'const {}*'.format(name)
+            virtual = False
+            constant = True
+            self.write_function_header(is_cpp_api, function, arguments,
+                                       return_type, constant, virtual)
+            self.skip_line(2)
+
+            # non const get by id
+            # create doc string header
+            title_line = 'Get {} {} from the {} based on its identifier.'\
+                .format(indef_name, name, parent)
+            params = ['@param sid a string representing the identifier '
+                      'of the {} to retrieve.'.format(name)]
+            return_lines = ['@return the {0} in this {1} based on the '
+                            'identifier or NULL if no such {0} exists.'
+                            .format(name, parent)]
+            additional = ['@see size()'] if is_list_of \
+                else ['@see getNum{}'.format(plural)]
+            self.write_comment_header(title_line, params, return_lines, class_name,
+                                      additional)
+            # create the function declaration
+            function = 'get' if is_list_of else 'get{}'.format(cap_name)
+            arguments = ['const std::string& sid']
+            return_type = '{}*'.format(name)
+            virtual = False
+            constant = False
+            self.write_function_header(is_cpp_api, function, arguments,
+                                       return_type, constant, virtual)
+            self.skip_line(2)
+
         # const get by index
-        self.open_comment()
-        self.write_comment_line('Get {0} {1} from the {2}.'
-                                .format(indef_name, cap_name, element_type))
-        self.write_blank_comment_line()
-        self.write_comment_line('@param n an unsigned int representing the '
-                                'index number of the {0} to retrieve.'
-                                .format(cap_name))
-        self.write_blank_comment_line()
-        self.write_comment_line('@return the nth {0} in the {1} within '
-                                'this {2}.'
-                                .format(cap_name, element_type, class_name))
-        self.write_blank_comment_line()
-        self.write_comment_line('@see getNum{0}()'
-                                .format(plural))
-        self.close_comment()
-        self.write_line('const {0}* get{0}(unsigned int n) const;'
-                        .format(attribute['capAttName']))
+        # create doc string header
+        title_line = 'Get {} {} from the {} based on its identifier.'\
+            .format(indef_name, name, parent)
+        params = []
+        if not is_cpp_api:
+            params.append('@param lo the ListOf_t structure to search.')
+        params.append('@param sid a string representing the identifier '
+                      'of the {} to retrieve.'.format(name))
+        return_lines = ['@return the {0} in this {1} based on the '
+                        'identifier or NULL if no such {0} exists.'
+                        .format(name, parent)]
+        additional = []
+        if is_cpp_api:
+            self.write_comment_header(title_line, params, return_lines,
+                                      class_name, additional)
+        else:
+            self.write_comment_header(title_line, params, return_lines,
+                                      name, additional)
+
+        # create the function declaration
+        if is_cpp_api:
+            function = 'get' if is_list_of else 'get{}'.format(cap_name)
+            arguments = ['const std::string& sid']
+            return_type = 'const {}*'.format(name)
+        else:
+            function = '{}_getById'.format(parent)
+            arguments = ['ListOf_t* lo', 'const char *sid'.format(name)]
+            return_type = '{}*'.format(name)
+        virtual = False
+        constant = True
+        self.write_function_header(is_cpp_api, function, arguments,
+                                   return_type, constant, virtual)
         self.skip_line(2)
-        # non const get by id
-        self.open_comment()
-        self.write_comment_line('Get {0} {1} from the {2} based on it\'s '
-                                'identifier.'
-                                .format(indef_name, cap_name, element_type))
-        self.write_blank_comment_line()
-        self.write_comment_line('@param sid a string representing the '
-                                'identifier of the {0} to retrieve.'
-                                .format(cap_name))
-        self.write_blank_comment_line()
-        self.write_comment_line('@return the {0} in the {1} with the given '
-                                'id or NULL if no such {0} exists.'
-                                .format(cap_name, element_type))
-        self.write_blank_comment_line()
-        self.write_comment_line('@see get{0}(unsigned int n)'
-                                .format(cap_name))
-        self.write_blank_comment_line()
-        self.write_comment_line('@see getNum{0}()'
-                                .format(plural))
-        self.close_comment()
-        self.write_line('{0}* get{0}(const std::string& sid);'
-                        .format(attribute['capAttName']))
-        self.skip_line(2)
-        # const get by id
-        self.open_comment()
-        self.write_comment_line('Get {0} {1} from the {2} based on it\'s '
-                                'identifier.'
-                                .format(indef_name, cap_name, element_type))
-        self.write_blank_comment_line()
-        self.write_comment_line('@param sid a string representing the '
-                                'identifier of the {0} to retrieve.'
-                                .format(cap_name))
-        self.write_blank_comment_line()
-        self.write_comment_line('@return the {0} in the {1} with the given '
-                                'id or NULL if no such {0} exists.'
-                                .format(cap_name, element_type))
-        self.write_blank_comment_line()
-        self.write_comment_line('@see get{0}(unsigned int n)'
-                                .format(cap_name))
-        self.write_blank_comment_line()
-        self.write_comment_line('@see getNum{0}()'
-                                .format(plural))
-        self.close_comment()
-        self.write_line('const {0}* get{0}(const std::string& sid) const;'
-                        .format(cap_name))
+
+    # function to write the getElement/get functions from ListOf
+    def write_remove_element_functions(self, class_name, attribute,
+                                       is_list_of=False, is_cpp_api=True):
+        # these may not used in all cases but declared to keep PEP8 happy
+        cap_name = ''
+        plural = ''
+        abbrev_ob = ''
+        if not is_list_of:
+            if is_cpp_api:
+                name = attribute['name']
+                indef_name = strFunctions.get_indefinite(name)
+                cap_name = attribute['capAttName']
+                plural = strFunctions.upper_first(attribute['pluralName'])
+                parent = class_name
+            else:
+                name = self.name + '_t'
+                indef_name = strFunctions.get_indefinite(name)
+                parent = strFunctions.list_of_name(self.name)
+                abbrev_ob = strFunctions.abbrev_name(self.name)
+        else:
+            name = self.name
+            indef_name = strFunctions.get_indefinite(name)
+            parent = class_name
+
+        if is_cpp_api:
+            # by index
+            # create doc string header
+            title_line = 'Removes the nth {} from this {} and returns a ' \
+                         'pointer to it.'.format(name, parent)
+            params = ['@param n an unsigned int representing '
+                      'the index of the {} to remove.'.format(name)]
+            return_lines = ['@return a pointer to the nth {} in this {}.'
+                            .format(name, parent)]
+            additional = ['@see size()'] if is_list_of \
+                else ['@see getNum{}'.format(plural)]
+            additional.append(' ')
+            additional.append('@note the caller owns the returned object and '
+                              'is responsible for deleting it.')
+            self.write_comment_header(title_line, params, return_lines, class_name,
+                                      additional)
+            # create the function declaration
+            function = 'remove' if is_list_of else 'get{}'.format(cap_name)
+            arguments = ['unsigned int n']
+            return_type = '{}*'.format(name)
+            virtual = False
+            constant = False
+            self.write_function_header(is_cpp_api, function, arguments,
+                                       return_type, constant, virtual)
+            self.skip_line(2)
+
+        # by id
+        # create doc string header
+        title_line = 'Removes the {} from this {} based on its identifier ' \
+                     'and returns a pointer to it.'\
+            .format(name, parent)
+        params = []
+        if not is_cpp_api:
+            params.append('@param lo the ListOf_t structure to search.')
+        params.append('@param sid a string representing the identifier '
+                      'of the {} to remove.'.format(name))
+        return_lines = ['@return the {0} in this {1} based on the '
+                        'identifier or NULL if no such {0} exists.'
+                        .format(name, parent)]
+        additional = []
+        if is_cpp_api:
+            self.write_comment_header(title_line, params, return_lines,
+                                      class_name, additional)
+        else:
+            self.write_comment_header(title_line, params, return_lines,
+                                      name, additional)
+        # create the function declaration
+        if is_cpp_api:
+            function = 'remove' if is_list_of else 'remove{}'.format(cap_name)
+            arguments = ['const std::string& sid']
+            return_type = 'const {}*'.format(name)
+        else:
+            function = '{}_removeById'.format(parent)
+            arguments = ['ListOf_t* lo', 'const char *sid'.format(name)]
+            return_type = '{}*'.format(name)
+        virtual = False
+        constant = False
+        self.write_function_header(is_cpp_api, function, arguments,
+                                   return_type, constant, virtual)
         self.skip_line(2)
 
     # function to write the addElement function

@@ -187,11 +187,12 @@ class BaseCppFile(BaseFile.BaseFile):
             else:
                 line = line + arguments[num_arguments-1] + ');'
             # look at length and adjust
-            if len(line) > self.line_length:
+            if len(line) >= self.line_length:
                 # do something else
                 line = saved_line
                 att_start = len(line)
                 line += arguments[0]
+                line += ','
                 self.write_line(line)
                 for i in range(1, num_arguments - 1):
                     line = arguments[i] + ','
@@ -219,6 +220,8 @@ class BaseCppFile(BaseFile.BaseFile):
             self.write_blank_comment_line()
         for i in range(0, len(return_line)):
             self.write_comment_line((return_line[i]))
+        if len(additional) > 0:
+            self.write_blank_comment_line()
         for i in range(0, len(additional)):
             if additional[i] == ' ':
                 self.write_blank_comment_line()
