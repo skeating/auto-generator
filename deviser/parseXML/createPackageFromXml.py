@@ -33,6 +33,20 @@ def find_element(elements, name):
     return None
 
 
+def standardize_types(attrib_type):
+    if attrib_type == 'boolean':
+        return 'bool'
+    elif attrib_type == 'unsigned integer':
+        return 'uint'
+    elif attrib_type == 'unsigned int':
+        return 'uint'
+    elif attrib_type == 'integer':
+        return 'int'
+    else:
+        return attrib_type
+
+
+
 def find_lo_element(elements, name):
     if elements is None or name is None:
         return None
@@ -136,7 +150,7 @@ def parse_deviser_xml(filename):
 
             attr_name = get_value(attr, 'name')
             required = to_bool(get_value(attr, 'required'))
-            attr_type = get_value(attr, 'type')
+            attr_type = standardize_types(get_value(attr, 'type'))
             attr_abstract = to_bool(get_value(attr, 'abstract'))
             attr_element = get_value(attr, 'element')
 
@@ -245,6 +259,7 @@ def parse_deviser_xml(filename):
             attr_name = get_value(attr, 'name')
             required = to_bool(get_value(attr, 'required'))
             attr_type = get_value(attr, 'type')
+
             attr_abstract = to_bool(get_value(attr, 'abstract'))
             attr_element = get_value(attr, 'element')
 
