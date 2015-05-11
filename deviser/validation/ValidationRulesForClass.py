@@ -6,12 +6,13 @@ import strFunctions
 class ValidationRulesForClass():
     """Class for creating the validation rules for an object"""
 
-    def __init__(self, object_desc, spec_name, number, package):
+    def __init__(self, object_desc, spec_name, number, package, pkg_ref):
         # members from object
         self.name = object_desc['name']
         self.fullname = spec_name
         self.number = number
         self.package = package.lower()
+        self.pkg_ref = pkg_ref
 
         # useful repeated text strings
         self.valid = '\\validRule{'
@@ -141,9 +142,9 @@ class ValidationRulesForClass():
                 .format(name, self.indef, self.formatted_name,
                         strFunctions.wrap_token('boolean'))
         elif att_type == 'enum':
-            enum_name = attribute['element']
+            enum_name = strFunctions.texify(attribute['element'])
             enums = attribute['parent']['root']['enums']
-            enum_values = self.parse_enum_values(enum_name, enums)
+            enum_values = self.parse_enum_values(attribute['element'], enums)
             text = 'The value of the attribute {0} of {1} {2} object must ' \
                    'conform to the syntax of SBML data type {3} and ' \
                    'may only take on the allowed values of {3} defined ' \
@@ -163,14 +164,15 @@ class ValidationRulesForClass():
                    'i.e. a string encoding optionally an absolute number ' \
                    'followed by an optional relative number followed ' \
                    'by a \\% sign. Adding spaces between the ' \
-                   'coordinates is encouraged, but not required.'.format(name, self.indef, self.formatted_name)
+                   'coordinates is encouraged, but not required.'\
+                .format(name, self.indef, self.formatted_name)
         else:
             text = 'FIX ME: Encountered an unknown attribute type {} in ' \
                    'ValidationRulesForClass:write_attribute_type_rule'\
                 .format(att_type)
 
-        ref = 'SBML Level~3 Specification for {} Version~1, {}.'\
-            .format(self.fullname, strFunctions.wrap_section(self.name))
+        ref = '{}, {}.'\
+            .format(self.pkg_ref, strFunctions.wrap_section(self.name))
         sev = 'ERROR'
         return dict({'number': self.number, 'text': text,
                      'reference': ref, 'severity': sev})
@@ -194,8 +196,8 @@ class ValidationRulesForClass():
                 .format(strFunctions.get_element_name(lo_child),
                         strFunctions.wrap_token('metaid'),
                         strFunctions.wrap_token('sboTerm'))
-            ref = 'SBML Level~3 Specification for {} Version~1, {}.'\
-                .format(self.fullname, strFunctions.wrap_section(self.name))
+            ref = '{}, {}.'\
+                .format(self.pkg_ref, strFunctions.wrap_section(self.name))
             sev = 'ERROR'
         return dict({'number': self.number, 'text': text,
                      'reference': ref, 'severity': sev})
@@ -217,8 +219,8 @@ class ValidationRulesForClass():
                    'permitted on all SBML objects, a {} container object ' \
                    'may only contain \{} objects.'\
                 .format(loname, lo_child['element'])
-            ref = 'SBML Level~3 Specification for {} Version~1, {}.'\
-                .format(self.fullname, strFunctions.wrap_section(self.name))
+            ref = '{}, {}.'\
+                .format(self.pkg_ref, strFunctions.wrap_section(self.name))
             sev = 'ERROR'
         return dict({'number': self.number, 'text': text,
                      'reference': ref, 'severity': sev})
@@ -244,8 +246,8 @@ class ValidationRulesForClass():
             text = '{} {} object must have {}, and may have {}. {}'\
                 .format(self.indef_u, self.formatted_name,
                         reqd, opt, no_other_statement)
-        ref = 'SBML Level~3 Specification for {} Version~1, {}.'\
-            .format(self.fullname, strFunctions.wrap_section(self.name))
+        ref = '{}, {}.'\
+            .format(self.pkg_ref, strFunctions.wrap_section(self.name))
         sev = 'ERROR'
         return dict({'number': self.number, 'text': text,
                      'reference': ref, 'severity': sev})
@@ -271,8 +273,8 @@ class ValidationRulesForClass():
             text = '{} {} object must contain {}, and may contain {}. {}'\
                 .format(self.indef_u, self.formatted_name,
                         reqd, opt, no_other_statement)
-        ref = 'SBML Level~3 Specification for {} Version~1, {}.'\
-            .format(self.fullname, strFunctions.wrap_section(self.name))
+        ref = '{}, {}.'\
+            .format(self.pkg_ref, strFunctions.wrap_section(self.name))
         sev = 'ERROR'
         return dict({'number': self.number, 'text': text,
                      'reference': ref, 'severity': sev})
@@ -455,8 +457,8 @@ class ValidationRulesForClass():
         text = 'The {0} sub{1} on {2} {3} object is optional, but if ' \
                'present, {4} container {1} must not be empty.'\
             .format(elements, obj, self.indef, self.formatted_name, pred)
-        ref = 'SBML Level~3 Specification for {} Version~1, {}.'\
-            .format(self.fullname, strFunctions.wrap_section(self.name))
+        ref = '{}, {}.'\
+            .format(self.pkg_ref, strFunctions.wrap_section(self.name))
         sev = 'ERROR'
         return dict({'number': self.number, 'text': text,
                      'reference': ref, 'severity': sev})

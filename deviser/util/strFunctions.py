@@ -28,13 +28,6 @@ def abbrev_name(element):
 
 def list_of_name(name):
     return 'ListOf' + plural(name)
-    if name.endswith('s'):
-        listof = 'ListOf' + name
-    elif name.endswith('x'):
-        listof = 'ListOf' + name + 'es'
-    else:
-        listof = 'ListOf' + name + 's'
-    return listof
 
 
 def cap_list_of_name(name):
@@ -78,7 +71,8 @@ def wrap_type(name, element, hack=False):
     if name == 'array':
         return 'consisting of an array of \\primtype{' + element + '}'
     elif name == 'enum':
-        return 'of type \\'+ element
+        element_name = texify(element)
+        return 'of type \\primtype{' + element_name + '}'
     elif name == 'element':
         if hack:
             return 'of type \\' + element
@@ -128,12 +122,36 @@ def get_element_name(attribute):
     else:
         return 'FIX ME'
 
+
 def replace_digits(name):
+    name = re.sub('0', 'Zero', name)
     name = re.sub('1', 'One', name)
     name = re.sub('2', 'Two', name)
     name = re.sub('3', 'Three', name)
+    name = re.sub('4', 'Four', name)
+    name = re.sub('5', 'Five', name)
+    name = re.sub('6', 'Six', name)
+    name = re.sub('7', 'Seven', name)
+    name = re.sub('8', 'Eight', name)
+    name = re.sub('9', 'Nine', name)
     return name
+
 
 def replace_underscore(name):
     name = re.sub('_', '\_', name)
+    return name
+
+
+def remove_spaces(name):
+    newname = ''
+    for i in range(0, len(name)):
+        if name[i] != ' ':
+            newname += name[i]
+    return newname
+
+
+def texify(name):
+    name = replace_digits(name)
+    name = replace_underscore(name)
+    name = remove_spaces(name)
     return name

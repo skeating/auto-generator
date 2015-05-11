@@ -12,16 +12,6 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
     """Class for the validation appendix in LaTeX"""
 
     def __init__(self, object_desc):
-        # members from object
-        self.package = object_desc['name']
-        self.fullname = object_desc['fullname']
-        self.sbml_classes = object_desc['sbmlElements']
-        self.offset = object_desc['offset']
-        self.enums = object_desc['enums']
-        self.plugins = object_desc['plugins']
-
-        self.start_b = '{'
-        self.end_b = '}'
 
         # derived members for description
         self.brief_description = 'Syntax section for specification'
@@ -29,10 +19,11 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
         # global member to keep track of classes written
         self.classes_written = []
 
-        self.sort_attribute_names(self.plugins)
-
         BaseTexFile.BaseTexFile.__init__(self, 'body', 'tex',
-                                         self.sbml_classes)
+                                         object_desc)
+        self.sort_attribute_names(self.plugins)
+        # self.full_pkg_command = '\\{}Package'.format(self.fulltexname)
+        # self.brief_pkg_command = '\\{}'.format(self.upper_package)
 
     ########################################################################
     # Write rules for an extended class
@@ -45,7 +36,7 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
             indef = strFunctions.get_indefinite(name)
             ex_objects.append('{} \\{} object'.format(indef, name))
         for i in range(0, len(plugin['lo_extension'])):
-            name = plugin['lo_extension'][i]['listOfName']
+            name = plugin['lo_extension'][i]['listOfClassName']
             ex_objects.append('a \\{} object'.format(name))
         if len(plugin['attribs']) > 0:
             ex_objects.append('the following attributes.')
@@ -61,9 +52,9 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
         self.skip_line()
         self.write_to_do('explain where {} comes from'.format(extended_object))
 
-        self.write_line('The \\{}Package extends the \\class{}{}{} object '
+        self.write_line('The {} extends the \\class{}{}{} object '
                         'with the addition of '
-                        .format(self.fullname, self.start_b,
+                        .format(self.full_pkg_command, self.start_b,
                                 extended_object, self.end_b))
         num_additions = len(ex_objects)
         if num_additions > 1:
@@ -94,7 +85,8 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
     def write_body_for_lo_class(self, sbml_class, nested=False):
         lo_name = 'default'
         if sbml_class['hasListOf']:
-            if 'lo_elementName' in sbml_class:
+            if 'lo_elementName' in sbml_class \
+                    and sbml_class['lo_elementName'] != '':
                 lo_name = strFunctions.upper_first(
                     sbml_class['lo_elementName'])
             else:
@@ -260,8 +252,9 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
         file_in = open(os.path.dirname(__file__) + '/' + filename, 'r')
         intro = file_in.read()
         file_in.close()
-        pkg_name = '\\' + self.fullname + 'Package'
-        intro = re.sub('PACKAGENAME', pkg_name, intro)
+        intro = re.sub('PACKAGENAME', self.full_pkg_command, intro)
+        intro = re.sub('LEVELNUM', str(self.level), intro)
+        intro = re.sub('VERSIONNUM', str(self.version), intro)
         return intro
 
     # Write namespace section
@@ -273,9 +266,10 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
         self.write_line(self.get_text('body_ns_section.txt'))
         self.skip_line()
         self.write_line('\\begin{center}')
-        self.write_line('\\uri{}http://www.sbml.org/sbml/level3/'
-                        'version1/{}/version1{}'
-                        .format(self.start_b, self.package, self.end_b))
+        self.write_line('\\uri{}http://www.sbml.org/sbml/level{}/'
+                        'version{}/{}/version{}{}'
+                        .format(self.start_b, self.level, self.version,
+                                self.package, self.pkg_version, self.end_b))
         self.write_line('\\end{center}')
         self.skip_line()
         self.write_line(self.get_text('body_ns_section2.txt'))
@@ -294,9 +288,9 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
                         'them in the rest of this specification, specifically '
                         '\\primtype{0}boolean{1}, \\primtype{0}ID{1}, '
                         '\\primtype{0}SId{1}, \\primtype{0}SIdRef{1}, and '
-                        '\\primtype{0}string{1}. The \\{2}Package defines '
+                        '\\primtype{0}string{1}. The \\{2} Package defines '
                         'other primitive types; these are described below.'
-                        .format(self.start_b, self.end_b, self.fullname))
+                        .format(self.start_b, self.end_b, self.fulltexname))
         self.skip_line()
         self.write_to_do('check all necessary types from core are listed')
         for i in range(0, len(self.enums)):
@@ -326,15 +320,14 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
     def write_enum_type(self, enum):
         self.write_line('\\subsubsection{0}Type \\fixttspace'
                         '\\primtypeNC{0}{1}{2}{2}'
-                        .format(self.start_b, enum['name'], self.end_b))
+                        .format(self.start_b, enum['texname'], self.end_b))
         self.skip_line()
         self.write_line('The \\primtype{}{}{} is an emueration of values used '
-                        'to TO DO.'.format(self.start_b, enum['name'],
-                                           self.end_b))
+                        'to.'.format(self.start_b, enum['texname'], self.end_b))
         self.write_line('The possible values are {}.'
                         .format(self.list_values(enum)))
         self.skip_line()
-        self.write_to_do('Explain use of {}'.format(enum['name']))
+        self.write_to_do('Explain use of {}'.format(enum['texname']))
 
     def list_values(self, enum):
         num_values = len(enum['values'])
@@ -391,12 +384,12 @@ class TexBodySyntaxFile(BaseTexFile.BaseTexFile):
         self.write_line('\\section{Package syntax and semantics}')
         self.skip_line()
         self.write_line('In this section, we define the syntax and '
-                        'semantics of the \\{}Package for '
+                        'semantics of the {} for '
                         '\\sbmlthreecore. We expound on the various data '
                         'types and constructs defined in this package, '
                         'then in {}, we provide complete '
                         'examples of using the constructs in example '
-                        'SBML models.'.format(self.fullname,
+                        'SBML models.'.format(self.full_pkg_command,
                                               strFunctions.wrap_section(
                                                   'examples', False)))
         self.skip_line()

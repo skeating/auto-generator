@@ -32,18 +32,19 @@ def find_element(elements, name):
             return element
     return None
 
+
 def find_lo_element(elements, name):
     if elements is None or name is None:
         return None
     for element in elements:
         if 'isListOf' in element and element['isListOf'] is True:
             match = strFunctions.list_of_name(element['name'])
-            if 'listOfClassName' in element and element['listOfClassName'] != '':
+            if 'listOfClassName' in element \
+                    and element['listOfClassName'] != '':
                 match = element['listOfClassName']
             if match.lower() == name.lower():
                 return element
     return None
-
 
 
 def parse_deviser_xml(filename):
@@ -52,9 +53,6 @@ def parse_deviser_xml(filename):
     the definition contained in it
     """
 
-#    package_name = ''
-#    number = 0
-#    offset = 0
     sbml_elements = []
     elements = []
     plugins = []
@@ -62,10 +60,23 @@ def parse_deviser_xml(filename):
 
     dom = parse(filename)
 
-    package_name = get_value(dom.documentElement, 'name')
+    temp = get_value(dom.documentElement, 'name')
+    # we expect this to be lower case
+    package_name = temp.lower()
     number = to_int(get_value(dom.documentElement, 'number'))
     offset = to_int(get_value(dom.documentElement, 'offset'))
     fullname = get_value(dom.documentElement, 'fullname')
+    required = to_bool(get_value(dom.documentElement, 'required'))
+
+    # get package information (assume we want the first only)
+    sbml_level = 3
+    sbml_version = 1
+    pkg_version = 1
+    for node in dom.getElementsByTagName('pkgVersion'):
+        sbml_level = to_int(get_value(node, 'level'))
+        sbml_version = to_int(get_value(node, 'version'))
+        pkg_version = to_int(get_value(node, 'pkg_version'))
+        break
 
     concrete_dict = dict({})
 
@@ -93,9 +104,27 @@ def parse_deviser_xml(filename):
         abstract = to_bool(get_value(node, 'abstract'))
         children_overwrite_element_name = to_bool(
             get_value(node, 'childrenOverwriteElementName'))
-        xml_element_name = get_value(node, 'elementName')
-        xml_lo_element_name = get_value(node, 'listOfName')
-        xml_lo_class_name = get_value(node, 'listOfClassName')
+
+        temp = get_value(node, 'elementName')
+        # we expect this to be camel case starting with lower
+        if temp is not None:
+            xml_element_name = strFunctions.lower_first(temp)
+        else:
+            xml_element_name = ''
+
+        temp = get_value(node, 'listOfName')
+        # we expect this to be camel case starting with lower
+        if temp is not None:
+            xml_lo_element_name = strFunctions.lower_first(temp)
+        else:
+            xml_lo_element_name = ''
+
+        temp = get_value(node, 'listOfClassName')
+        # we expect this to be camel case starting with upper
+        if temp is not None:
+            lo_class_name = strFunctions.upper_first(temp)
+        else:
+            lo_class_name = ''
 
         add_decls = get_value(node, 'additionalDecls')
         add_defs = get_value(node, 'additionalDefs')
@@ -137,8 +166,7 @@ def parse_deviser_xml(filename):
                                    'reqd': required,
                                    'name': attr_name,
                                    'element': attr_element,
-                                   'abstract': attr_abstract,
-            })
+                                   'abstract': attr_abstract})
             if attr_abstract:
                 attribute_dict['concrete'] = concrete_dict[attr_element]
 
@@ -164,17 +192,17 @@ def parse_deviser_xml(filename):
         if xml_lo_element_name is not None:
             element['lo_elementName'] = xml_lo_element_name
 
-        if xml_lo_class_name is not None:
-            element['lo_class_name'] = xml_lo_class_name
+        if lo_class_name is not None:
+            element['lo_class_name'] = lo_class_name
 
         if add_decls is not None:
             if os.path.exists(os.path.dirname(filename) + '/' + add_decls):
-                add_decls = os.path.dirname(filename) + '/' + add_decls
+                add_decls += os.path.dirname(filename) + '/'
             element['addDecls'] = add_decls
 
         if add_defs is not None:
             if os.path.exists(os.path.dirname(filename) + '/' + add_defs):
-                add_defs = os.path.dirname(filename) + '/' + add_defs
+                add_defs += os.path.dirname(filename) + '/'
             element['addDefs'] = add_defs
 
         if abstract:
@@ -183,8 +211,10 @@ def parse_deviser_xml(filename):
         elements.append(dict({'name': element_name,
                               'typecode': type_code,
                               'isListOf': has_list_of,
-                              'listOfName': xml_lo_element_name if xml_lo_element_name is not None else '',
-                              'listOfClassName': xml_lo_class_name if xml_lo_class_name is not None else ''}))
+                              'listOfName': xml_lo_element_name
+                              if xml_lo_element_name is not None else '',
+                              'listOfClassName': lo_class_name
+                              if lo_class_name is not None else ''}))
         sbml_elements.append(element)
 
     for node in dom.getElementsByTagName('plugin'):
@@ -236,12 +266,12 @@ def parse_deviser_xml(filename):
 
         if add_decls is not None:
             if os.path.exists(os.path.dirname(filename) + '/' + add_decls):
-                add_decls = os.path.dirname(filename) + '/' + add_decls
+                add_decls += os.path.dirname(filename) + '/'
             plugin_dict['addDecls'] = add_decls
 
         if add_defs is not None:
             if os.path.exists(os.path.dirname(filename) + '/' + add_defs):
-                add_defs = os.path.dirname(filename) + '/' + add_defs
+                add_defs += os.path.dirname(filename) + '/'
             plugin_dict['addDefs'] = add_defs
 
         plugins.append(plugin_dict)
@@ -263,7 +293,11 @@ def parse_deviser_xml(filename):
                     'sbmlElements': sbml_elements,
                     'enums': enums,
                     'offset': offset,
-                    'fullname': fullname
+                    'fullname': fullname,
+                    'sbml_level': sbml_level,
+                    'sbml_version': sbml_version,
+                    'pkg_version': pkg_version,
+                    'required': required
                     })
 
     # link elements

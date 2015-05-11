@@ -1,18 +1,18 @@
 #!/usr/bin/python
 
 import strFunctions
-import BaseTexFile
 
 
 class ValidationRulesForPlugin():
     """Class for creating the validation rules for an plugin object"""
 
-    def __init__(self, object_desc, spec_name, number, package):
+    def __init__(self, object_desc, spec_name, number, package, pkg_ref):
         # members from object
         self.name = object_desc['sbase']
         self.fullname = spec_name
         self.number = number
         self.package = package.lower()
+        self.pkg_ref = pkg_ref
 
         # useful repeated text strings
         self.valid = '\\validRule{'
@@ -82,10 +82,6 @@ class ValidationRulesForPlugin():
             rule = \
                 self.write_core_attribute_rule(self, self.opt_child_lo_elem[i])
             self.add_rule(rule)
-#             lo_name = strFunctions.list_of_name(self.opt_child_lo_elem[i]['name'])
-#             lo_class = self.get_class(lo_name)
-#             for j in range (0, len(lo_class['attribs'])):
-#                 self.write_package_attribute_rule(lo_class['attribs'][j])
 
         for i in range(0, len(self.reqd_child_lo_elem)):
             self.number += 1
@@ -163,8 +159,8 @@ class ValidationRulesForPlugin():
                    'ValidationRulesForClass:write_attribute_type_rule'\
                 .format(att_type)
 
-        ref = 'SBML Level~3 Specification for {} Version~1, {}.'\
-            .format(self.fullname, strFunctions.wrap_section(self.name))
+        ref = '{}, {}.'\
+            .format(self.pkg_ref, strFunctions.wrap_section(self.name))
         sev = 'ERROR'
         return dict({'number': self.number, 'text': text,
                      'reference': ref, 'severity': sev})
@@ -188,8 +184,8 @@ class ValidationRulesForPlugin():
                 .format(strFunctions.get_element_name(lo_child),
                         strFunctions.wrap_token('metaid'),
                         strFunctions.wrap_token('sboTerm'))
-            ref = 'SBML Level~3 Specification for {} Version~1, {}.'\
-                .format(self.fullname, strFunctions.wrap_section(self.name))
+            ref = '{}, {}.'\
+                .format(self.pkg_ref, strFunctions.wrap_section(self.name))
             sev = 'ERROR'
         return dict({'number': self.number, 'text': text,
                      'reference': ref, 'severity': sev})
@@ -217,8 +213,8 @@ class ValidationRulesForPlugin():
                    'permitted on all SBML objects, a {} container object ' \
                    'may only contain \{} objects.'\
                 .format(loname, element)
-            ref = 'SBML Level~3 Specification for {} Version~1, {}.'\
-                .format(self.fullname, strFunctions.wrap_section(self.name))
+            ref = '{}, {}.'\
+                .format(self.pkg_ref, strFunctions.wrap_section(self.name))
             sev = 'ERROR'
         return dict({'number': self.number, 'text': text,
                      'reference': ref, 'severity': sev})
@@ -244,8 +240,8 @@ class ValidationRulesForPlugin():
             text = '{} {} object must have {}, and may have {}. {}'\
                 .format(self.indef_u, self.formatted_name,
                         reqd, opt, no_other_statement)
-        ref = 'SBML Level~3 Specification for {} Version~1, {}.'\
-            .format(self.fullname, strFunctions.wrap_section(self.name))
+        ref = '{}, {}.'\
+            .format(self.pkg_ref, strFunctions.wrap_section(self.name))
         sev = 'ERROR'
         return dict({'number': self.number, 'text': text,
                      'reference': ref, 'severity': sev})
@@ -271,8 +267,8 @@ class ValidationRulesForPlugin():
             text = '{} {} object must contain {}, and may contain {}. {}'\
                 .format(self.indef_u, self.formatted_name,
                         reqd, opt, no_other_statement)
-        ref = 'SBML Level~3 Specification for {} Version~1, {}.'\
-            .format(self.fullname, strFunctions.wrap_section(self.name))
+        ref = '{}, {}.'\
+            .format(self.pkg_ref, strFunctions.wrap_section(self.name))
         sev = 'ERROR'
         return dict({'number': self.number, 'text': text,
                      'reference': ref, 'severity': sev})
@@ -418,24 +414,6 @@ class ValidationRulesForPlugin():
                 self.opt_elem.append(extension)
             else:
                 self.opt_elem.append(extension)
-                    # if attributes[i]['type'] == 'element':
-            #     if attributes[i]['reqd'] is True:
-            #         self.reqd_elem.append(attributes[i])
-            #     else:
-            #         self.opt_elem.append(attributes[i])
-            # elif attributes[i]['type'] == 'lo_element' \
-            #         or attributes[i]['type'] == 'inline_lo_element':
-            #     if attributes[i]['reqd'] is True:
-            #         self.reqd_child_lo_elem.append(attributes[i])
-            #         self.reqd_elem.append(attributes[i])
-            #     else:
-            #         self.opt_elem.append(attributes[i])
-            #         self.opt_child_lo_elem.append(attributes[i])
-            # else:
-            #     if attributes[i]['reqd'] is True:
-            #         self.reqd_att.append(attributes[i])
-            #     else:
-            #         self.opt_att.append(attributes[i])
 
     ########################################################################
 
