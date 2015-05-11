@@ -46,7 +46,6 @@ def standardize_types(attrib_type):
         return attrib_type
 
 
-
 def find_lo_element(elements, name):
     if elements is None or name is None:
         return None

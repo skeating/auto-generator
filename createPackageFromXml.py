@@ -42,6 +42,17 @@ def findElement(elements, name):
       return element
   return None
 
+def standardize_types(attrib_type):
+    if attrib_type == 'boolean':
+        return 'bool'
+    elif attrib_type == 'unsigned integer':
+        return 'uint'
+    elif attrib_type == 'unsigned int':
+        return 'uint'
+    elif attrib_type == 'integer':
+        return 'int'
+    else:
+        return attrib_type
 
 def parseDeviserXML(filename):
   """
@@ -113,7 +124,7 @@ def parseDeviserXML(filename):
  
         attrName = getValue( attr, 'name')
         required = toBool(getValue( attr, 'required'))
-        type = getValue( attr, 'type')
+        type = standardize_types(getValue( attr, 'type'))
         attrAbstract = toBool(getValue( attr, 'abstract'))
         attrElement = getValue( attr, 'element')
      
